@@ -82,37 +82,36 @@ Wei Tsang OOI}
     %decoded until the lost packet is successfully retransmitted. 
     Hence, the effect of dependency needs to
     be considered in choosing the sending order of vertex splits. 
-    To find the effect of dependency
-    is non-trivial as the packet loss happens randomly.
+    %To find the effect of dependency
+    %is non-trivial as the packet loss happens randomly.
     In this thesis, an analytical model is proposed to 
     quantify the effect of dependency on the quality curve.
     %quantitatively analyzes the effects of dependency
     %by modeling the distribution of decoding time of each vertex split
     %as a function of mesh properties and network parameters.
-    
     The quality curve is determined by the decoding time of the vertex
     splits and their contributions to the overall mesh quality.    
     %The decoding time of a vertex split depends on its receiving time and the 
     %receiving time of its all ancestors. The receiving time of a vertex split
     %in turn depends on its sending time and how many times it is 
     %transmitted. 
-    Our model gives an expression for the expected
-    decoding time of each vertex split, given the dependencies among the vertex splits and the network
-    condition (including loss probability).
-    From this expression, %both the expected value and 
-    the distribution of the decoding time of each
-    vertex split can be efficiently computed before transmission. 
+    Hence, the distribution of decoding time of each vertex split
+    is modeled as a function of the mesh property and the network condition.
+    %From this expression, %both the expected value and 
+    %the distribution of the decoding time of each
+    %vertex split can be efficiently computed before transmission. 
     Consequently, Different sending orders can be  
-    efficiently evaluated without simulations.   
-    Hence, this model can help in developing a sending
+    efficiently evaluated without simulations, 
+    and this model can help in developing a sending
     strategy to improve the quality curve 
     during transmission. % to improve the quality.
+    
     Furthermore, %closed-form expressions are derived in two extreme cases,
     this model is applied to study two extreme cases of dependency in 
     progressive meshes and
     %providing insights to the importance of dependencies on the
     %decoded mesh quality. 
-    The main insight is that if each lost packet
+    The main insight found is that if each lost packet
     is immediately retransmitted upon the packet loss is detected, 
     the effect of dependencies on decoded mesh quality diminishes with time.
     %the dependencies only matters in the first several round trip times. 
@@ -126,21 +125,24 @@ Wei Tsang OOI}
     
     To further improve the quality curve, the view-point of the 
     user can be considered in deciding the sending order.
-    Usually, users can only see a part of a mesh, so sending non-visible data
-    before visible data wastes bandwidth. Moreover, the visual contributions of visible
-    vertex splits (how much they can improve the rendered image)
+    %Usually, users can only see a part of a mesh, so sending non-visible data
+    %before visible data wastes bandwidth. Moreover, 
+    Non-visible vertex splits do not need to be sent, and 
+    the visual contributions of visible vertex splits (how much they can improve the rendered image)
     also depend on the view-point of the user.
     Hence, choosing the sending order according to the viewpoint of the user, so called
     \emph{view-dependent streaming}, is a natural choice.
     
     In existing solutions to view-dependent streaming,  the
-    sender decides the sending order. This sender-driven protocol has several
-    drawbacks. First, it is not scalable to many receivers as the sender has to
-    determine the visibility of vertices and sort the visible vertex splits based on their
-    visual contributions for each receiver. 
-    Second, the sender needs to maintain
+    sender decides the sending order. 
+    %This sender-driven protocol has several
+    %drawbacks. First, it is not scalable to many receivers as the sender has to
+    %determine the visibility of vertices and sort the visible vertex splits based on their
+    %visual contributions for each receiver. 
+    %Second, 
+    The sender needs to maintain
     the rendering state of each receiver to avoid sending duplicate data. 
-    Due to the stateful design and high computational requirements,
+    Due to the stateful design %and high computational requirements,
     the sender-driven approach cannot be easily extended to support 
     many receivers with caching proxy and peer-to-peer system,
     two common solutions to scalability. 
