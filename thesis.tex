@@ -74,16 +74,21 @@ Wei Tsang OOI}
     the vertex splits, and the descendants cannot be decoded
     before their ancestors are all decoded. Therefore, 
     when a progressive mesh is transmitted over a lossy network,
-    a packet loss will disable the decoding of the following
+    a packet loss will 
+    %disable the decoding of the following
+    delay the decoding of the following
     vertex splits if they depend on this lost packet. 
-    These successfully received vertex splits cannot be 
-    decoded until the lost packet is successfully retransmitted. 
+    %These successfully received vertex splits cannot be 
+    %decoded until the lost packet is successfully retransmitted. 
     Hence, the effect of dependency needs to
     be considered in choosing the sending order of vertex splits. 
     To find the effect of dependency
     is non-trivial as the packet loss happens randomly.
     In this thesis, an analytical model is proposed to 
     quantify the effect of dependency on the quality curve.
+    %quantitatively analyzes the effects of dependency
+    %by modeling the distribution of decoding time of each vertex split
+    %as a function of mesh properties and network parameters.
     
     The quality curve is determined by the decoding time of the vertex
     splits and their contributions to the overall mesh quality.    
@@ -94,19 +99,23 @@ Wei Tsang OOI}
     Our model gives an expression for the expected
     decoding time of each vertex split, given the dependencies among the vertex splits and the network
     condition (including loss probability).
-    From this expression, both the expected 
-    value and the distribution of the decoding time of each
-    vertex split can be efficiently computed before transmission. Consequently, 
-    Different sending orders can be  
+    From this expression, %both the expected value and 
+    the distribution of the decoding time of each
+    vertex split can be efficiently computed before transmission. 
+    Consequently, Different sending orders can be  
     efficiently evaluated without simulations.   
     Hence, this model can help in developing a sending
     strategy to improve the quality curve 
     during transmission. % to improve the quality.
-    Furthermore, closed-form expressions are derived in two extreme cases,
-    providing insights to the importance of dependencies on the
-    decoded mesh quality. The main insight is that if each lost packet
+    Furthermore, %closed-form expressions are derived in two extreme cases,
+    this model is applied to study two extreme cases of dependency in 
+    progressive meshes and
+    %providing insights to the importance of dependencies on the
+    %decoded mesh quality. 
+    The main insight is that if each lost packet
     is immediately retransmitted upon the packet loss is detected, 
-    then the dependencies only matters in the first several round trip times. 
+    the effect of dependencies on decoded mesh quality diminishes with time.
+    %the dependencies only matters in the first several round trip times. 
     Therefore, the effect of dependency is only significant in the applications
     requiring high interactivity. 
 
