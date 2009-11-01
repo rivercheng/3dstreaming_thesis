@@ -34,6 +34,135 @@ Wei Tsang OOI}
 \maketitle
 \doublespacing
 \begin{abstract}
+    High-resolution 3D meshes are increasingly available in networked
+    applications, such as digital museum, online game, and virtual reality.
+    The amount of data constituting a high-resolution 3D mesh can be
+    huge, leading to a long downloading time. 
+    To reduce the waiting time of users, 
+    a common technique for remote viewing is progressive streaming,
+    which allows a low-resolution version of the mesh to be transmitted
+    and rendered with low latency. Then the quality of the transmitted 
+    mesh can be incrementally improved when the refinement information
+    is continuously being transmitted.
+
+    Progressive mesh is commonly used to support progressive
+    streaming. A progressive mesh comprises a \emph{base mesh} and a series
+    of refinements. The base mesh is obtained by simplifying the original mesh
+    with a series of \emph{edge collapses}.
+    With the \emph{vertex splits}, the inverses of these edge
+    collapses, the original mesh can be reconstructed from the base mesh.
+    Therefore, progressive streaming can be implemented by sending the vertex
+    splits as refinements after sending the base mesh.
+    
+    In progressive streaming, the quality of the mesh on the receiver
+    increases over time, and plotting this quality versus time gives us a \emph{quality curve}. 
+    Because vertex splits contribute differently to the quality,
+    the quality curve depends on the decoding order of the vertex splits,
+    which in turn depends on the sending order of the vertex splits.
+    Therefore, it is important to choose a sending order so that the 
+    quality on the receiver increases as fast as possible.
+    This problem is the main objective of this thesis. 
+       
+    %A natural method is to send vertex splits in the descending order
+    %of their contribution to the quality of the received mesh. 
+    %This strategy, however, is not always optimal, 
+    %because dependency also plays an important role,
+    %especially when the mesh is transmitted over a lossy network.
+    %When a mesh is transmitted over a lossy network, the dependency
+    %among data plays an important role in deciding sending order.
+    The progressive coding of meshes introduces dependencies among 
+    the vertex splits, and the descendants cannot be decoded
+    before their ancestors are all decoded. Therefore, 
+    when a progressive mesh is transmitted over a lossy network,
+    a packet loss will disable the decoding of the following
+    vertex splits if they depend on this lost packet. 
+    These successfully received vertex splits cannot be 
+    decoded until the lost packet is successfully retransmitted. 
+    Hence, the effect of dependency needs to
+    be considered in choosing the sending order of vertex splits. 
+    To find the effect of dependency
+    is non-trivial as the packet loss happens randomly.
+    In this thesis, an analytical model is proposed to 
+    quantify the effect of dependency on the quality curve.
+    
+    The quality curve is determined by the decoding time of the vertex
+    splits and their contributions to the overall mesh quality.    
+    %The decoding time of a vertex split depends on its receiving time and the 
+    %receiving time of its all ancestors. The receiving time of a vertex split
+    %in turn depends on its sending time and how many times it is 
+    %transmitted. 
+    Our model gives an expression for the expected
+    decoding time of each vertex split, given the dependencies among the vertex splits and the network
+    condition (including loss probability).
+    From this expression, both the expected 
+    value and the distribution of the decoding time of each
+    vertex split can be efficiently computed before transmission. Consequently, 
+    Different sending orders can be  
+    efficiently evaluated without simulations.   
+    Hence, this model can help in developing a sending
+    strategy to improve the quality curve 
+    during transmission. % to improve the quality.
+    Furthermore, closed-form expressions are derived in two extreme cases,
+    providing insights to the importance of dependencies on the
+    decoded mesh quality. The main insight is that if each lost packet
+    is immediately retransmitted upon the packet loss is detected, 
+    then the dependencies only matters in the first several round trip times. 
+    Therefore, the effect of dependency is only significant in the applications
+    requiring high interactivity. 
+
+    The accuracy of the analylitical model proposed in this thesis is validated
+    under a variety of network conditions, including bursty losses, fluctuating RTT,
+    and varying sending rate. The values predicted from our model match the measured
+    value reasonably well in all cases except when losses are too bursty.
+    
+    To further improve the quality curve, the view-point of the 
+    user can be considered in deciding the sending order.
+    Usually, users can only see a part of a mesh, so sending non-visible data
+    before visible data wastes bandwidth. Moreover, the visual contributions of visible
+    vertex splits (how much they can improve the rendered image)
+    also depend on the view-point of the user.
+    Hence, choosing the sending order according to the viewpoint of the user, so called
+    \emph{view-dependent streaming}, is a natural choice.
+    
+    In existing solutions to view-dependent streaming,  the
+    sender decides the sending order. This sender-driven protocol has several
+    drawbacks. First, it is not scalable to many receivers as the sender has to
+    determine the visibility of vertices and sort the visible vertex splits based on their
+    visual contributions for each receiver. 
+    Second, the sender needs to maintain
+    the rendering state of each receiver to avoid sending duplicate data. 
+    Due to the stateful design and high computational requirements,
+    the sender-driven approach cannot be easily extended to support 
+    many receivers with caching proxy and peer-to-peer system,
+    two common solutions to scalability. 
+
+    In this thesis, a receiver-driven protocol is proposed to 
+    improve the scalability. In this protocol, the receiver decides the sending order
+    and explicitly requests the vertex splits, 
+    while the sender simply sends the data requested.
+    The sending order is computed at the receiver  by estimating the visibility
+    and visual contributions of the refinements, even before receiving them,
+    with the help of GPU.
+
+    Because the visibility determination and state maintenance are all done by the receivers, 
+    the sender in our receiver-driven protocol is stateless and free of complex computation.
+    Furthermore, caching proxy and P2P streaming systems can be applied to improve
+    the scalability without adding more servers.  
+    
+    The receiver-driven protocol significantly reduces the computing cost at the sender,
+    but the bandwidth can remain the bottleneck if each receiver receives data
+    from the same sender. 
+    Based on the receiver-driven protocol, P2P techniques are applied to mesh
+    streaming in this thesis. In the implementation of P2P mesh streaming system,
+    two issues are considered: how to partition a progressive mesh into chunks and 
+    how to lookup the provider of a chunk. For the latter issus, we investigated 
+    into two solutions, which trade off server overhead and response time. The first
+    uses a simple centralized lookup service, while the second organizes peers into
+    groups according to the hierarchical structure of the progressive mesh to 
+    take advantage of access pattern. Simulation results show that our 
+    proposed systems are robust under high churn rate, reduce the server overhead
+    by more than $90\%$, keep control overhead below $10\%s$, and achieve
+    low average response time.
 \end{abstract}
 \chapter{Introduction}
 \label{c:intro}
