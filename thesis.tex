@@ -1,0 +1,368 @@
+\documentclass[11pt, a4paper]{report}
+\clubpenalty=10000
+\widowpenalty=10000
+\usepackage{fullpage}
+\usepackage{epsfig}
+\usepackage{setspace}
+\usepackage{latexsym}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{epsfig}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{subfigure}
+\usepackage[usenames]{color}
+
+\newcommand\todo[1]{\textcolor{Red}{\textbf{#1}}}
+\newcommand\pOlost{\textrm{$P_0$ is lost}}
+\newcommand\QED{\hfill\ensuremath{\Box}}
+\let\showproof1
+
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+\newenvironment{proof}[1][Proof]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+
+\title{Streaming of Progressive Meshes Over Network}
+\author{Wei CHENG\\
+National University of Singapore\\
+SuperVisor\\
+Wei Tsang OOI}
+\begin{document}
+\maketitle
+\doublespacing
+\begin{abstract}
+\end{abstract}
+\chapter{Introduction}
+\label{c:intro}
+    Many networked 3D applications are emerging nowadays, 
+    such as digital museums, virtual reality applications, 
+    and 3D social games including Second Life and Google Lively. 
+    In these applications, 3D representations of objects, 
+    so called 3D models, are provided as the main contents instead of 2D images. 
+    Compared with images, 3D models carry more information, 
+    so they can be viewed from any direction and at any distance. 
+    Moreover, 3D applications typically support user interactivity. 
+    Hence, users can walk through a virtual 3D scene and move 3D objects
+    as if they are in the real world. 
+
+    Because 3D models are relatively difficult to create, 
+    less 3D models exist online than images and videos. 
+    With the advances in 3D modeling techniques, 
+    such as 3D scanning technology, mesh reconstruction algorithm
+    and 3D modeling softwares, however, many 3D models now have been available online, 
+    such as the high resolution statues digitized by Stanford’s Digital Michelangelo Project,
+    the 3D statues directly created by digital sculpture softwares like Zbrush, 
+    and the simple solid models made by hundreds of thousands of users in Second Life. 
+    Hence, it may be expected that 3D models may play a more important role 
+    in multimedia streaming research in the near future.
+
+    Traditional 3D games store all data of 3D models in users’ local disks, 
+    but now some networked applications store the data on the server side 
+    and transmit them from the server to users when they are needed. 
+    The latter method has several advantages. 
+    First, users can immediately start the application without buying a CD
+    or downloading large amount of data. 
+    Second, because the 3D data are stored in the server and shared by all the users, 
+    users can create and modify objects and others can see the new objects immediately. 
+    For example, many objects in Second Life are user-created, 
+    and this feature is believed to be essential to success of Second Life. 
+
+    High resolution 3D models have large amount of data, 
+    so transmitting the data over networks with limited bandwidth needs long time. 
+    To reduce the waiting time of the user, 
+    the streaming technology can be used to transmit 3D data. 
+    The 3D streaming technology enables users to render the partially received data as a preview, 
+    and then improve the quality when more data are available. 
+    Users can decide how many data to receive based on their requirement of quality
+    and the rendering ability of their hardware. 
+
+    Although audio and video streaming have been studied extensively, 
+    3D streaming remains a new research area. 
+    Video streaming and 3D streaming are significantly different
+    due to the difference between videos and the representations of 3D models. 
+    In Section \ref{s:intro:representation}, two common representations of 3D objects, 
+    polygonal meshes and point-based representations, will be introduced. 
+    Complex representations are often simplified to support different level of details. 
+    In Section \ref{}, the simplification methods of meshes are briefly reviewed. 
+    Then various coding schemes of polygonal meshes will be surveyed briefly in Section \ref{}, 
+    and among them, the coding of progressive mesh will be introduced in detail. 
+    Next, some important studies about streaming of progressive meshes
+    are briefly reviewed in Section \ref{}, and more detailed reviews are presented in next chapter.
+    Finally, the research problems of this thesis are stated in Section \ref{s:intro:problem}
+    and the main contributions of this thesis are given in Section \ref{}.
+
+    \section{Representations of 3D Objects}
+    \label{s:intro:representation}
+    A 3D object is represented with a certain model and often compressed
+    to save storage space and transmission bandwidth. 
+    The most popular representation of 3D objects is polygonal meshes, 
+    especially the triangle meshes, because most graphic cards are optimized for triangle meshes. 
+    Nonetheless, some other representations exist, 
+    such as point-based meshes, which is better in some cases.
+    \section{View-dependent Streaming}
+    \label{s:intro:view_dependent}
+    View-dependent technique is first proposed in adaptive rendering of complex 3D meshes. 
+    View-dependent rendering systems only render vertices that contribute
+    to the quality of rendered image. 
+    The invisible vertices are not rendered. 
+    Moreover, if the quality of a region of a mesh is good enough, 
+    the vertex splits that further refine this region are ignored. 
+    Therefore, real-time rendering of a complex mesh becomes possible 
+    even for systems with limited rendering ability because the number
+    of vertices to be rendered is significantly reduced. 
+
+    Later, View-dependent technique is applied in progressive streaming of 3D meshes [4, 6, 7].
+    Southern et al. [6] propose a system in which the client is stateless 
+    and only stores the visible vertices of meshes. 
+    In this system, when client changes viewpoint, 
+    the server will send the newly visible vertices and the client 
+    will drop the vertices out of the viewable area. 
+    When a client returns to a previous viewpoint, 
+    the sender has to send again the data previously sent already 
+    and the bandwidth is wasted in duplicate transmission. 
+    Therefore, this system is not appropriate for transmission
+    over networks with limited bandwidth. 
+
+    To et al. [7] and Kim et al. [4] prevent the server 
+    from sending duplicate data by storing the received vertices data 
+    in the client even when they become temporarily not needed. 
+    Later, when the client returns to a previous viewpoint, 
+    the data needed are still available from local storage, 
+    so duplicate transmission is avoided. 
+    These methods reduce the bandwidth needed in transmission, 
+    but now the server has to remember that which part of mesh is sent
+    and which part is not for each client. 
+    To keep such information for each client increases the memory usage of the server, 
+    and it makes the application of caching proxy and peer-to-peer technique, 
+    two common solutions to increase the scalability, hard to be used.  
+    Moreover, their studies are mainly addressing the limited rendering ability of the client,
+    which is the bottleneck in that time. 
+    Now with the advance of commodity graphic card technology, 
+    the rendering ability increases so much that the network bandwidth becomes the main bottleneck
+    in most cases. Hence, the focus of view-dependent streaming systems needs to be changed
+    to address reducing transmission bandwidth.
+
+    Yang et al. [8] and Zheng et al. [10] address reducing transmission bandwidth in their research. 
+    The server in the system proposed by Yang et al. [8] decides the resolution of meshes
+    according to the available network bandwidth. 
+    Zheng et al. let the server predict users' viewpoints so that the server could send data in advance 
+    to compensate the round-trip time with the rendering time. 
+    In both systems, the sender decides which part of data to send based on complex algorithms. 
+    When the mesh size and number of receivers are both large, the requirement of computing resources
+    may beyond the ability of the server. 
+    Hence, a more scalable way to support view-dependent steaming of large progressive meshes 
+    to many receivers needs to be designed.
+    
+    In designing a view-dependent streaming system, 
+    some challenges need to be considered. 
+    In this section, the main challenges and the solutions in previous work are briefly introduced.
+
+    The primary task of view-dependent streaming is finding an appropriate subset of refinements
+    to generate a rendered image with satisfactory quality. 
+    The flexibility of choosing vertex splits to send is crucial to enable this task, 
+    but it is restricted by the dependency among the vertex splits. 
+    Therefore, to reduce the dependency among vertex splits becomes a challenge in view-dependent streaming. 
+    Some studies have been done to address this challenge. 
+    To et al. [7] remove the cut-neighbor dependency by using a vertex's ancestor if it is not generated yet. 
+    Their method is innovative but cannot preserve the original topology 
+    and hence cannot be applied when accurate topology is required. 
+    Kim and Lee [3] propose another way to remove the cut-neighbor dependency 
+    and ensure the final mesh having the correct topology. 
+    Kim et al. [4] further improve this method and significantly improve the compression efficiency. 
+     Their scheme is neat since it significantly increases the flexibility in choosing vertex splits
+    and meanwhile keeps the original connectivity. 
+    It is applied in this thesis to reduce the cut-neighbor dependency.
+
+    Another Challenge is how to keep the flexibility in choosing sending order
+    when progressive meshes are encoded and compressed. 
+    Most compression algorithms for progressive meshes choose a specific encoding order
+    to reduce the redundancy by exploiting the correlation between consecutive vertex splits. 
+    Moreover, the mesh compressed with traditional methods can only be sequentially decoded, 
+    making changing sending order impossible. 
+    Kim and Lee [2] propose a compression scheme allowing random decoding order
+    and the same method is used by Yoon and Lindstrom [9]. 
+    In the same time, the efficiency of their methods is close to the best compression algorithms available. 
+    Their studies are very important since now we have the flexibility in choosing sending order, 
+    which is essential in view-dependent streaming, with little loss of compression efficiency. 
+    Although their methods are designed for local accessing of meshes, 
+    it is possible to extend them to be used in network transmission. 
+    \section{Problem Statement}
+    \label{s:intro:problem}
+    (summary)
+    \begin{itemize}
+        \item No quantitative analysis has been done for 
+            finding the effect of dependency 
+            when progressive meshes are transmitted over lossy networks. 
+        \item Sender-driven view-dependent streaming
+            is not scalable to large number of receivers. 
+        \item No peer-to-peer system 
+            exists for view-dependent progressive mesh streaming. 
+    \end{itemize}
+    
+    \section{Objectives and Scope}
+    \label{s:intro:objectives}
+    To address the problems introduced in Section 1.5, 
+    the objectives of this thesis are listed as follows: 
+    \begin{enumerate}
+        \item The first objective of this thesis is
+            to quantitatively analyze how sending order affects
+            the rendered quality of progressive meshes 
+            during transmission over lossy network. 
+            To achieve this objective, 
+            an analytical model is proposed
+            to estimate the decoding time of
+            each vertex split by considering both
+            the mesh property and network condition. 
+            This model could help us to find some insights
+            about the effect of dependency. 
+            In addition, it may be applied to find a better sending strategy, 
+            and a greedy strategy is given in the thesis as an example. 
+            Compared with methods based on simulation, 
+            analytical model is more efficient and may be used
+            in the real time so that the sending order
+            can be adaptive to the network condition.
+        \item The second objective is to implement view-dependent streaming
+            in a more scalable way. A receiver-driven approach is proposed 
+            to move the visibility decision from the sender to the receiver.
+            The receiver-driven approach increase the scalability
+            not only because it reduce the the CPU overhead of the sender 
+            but also because it makes the caching proxy and peer-to-peer much easier
+            to be applied to remove the bandwidth bottleneck on the sender side.
+            The application of receiver-driven approach could eventually
+            make possible the view-dependent streaming of large meshes
+            to huge number of receivers.
+        \item The third objective of this thesis to examine the possibility 
+            of implementing a peer-to-peer view-dependent streaming system. 
+            The receiver-driven approach proposed in this thesis 
+            makes the peer-to-peer system possible, 
+            but some challenges still exist such as how to reduce the response time
+            and message overhead. 
+            The prototype proposed in this thesis could give some insights
+            to the future research on this area. 
+            Eventually, peer-to-peer system should be an attractive way 
+            to bring the streaming of large meshes into practice. 
+    \end{enumerate}
+
+    Only streaming of static 3D objects is considered in this thesis. 
+    Streaming of 3D animations beyonds the scope of this thesis. 
+    Moreover, streaming of 3D scenes is not concerned in this thesis.
+    Instead, this thesis concentrates on streaming of one large mesh.
+    Nonetheless, streaming of 3D scenes becomes easier when mature methods
+    of streaming of single objects exist because a 3D scene is the collection
+    of multiple single meshes. 
+    Finally, this thesis focuses on the streaming of progressive meshes. 
+    Streaming of other representations of 3D objects is not discussed in this thesis,
+    but the methods proposed in this thesis should be possible
+    extended to support streaming of other representations with some modifications.
+
+    In next chapter, existed studies about streaming of progressive mesh
+    will be introduced. 
+    First, various ways to improve the quality when progressive meshes are transmitted
+    over lossy network are reviewed.
+    Second, previous view-dependent streaming systems of progressive meshes are introduced
+    and why these sender-driven approaches are not scalable is explained. 
+    Finally, peer-to-peer techniques are introduced briefly
+    and the difference between peer-to-peer video streaming
+    and peer-to-peer progressive mesh streaming is discussed in detail. 
+\include{mesh}
+\include{dstream}
+\include{mm09-3dstreaming}
+\include{p2p}
+
+\chapter{Conclusion}
+\label{c:conclusion}
+This research concentrated on streaming of progressive meshes over network. 
+First, the effect of dependency over lossy network was quantitatively analyzed. 
+To enable quantitative analysis, an analytical model was developed to compute 
+the probability distribution of the decoding time of each vertex split. 
+Many experiments were carried out to verify the accuracy of the analytical model, 
+and different network traces and progressive meshes were used to avoid bias. 
+In these experiments, the predicted decoding time of vertex splits obtained 
+with the analytical model was reasonably close to the measured one. 
+Therefore, with the help of the analytical model, 
+the quality of the received mesh could be predicted efficiently before transmission.
+Consequently, adaptive transmitting vertex splits according to the network condition
+becomes possible. Besides streaming of progressive meshes, 
+streaming of other partially ordered data could also be modeled
+with the analytical model in this thesis. 
+For example, this model was successfully applied in streaming of 3D plants.
+
+The analytical model in this thesis assumes that the packet losses 
+are independent with each other, 
+so a network trace with many burst packet losses may cause considerable error in the prediction. 
+Gilbert model of packet loss may be used to obtain results that are more accurate, 
+but using Gilbert model may significantly increase the complexity of the analytical model. 
+Moreover, burst packet losses happen less commonly in the Internet
+after widespread application of RED in routers. 
+Therefore, the precision of the analytical model
+without considering burst packet loss may be acceptable in most cases now.
+
+It is observed in the experiments that the effect of dependency
+is only significant in the short period at the beginning of transmission, 
+and the length of this period increases
+when the round trip time or packet loss rate increases. 
+This observation is consistent with the result of the analytical model. 
+Since each lost packet will be retransmitted as soon as the packet loss is detected, 
+the effect of a packet loss is restricted to a certain period. 
+This effect decreases with time because of two reasons. 
+First, the contribution of the vertex splits sent decreases; 
+second, the quality of the reconstructed mesh increases. 
+Consequently, the relative value of the effect, 
+represented as the ratio of the contribution of vertex
+splits to the quality of the reconstructed mesh, decreases.
+As a result, considering the dependency among the vertex splits 
+is only needed for applications requiring high interactivity
+because these applications require low initial latency. 
+For these applications, the greedy method proposed in this thesis
+could generate a adaptive sending strategy to reduce the initial latency. 
+
+View-dependent streaming is needed in streaming of large meshes
+to improve the quality quickly, but current implementations cannot be easily scaled
+to large number of receivers because the sender is not stateless. 
+To address this weakness, a receiver-driven view-dependent streaming system,
+in which the sender is stateless, was proposed in this thesis. 
+According to the experimental results, the receiver-driven approach
+can reduce both the CPU usage and outgoing bandwidth of the sender significantly. 
+Moving the visibility decision to the receiver reduces the overhead of the server. 
+Moreover, it also reduces the outgoing bandwidth of the sender because the server
+does not need to send the identifications of the vertex splits any more. 
+Above all, a significant advantage of receiver-driven approach is that
+now both the caching proxy and P2P techniques can be applied to increase the scalability of the system
+because of the sender is stateless. 
+
+The visibility decision made by the receiver may not be accurate 
+because the receiver can only estimate the visibility based on
+the partially received mesh. 
+Visible vertices may be not displayed if their ancestor vertices are not visible. 
+According to the current results, however, this kind of error is negligible in most cases. 
+For applications that tolerate no error, 
+further research could be done to remove this kind of error. 
+A possible solution could be to split those vertices near the silhouette even when they are invisible.
+
+To increase the scalability of the view-dependent mesh-streaming systems, 
+a P2P mesh streaming system was proposed in this thesis based on the receiver-driven approach. 
+According to the experimental results, the server overhead can be reduced by 90\%
+and the response time is still close to the low bound. 
+The control overhead introduced in this system is about 10\%, a reasonable value. 
+The response time is low because most requests in this system are successful in the first try, 
+and the message overhead is reasonable because the hierarchical group system proposed in this thesis effectively 
+reduces the message overhead. 
+The prototype developed in this thesis shows that P2P mesh streaming system is feasible
+and it can significantly reduce the server cost when there are many clients.
+
+The control overhead at 10\% is acceptable in this system since the majority of
+control messages are transmitted among the peers and the server overhead keeps low. 
+Nonetheless, the message overhead could be further reduced. 
+
+During the study, it is found that in some cases the bottleneck can be the rendering of the meshes, 
+especially when the graphic card is used in deciding the visibility of vertices. 
+Improving the rendering efficiency of the progressive mesh during the streaming 
+could be an interesting research problem.  
+During the streaming, a progressive mesh with only partial modification is frequently re-rendered, 
+so it is possible to exploit the similarity between two consecutive meshes to improve the rendering speed.
+\bibliographystyle{abbrv}
+\bibliography{thesis}
+\end{document}
