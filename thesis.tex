@@ -12,6 +12,7 @@
 \usepackage{amsfonts}
 \usepackage{subfigure}
 \usepackage[usenames]{color}
+\usepackage{verbatim}
 
 \newcommand\todo[1]{\textcolor{Red}{\textbf{#1}}}
 \newcommand\pOlost{\textrm{$P_0$ is lost}}
@@ -25,7 +26,7 @@
 \item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
 
 
-\title{Streaming of Progressive Meshes Over Network}
+\title{Streaming of High-Resolution Progressive Meshes Over Network}
 \author{Wei CHENG\\
 National University of Singapore\\
 SuperVisor\\
@@ -53,7 +54,19 @@ Wei Tsang OOI}
     collapses, the original mesh can be reconstructed from the base mesh.
     Therefore, progressive streaming can be implemented by sending the vertex
     splits as refinements after sending the base mesh.
+
+    Although streaming of videos is extensively studied, 
+    streaming of high-resolution progressive meshes is considerably different.
+    Frames of a video are usually sent following the time order,
+    vertex splits of a progressive mesh, however, can be sent in various of orders.
+    Some new research problems arise due to the flexibility in sending order of 
+    vertex splits. In this thesis, four related topics are discussed. 
+    %After decoding, each frame contributes the same to a video, but vertex splits
+    %in a progressive mesh vary considerably in their contribution to the quality
+    %of the reconstructed mesh. 
     
+
+\begin{comment}    
     In progressive streaming, the quality of the mesh on the receiver
     increases over time, and plotting this quality versus time gives us a \emph{quality curve}. 
     Because vertex splits contribute differently to the quality,
@@ -62,21 +75,16 @@ Wei Tsang OOI}
     Therefore, it is important to choose a sending order so that the 
     quality on the receiver increases as fast as possible.
     This problem is the main objective of this thesis. 
+\end{comment}
        
-    %A natural method is to send vertex splits in the descending order
-    %of their contribution to the quality of the received mesh. 
-    %This strategy, however, is not always optimal, 
-    %because dependency also plays an important role,
-    %especially when the mesh is transmitted over a lossy network.
-    %When a mesh is transmitted over a lossy network, the dependency
-    %among data plays an important role in deciding sending order.
-    The progressive coding of meshes introduces dependencies among 
+    First, 
+    %the effect of dependency needs to be considered in choosing
+    %the sending order of vertex splits.
+    the progressive coding of meshes introduces dependencies among 
     the vertex splits, and the descendants cannot be decoded
     before their ancestors are all decoded. Therefore, 
     when a progressive mesh is transmitted over a lossy network,
-    a packet loss will 
-    %disable the decoding of the following
-    delay the decoding of the following
+    a packet loss will delay the decoding of the following
     vertex splits if they depend on this lost packet. 
     %These successfully received vertex splits cannot be 
     %decoded until the lost packet is successfully retransmitted. 
@@ -85,18 +93,18 @@ Wei Tsang OOI}
     %To find the effect of dependency
     %is non-trivial as the packet loss happens randomly.
     In this thesis, an analytical model is proposed to 
-    quantify the effect of dependency on the quality curve.
-    %quantitatively analyzes the effects of dependency
-    %by modeling the distribution of decoding time of each vertex split
-    %as a function of mesh properties and network parameters.
-    The quality curve is determined by the decoding time of the vertex
-    splits and their contributions to the overall mesh quality.    
+    %quantify the effect of dependency on the quality curve.
+    quantitatively analyzes the effects of dependency
+    by modeling the distribution of decoding time of each vertex split
+    as a function of mesh properties and network parameters.
+    %The quality curve is determined by the decoding time of the vertex
+    %splits and their contributions to the overall mesh quality.    
     %The decoding time of a vertex split depends on its receiving time and the 
     %receiving time of its all ancestors. The receiving time of a vertex split
     %in turn depends on its sending time and how many times it is 
     %transmitted. 
-    Hence, the distribution of decoding time of each vertex split
-    is modeled as a function of the mesh property and the network condition.
+    %Hence, the distribution of decoding time of each vertex split
+    %is modeled as a function of the mesh property and the network condition.
     %From this expression, %both the expected value and 
     %the distribution of the decoding time of each
     %vertex split can be efficiently computed before transmission. 
@@ -234,14 +242,951 @@ Wei Tsang OOI}
     Finally, the research problems of this thesis are stated in Section \ref{s:intro:problem}
     and the main contributions of this thesis are given in Section \ref{}.
 
-    \section{Representations of 3D Objects}
+    Before we introduce the streaming technology, it is important to
+    have a look at the objects to be streamed first. 3D objects are
+    often obtained from 3D scanning, modeling software and other
+    sources. They are represented with certain models and often
+    compressed to save the storage space and transfer bandwidth. In this
+    section, we introduce some typical representation methods as well as 
+    compression algorithms and compare them in the context of network streaming.
+    \section{Representation}
     \label{s:intro:representation}
-    A 3D object is represented with a certain model and often compressed
-    to save storage space and transmission bandwidth. 
-    The most popular representation of 3D objects is polygonal meshes, 
+    A 3D object is represented with a certain model.
+    Currently the most popular representation of 3D objects is polygonal meshes, 
     especially the triangle meshes, because most graphic cards are optimized for triangle meshes. 
     Nonetheless, some other representations exist, 
     such as point-based meshes, which is better in some cases.
+    In this section, we briefly introduce these representations and give the reason
+    why we concentrate on meshes.
+    \subsection{Polygonal Mesh}
+    %\subsubsection*{Some concepts about mesh}
+    A triangle mesh can be donated as a tuple $(K, V)$, where $K$ is a
+    \emph{simplicial complex} including all the mesh simplices 
+    (vertices, edges and triangles) and $V =\{v_{1}, v_{2}, ...,
+    v_{n}\}$ is the set of geometry positions of vertices. Therefore,
+    a mesh has both \emph{connectivity} information represented by $K$
+    and \emph{geometry information} represented by $V$. In another
+    word, $K$ includes all the topology information of all the
+    elements in the mesh, and with $V$ it is embedded into $R^{3}$. If
+    polygons are allowed in $K$ instead of only triangles, then this
+    kind of meshes are called polygonal meshes.
+
+    %Here are some important concepts about mesh without
+    %giving rigorous definition. 
+    In a mesh, it is required that every
+    vertex is an end of an edge and every edge should be incident to at
+    least one face ((a) in figure \ref{mesh_non_mesh} is not a mesh).
+    The number of edges incident to a vertex is called the
+    \emph{valence} of this vertex, and the number of edges incident to
+    a face is called the \emph{degree} of this face. An edge only
+    incident to one face is called a \emph{boundary edge}; an edge
+    shared by two faces is called an \emph{interior edge}; an edge
+    shared by more than two faces is called a \emph{singular edge}. A
+    \emph{manifold mesh} is a mesh without singular edges and every
+    two faces share one edge or nothing (see figure \ref{mesh_non_mesh}).
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{figure2.1.eps}
+\caption[Manifold mesh, non-manifold mesh and non-mesh]{ (a) is not
+a mesh since one edge is incident to no face. (b) is a manifold
+mesh. (c) is a non-manifold mesh since there is a singular edge.
+(d) is a non-manifold mesh since two faces share only a
+vertex.\label{mesh_non_mesh}}\
+\end{figure}
+
+\begin{comment}
+    Two vertices are \emph{adjacent} if there is an edge between them,
+    and two faces are \emph{adjacent} if they share an edge. The
+    \emph{orientation} of a polygon is the cyclic order (clockwise or
+    counter-clockwise) of the incident vertices. If two faces are
+    adjacent and the two vertices in the common edge are
+    in the opposite order, their orientations are \emph{compatible}.
+    If there is an arrangement of all the face orientations in a mesh
+    such that all pairs of adjacent faces are compatible, this mesh is
+    \emph{orientable}. A compatible mesh with such arrangement is
+    called an \emph{oriented mesh} (see figure \ref{orient}). As we
+    can see, an orientable manifold mesh is simpler than non-manifold
+    non-orientable meshes. It is worth noting that many algorithms
+    introduced later can only deal with orientable manifold meshes. A
+    typical orientable manifold triangle mesh has following
+    properties: its vertex number is almost twice as many as the
+    triangle number; its edge number is almost 1.5 as many as the
+    triangle number; the average valence value of a vertex is about 6.
+    More detail about the triangle meshes can be seen in Chapter 2 of
+    \cite{381198}.
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{orient.eps}
+\caption[Orientable and non-orientable mesh]{(a) is a orientable
+and oriented mesh. (b) is a orientable but not oriented mesh. (c)
+is a non-orientable mesh. \label{orient}}
+\end{figure}
+\end{comment}
+    
+    %\subsubsection*{Associate properties with mesh}
+    Polygonal meshes can be used as an approximation of the surfaces
+    of 3D objects. In this case, some properties of the surface such
+    as color and normal are often associated to the mesh. These
+    properties can be categorized into two types: discrete attributes
+    and scalar attributes \label{property}. Discrete attributes, such
+    as material identifier, are usually associated to the faces, while
+    scalar attributes, such as color, normal, and texture coordinate,
+    are often associated to vertices or corners (the tuple (vertex,
+    face)). The latter one is used because in the case of
+    discontinuity, a vertex can have more than one scalar value. For
+    example, if two smooth surface intersect at a curve, then vertices
+    in this curve will have two different normal values. Therefore,
+    the normal value should be associated to the tuple (vertex face).
+    Then, polygonal meshes can be represented by $(K, V, D, S)$ where
+    $D$ is the set of discrete attributes associated to face $f \in
+    K$ and $S$ is the set of scalar attributes associated to corners $(v, f)$ in $S$.
+    
+\begin{comment}
+    \subsubsection*{Mesh simplification and progressive mesh}
+    Mesh simplification means to transform a given polygonal mesh into
+    another mesh with fewer faces, edges and vertices, and the simpler
+    mesh should preserve specific properties of the original mesh as
+    much as possible. A lower resolution mesh is useful in faster
+    rendering or transmission. The algorithms to simplify mesh are
+    named \emph{mesh decimation}. They can be categorized into three
+    classes: Re-sampling algorithms, Vertex clustering algorithms, and
+    Incremental decimation algorithms.
+
+    Re-sampling algorithms re-sample a given mesh into a new
+    mesh with some attractive property, such as semi-regular
+    connectivity, for some specific compress algorithms. 
+    Re-sampling algorithms try to keep the shape of the original mesh but not the topology, 
+    so they are usually used in lossy compression algorithms, 
+    which are out of the scope of this paper.
+
+    The idea of Vertex clustering is as follows: given a certain
+    approximation tolerance $\varepsilon$, we partition the bounding
+    space of the mesh into cells with diameter smaller than
+    $\varepsilon$. Then for each cell we generate a representative
+    vertex position for all the vertices in this cell. In another
+    word, all the vertices, edges and faces entirely in one cell are
+    degenerated to one vertex (see figure \ref{simplification} (a)).
+    Vertex clustering is simple and robust but often provide worse
+    model quality than incremental decimation.
+
+    Incremental decimation algorithms remove vertex one by one. In
+    each step, a vertex whose removal cause the minimal
+    reduction to the quality of the mesh is chosen. Usually there are two ways to
+    remove a vertex: \emph{vertex removal}\label{vertex_removal} and
+    \emph{edge collapse}\label{edge_collapse}. Vertex removal is to
+    delete a vertex and re-triangulate the hole caused by the removal
+    of this vertex (see figure \ref{simplification} (b)). Edge collapse operation
+    chooses two adjacent vertices $p$ and $q$,  and then moves them both
+    to the same point on the edge between them (see figure
+    \ref{simplification}(c)). A special kind of edge collapse is
+    called \emph{half-edge collapse}, which always move one vertex $p$
+    to one of its neighbors $q$. Actually, half-edge collapse is
+    a special case of vertex removal too, and the  difference is half-edge collapse has 
+    no freedom to choose a triangulation as in normal vertex
+    removal. Incremental decimation can provide optimal mesh based on
+    some specific criteria, but the computational complexity is always
+    much higher than vertex clustering.
+\begin{figure}
+\centering
+\includegraphics[width = 0.8\textwidth]{simplification.eps}
+\caption[Mesh simplification]{Mesh simplification: (a) vertex
+clustering, (b) vertex removal and vertex insertion, and (c) edge collapse
+and vertex split\label{simplification}}
+\end{figure}
+    In incremental decimation, the operation done can always be recorded 
+    so that its inverse can be taken to restore the original mesh. The
+    inverse of vertex removal is \emph{vertex insertion} and the
+    inverse of edge collapse is \emph{vertex split} (see figure
+    \ref{simplification}(b,c)). Accordingly, we have \emph{restricted
+    vertex split} as the inverse of half edge collapse. More details 
+    about mesh simplification can be seen in the tutorial of Gotsman,
+    Gumhold and Kobbelt \cite{gotsman-simplification}.
+
+    Suppose we obtain a base model after a series of incremental
+    decimation and record all the inverses, and then we transfer the
+    base model followed by the inverses with the reverse order. At the
+    receiver side, the model can be rendered anytime after the base
+    model has been received and the quality of model depends on how
+    much inverses received. Therefore, this kind of mesh, a base mesh
+    plus a series of refinement operations, is called
+    \emph{progressive mesh}, which will be introduced in more detail 
+    in section \ref{progressive_mesh}.
+\end{comment}
+
+    \subsection{Point-based Model}\label{point_based}
+\begin{comment}
+    Triangle meshes always try to keep the accurate topology information, 
+    so they may be not suitable for some cases. 
+    For a model with complicate topology, 
+    it is very expensive to keep the topology information, 
+    while the topology information is not necessary in some cases. 
+    For example, the resolution of models becomes higher and higher 
+    due to the improvements of laser scanner, 
+    but the resolution of the screen grows much slower. 
+    Therefore, many triangles in a high resolution model may be 
+    rendered into one pixel in the screen. 
+    In this case, all the expensive connectivity information 
+    are not necessary in the rendering, 
+    and one point is enough to represent this part. 
+    Moreover, the topology information of dynamic 3D models always changes, 
+    hence a consistent topology is not necessary to be kept. 
+    Therefore, point based models have more flexibility for dynamic 3D objects.
+\end{comment}
+    A point-based geometry representation can be considered as a 
+    sampling of a continuous surface.  The result are a set of 3D points. 
+    These points are optionally associated with the normal vectors 
+    and other attributes, such as color and material properties. 
+    To bridge the gaps between neighboring point samples, 
+    bounding sphere or surface splats are used as rendering primitives. 
+
+    Rusinkiewicz \cite{rusinkiewicz:qsplat, 364350} proposed a point-based system named QSplat. 
+    In QSplat, bounding spheres are used in rendering and level-of-detail control. 
+    When sampling points added, a bounding spheres can be divided into several children spheres. 
+    Therefore, the bounding sphere hierarchy can be represented as a tree
+    and the root represents one bounding sphere including the whole objects (see Figure \ref{qsplat}).
+    \begin{comment}
+\begin{figure}
+\centering
+\includegraphics[width=0.4\textwidth]{qsplat.eps}
+\caption{Bounding Sphere Hierarchy of QSplat: the curves and horizontal arrows represent the storage order.}
+\label{qsplat}
+\end{figure}
+    \end{comment}
+    Other rendering primitives often used are surface splats, 
+    first proposed by Zwicker, Pfister, Baar and Gross \cite{383300}. 
+    The splats can be disk, elliptical splats. 
+    One special splat is \emph{surfel} proposed by Pfister, Zwicker, Baar and Gross\cite{344936}.
+    More details about point based model can be seen in the survey by Kobbelt and Botsch \cite{DBLP:journals/cg/KobbeltB04} 
+    and the PhD thesis of Wand \cite{wand:point}.  
+
+    Some other representations also exist, such as simple solid models used in Second Life
+    and generalized cylinders used in representing plants \cite{plant:seb, compact:mondet}.
+    They are out of the scope of this thesis and will not be introduced.
+    \subsection{Choice in This Thesis}
+    This thesis concentrates on meshes because of following reasons:
+    \begin{itemize}
+        \item Most rendering hardwares are optimized for meshes, so other model need to be convert
+            to mesh before rendering either explicitly or implicitly. 
+        \item Without connectivity information in the model, point-based model is relatively easier to deal with
+            than meshes. Therefore, adapting techniques used in streaming meshes to streaming point-based model
+            is easier than the opposite direction.
+    \end{itemize}
+
+    \section{Coding and Compression}
+    A mesh is encoded first before it can be stored or
+    transmitted. Coding is to represent a mesh with a sequence of
+    digits. Compression is always combined with coding to save the storage space
+    or the bandwidth needed in transmission. 
+    In this section, we use coding and compression interchangeably.  
+    There are two kinds of coding:
+    single-rate coding and progressive coding. 
+    Single-rate coded mesh can only be decoded when all data are available 
+    whereas progressive coded mesh can be decoded with only part of data are available. 
+    We will briefly introduce single-rate coding methods, and then concentrate on
+    progressive coding methods, because the latter are more suitable for progressive streaming.
+    %They are both introduced in this section.
+    \subsection{Single-rate Coding} \label{single_rate}
+    In a mesh, three kind of information needs to be coded:
+    connectivity, geometry and property. 
+    %connectivity coding has been researched in depth and near optimal result has been reached,
+    %although actually the latter two dominate in a mesh. Now, more
+    %studies begin to concentrate in geometry coding than before. 
+    Since most property data are associated to vertices, 
+    in many compress algorithms they are treated as same as geometry data or even
+    ignored. We introduce connectivity coding first, and then introduce geometry coding briefly.
+    
+    \subsubsection*{Connectivity coding}
+    \begin{comment}
+    In VRML ASCII representation, a polygonal mesh is represented by
+    an \emph{Indexed-FaceSet} node with a \emph{coord} array, and a
+    \emph{coordIndex} array. For example, a representation of a
+    tetrahedron is as follows:
+    \begin{quote}
+    \begin{verbatim}
+#VRML V2.0 utf8 Shape {
+  geometry IndexedFaceSet {
+    coord Coordinate {
+      point [
+        -1.63 -0.94 -0.66
+         1.63 -0.94 -0.66
+         0.00  0.00  2.00
+         0.00  1.88 -0.66
+      ] }
+    coordIndex [
+      1 2 0 -1
+      3 2 1 -1
+      0 2 3 -1
+      0 3 1 -1
+    ] } }
+    \end{verbatim}
+    \end{quote}
+    As we can see, each face is represented with the indices of the
+    vertices, followed by -1 as a face separator. 
+    For a mesh with $v$ vertices, one index needs ${\lceil}log_{2}v\rceil$ bits. For a
+    triangular mesh, every face needs $3{\lceil}log_{2}v{\rceil}$ bits. 
+    Therefore, the total cost is $3{\lceil}flog_{2}v{\rceil}$,
+    where $f$ represents the number of faces. Since in a typical
+    triangular mesh $v \approx 2f$, the total cost can be represented
+    as $6v{\lceil}log_{2}v{\rceil}$ or $6{\lceil}log_{2}v{\rceil}$
+    bpv (bit per vertex).
+\end{comment}
+
+    A mesh is often represented as an array of vertex coordinates and 
+    an array of triangles (or polygons). A triangle is represented by 
+    the indices of its three vertices.
+    In this representation, every vertex is indexed by all the
+    triangles to which it is incident. Repeated references introduce
+    redundancy. Therefore, triangle strip method is introduced to
+    reduce this redundancy. In a triangle strip or a triangle fan or a
+    generalized triangle strip (a mixture of triangle strips and
+    triangle fans) (see Figure \ref{strip}), 
+    triangles can be represented with one index of vertex
+    except the first triangle. 
+    %Since the number of faces is
+    %about twice as many as the number of vertices, 
+    %some vertices have to be repeatedly indexed. 
+    Deering \cite{218391} first introduced generalized triangular mesh, 
+    which combining the generalized triangle strips with a vertex buffer,
+    which is used to further reduce the bits used to represent indices. 
+    %In his work, a first-in-first out vertex buffer is used to store up to 16
+    %recently visited vertices. Then vertices saved in the buffer can
+    %be represented with 4 bit buffer indices instead of much longer
+    %global indices. 
+    Further, Chow \cite{267103} introduced a method to
+    decompose a mesh into triangle strips. 
+    %In their paper, a mesh is decomposed into triangle strips from boundary to the center. 
+    Bajaj, Pascucci and Zhuang \cite{789628} presented a coding method with layered
+    decomposition. 
+    %A triangular mesh is decomposed into several
+    %concentric layers of vertices and then the triangles between each
+    %pair of adjacent vertex layers is constructed to triangle layers.
+    Typically, a triangle layer is a generalized triangle strip. 
+    %Then
+    %the connectivity coding is reduced to coding of the number of
+    %vertex layers, the number of vertices in each layer, and the
+    %generalized triangle strip in each triangle layer. This method is
+    %reported to be able to encode the connectivity in about 1.40-6.08
+    %bpv.
+    \begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{strip.eps}
+    \caption{(A)The triangle strip, (B)the triangle fan, and (C) the generated triangle strip.}\label{strip}
+    \end{figure}
+
+    Taubin and Rossignac \cite{274365} proposed a method named
+    \emph{topological surgery}, which changes coding of a manifold
+    mesh to coding of two trees: 
+    a vertex spanning tree and the dual of the triangles.
+    %First, a vertex spanning tree is
+    %selected and then the mesh is cut along the edges of this tree. A
+    %planar polygon is generated and the dual of the triangles is a tree too (see Figure \ref{surgery}). By
+    %encoding these two trees with run-length method, the connectivity
+    %of a manifold mesh can be coded in 2.48 - 7.0 bpv. 
+    Topological surgery has been implemented in MPEG-4 standard, and more details
+    can be seen in the report of Taubin\cite{3d:Taubin}.
+\begin{comment}
+    \begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{surgery.eps}
+    \caption{(A)An octahedron mesh, (B)its vertex spanning tree, and (C) the cut and flattened mesh with its triangle spanning tree shown by dashed lines.}\label{surgery}
+    \end{figure}
+\end{comment}
+    
+    Touma and Gotsman \cite{triangle:Touma} introduced a
+    valence-driven approach to encode the connectivity by coding the
+    valence of all the vertices in a specific traversing order. 
+    %With
+    %the valences, the connectivity information can be re-constructed in
+    %the receiver side. As we know, the average valence of a vertex in
+    %a typical manifold mesh is about 6 and the distribution is quite compact,
+    %so the entropy of valence is small. Therefore, the valences
+    %can be coded effectively with arithmetic coder and the cost is
+    %less than 1.5 bpv on average. 
+    The performance is further improved
+    by Alliez and Desbrun \cite{alliez01valencedriven}, who also proved a
+    upper-bound 3.24 bpv, exactly the theoretical value computed
+    by Tutte \cite{census:Tutte} after enumerating all possible planar
+    graphs.
+
+    Several methods based on triangle conquest have also been
+    proposed, whose difference from valence-driven is that in a
+    specific order, what kind of operations
+    to build new triangles instead of valences is recorded. Gumhold and
+    Stra\ss{}er \cite{280836} proposed a triangle conquest approach
+    named \emph{cut-border machine}, which can encode the connectivity
+    of manifold mesh within 3.22 - 8.94 bpv, mostly around 4 bpv. 
+    A significant advantage of this method is that it can be easily implemented
+    in hardware and the decompression is very fast, which
+    renders it to be very useful in real-time coding. 
+    Another method named \emph{edgebreaker} is presented by Rossignac \cite{614421},
+    and it is similar to the cut-border machine but has better
+    compress efficiency and much slower decompression speed.
+
+    Among all these methods, Alliez and Desbrun's algorithm
+    \cite{alliez01valencedriven} has the best efficiency, but it can
+    be only used to code orientable manifold mesh. 
+    Therefore, non-manifold meshes should be transformed before they can be coded.
+    It is worth noting that the triangle strip based algorithms \cite{218391, 267103,
+    789628} can directly encode meshes with arbitrary topology.
+    \subsubsection*{Geometry coding}
+    Most single-rate geometry compression methods involve three steps:
+    quantization, prediction, and entropy coding.
+
+    In VRML, geometry data is represented with 32 bit floating-point
+    number, but this precision is highly beyond the perceiving
+    capability of human eyes. Hence, quantization can be performed to
+    compress the geometry data. Typically, each coordinate in a mesh is
+    uniformly quantized to 8-16 bits integer.
+
+    After quantization of vertex coordinates, prediction is taken in
+    encoding by exploiting correlations exist between adjacent vertex
+    coordinates. An effective prediction scheme generates prediction
+    errors with highly compact distribution, which can be effectively
+    encoded by entropy coders, such as Huffman coder or arithmetic
+    coder. 
+    %Prediction schemes can be categorized into several classes:
+    %\emph{delta prediction}, \emph{linear prediction},
+    %\emph{parallelogram prediction}, and \emph{second-order
+    %prediction}. %We do not introduce them due to the limited space.
+
+    More details about single-rate coding can be seen in the tutorial
+    by Gotsman, Gumhold, and Kobbelt \cite{gotsman-simplification},
+    the survey by Taubin \cite{3d:Taubin}, by Alliez and Gotsman
+    \cite{recent:alliez}, and the survey by Peng, Kim and Kuo
+    \cite{technologies:peng}.
+    \subsection{Progressive Coding}
+    Single-rate coded meshes can only be decoded after they are
+    totally received, so they are not suitable for streaming. Therefore,
+    some progressive coding schemes have been proposed. According to
+    how the original mesh is simplified, these coding scheme can be
+    categorized into three classes: progressive mesh based, vertex
+    clustering based, and re-meshing based.
+
+    \subsubsection*{Progressive mesh based}
+    The progressive mesh (PM) \label{progressive_mesh}is first
+    introduced by Hoppe in 1996 \cite{hoppe96progressive}. In this
+    scheme, the simplification is based on \emph{edge collapse}, which
+    collapses an edge into a vertex.
+    (see Figure \ref{split2}).
+    %\ref{edge_collapse} in page \pageref{edge_collapse}). 
+    After a series of edge collapse, a coarser \emph{base mesh} remains. 
+    Then the PM is constructed by the base mesh and a series of \emph{vertex
+    splits}, the inverse of edge collapse, in a reverse order.
+    Rendering can be done in receiver side at any time after the base
+    mesh is received. More vertex splits received, better
+    approximation to the original mesh generated. After all
+    the vertex split operations are received, the original mesh can be
+    reconstructed without loss. \footnote{quantization error may exist
+    when quantization is taken in geometry compression.}
+
+    The base mesh can be encoded with the single-rate coding methods
+    introduced in section \ref{single_rate}. Here, we introduce
+    how to encode the vertex splits. A vertex split can be represented
+    as $vsplit(s, l, r ,A)$, where $s$ is the index of vertex to be
+    split; $l$, $r$ are the indices of two vertices with which new
+    edge will be added, and $A$ represents the discrete and scalar
+    attribute associated to the affected faces and corners (tuple of
+    vertex and face). (see Figure \ref{split2})
+\begin{figure}
+\centering
+\includegraphics[width=0.5\textwidth]{split2.eps}
+\caption{Edge collapse and vertex split}\label{split2}
+\end{figure}
+    This operation will add new vertex $v_{t}$, two
+    edges $\{v_{t}, v_{l}\}, \{v_{t}, v_{r}\}$, two faces $\{v_{s},
+    v_{t}, v_{l}\}$, $\{v_{t}, v_{s}, v_{r}\}$, and the attributes
+    associated to all affected faces and corners. For connectivity
+    information, we need to code $s$, $l$, and $r$, and for geometry
+    information, we need to code the new position of $v_{s}$ and the
+    position of $v_{r}$. If the number of vertices in current model is
+    $V$, and $s$ can be any one of them, to encode $s$ need
+    ${\lceil}log_{2}V{\rceil}$ bits. For $l$ and $r$, since they are
+    only possible among the neighbors of $v_{s}$, and the average
+    valence of a vertex is 6, in average they only have $\mathrm{P}_{2}^{6} =
+    30$ choices and need $log_{2}30 \approx 5$ bits. Therefore, the total
+    cost for connectivity is about ${\lceil}log_{2}V{\rceil} + 5$ bpv.
+    In geometry coding, the coordinates is first quantized to 16 bit
+    and then delta prediction is used. Since in PM construction, one
+    edge is only collapsed to either the midpoint of one of the
+    endpoint, this property is used in prediction coding.
+
+    Hoppe's paper \cite{hoppe96progressive} is really important
+    not only because it is the first
+    paper to introduce a mesh can be progressively transmitted, but
+    also because it is one solution for many problems: mesh
+    simplification, various level of detail, mesh compression,
+    progressive transmission and selective refinement.
+
+    Based on Hoppe et al.'s
+    \emph{mesh optimization} \cite{166119}, Hoppe presented a
+    construction scheme for progressive mesh \cite{hoppe96progressive}. 
+    In this scheme, not only the shape but
+    also the discrete and scalar attributes (see section
+    \ref{property} in page \pageref{property}) are considered. The
+    candidate of edges to collapse is chosen based on its energy
+    value. The energy value of a edge is decided by the effect of
+    collapse to the distance error, scalar attributes error and
+    discontinuity curves error. Therefore, a near optimal PM is
+    constructed in a specific order of edge collapse operations. Least
+    important edges are removed first in simplification and restored
+    last in reconstruction, while the most important edges are removed
+    last and transmitted and restored first. That means the coarse
+    model in receiver side is as close to the original as possible in
+    any time of streaming, if the sending order is strictly as same as
+    the reverse of construction order.
+
+    This order, however, can be changed to obtain other two
+    objectives. One object is selective refinement, in another word,
+    to transmit only those useful refinements, such as the vertices in
+    observer's vision area. Since the index $s$ is encoded with
+    ${\lceil}log_{2}V{\rceil}$ bits, it can be an arbitrary vertex in
+    current model, the selective refinement is easy to be implemented
+    with the feedback of receiver side. But since the vertex
+    split operation also depends on $v_{l}$ and $v_{r}$, these two
+    vertices should be generated in receiver side already. Therefore,
+    the selectivity is not totally free. We discuss this topic in
+    section \ref{sec_dependency}. 
+    The other objective is compression efficiency. 
+    The flexibility to choose arbitrary vertex to split 
+    requires ${\lceil}log_{2}V{\rceil}$ bpv to encode $s$. 
+    If we choose vertex to be split according to a specific order 
+    such that correlation exists between successive vertices, 
+    the entropy will decreased and hence the cost will decrease.
+
+    Hoppe \cite{efficient:hoppe} presented an efficient implementation
+    of PM later. In this paper, Hoppe argued that by reordering the
+    vertex split such that next one is as close to current one as
+    possible, the cost of connectivity can be reduced to 10.4 bpv,
+    which is $O(V)$ instead of $O(Vlog_{2}V)$ in the original paper
+    \cite{hoppe96progressive}. It is worth noting that the increased
+    efficiency is reached by sacrifice of optimum of the construction
+    of PM, since the order has no consideration of preserve the
+    quality now. In addition, the selective refinement property is
+    sacrificed with the loss of flexibility. In Karni, Bogomjakov, and
+    Gotsman's paper \cite{602153}, specific order of vertex split is
+    also used to reduce the cost of connectivity. The
+    vertex sequence is generated by recursively cut a mesh to two
+    balanced part with minimum cut. With their algorithm, the connectivity can
+    be encoded with in average 4.5 bpv. Moreover, their objective is
+    not only the compress efficiency but also the rendering speed. In
+    their paper, the criteria of choosing vertices is to maintain high
+    locality and continuity of vertices so that the render process can
+    be accelerated in modern graphics hardware with vertex buffer. 
+
+    Another idea is to group many vertex splits together, 
+    and efficiency will be improved at the cost of coarser granularity. 
+    Taubin, Gu\'{e}ziec, Horn, and Lazarus \cite{280834} proposed the
+    progressive forest split scheme (PFS), in which several edge
+    collapse operations are combined together and the inverse operation splits a
+    forest of edges and vertices. With one forest split, the vertex
+    number will increase about $50\%$ to $100\%$; accordingly, the
+    connectivity coding cost is from $10$ bpv to $7$ bpv. In addition,
+    since a lot of vertex split operations are done at one time, pre
+    and post smoothing can be used to decrease the geometry coding
+    cost by up to $20-25\%$. Payarola and Rossignac \cite{614450},
+    proposed compressed progressive mesh (CPM)\label{cpm} with similar
+    idea. They group about $50\%$ vertex splits into one batch. To
+    differentiate vertices to be split with others, one bit per vertex
+    is used as indicative. CPM encode the connectivity with about 7
+    bpv. CPM also improve the geometry coding efficiency by predicting
+    the collapsed vertices position from their neighbors' coordinates.
+    It is reported that the geometry coding cost is almost half as
+    much as the cost of PFS.
+
+    With the similar idea of combining decimation operations together
+    but based on vertex removal (see section \ref{vertex_removal} in
+    page \pageref{vertex_removal}), some progressive coding algorithms
+    are proposed. In Cohen-Or et al.'s paper \cite{319358},
+    vertex removals in one iteration are grouped together. In one
+    iteration, only non-adjacent vertices can be chosen to remove.
+    Holes will be left after vertex removals, and they should be
+    re-triangulated. A set of triangles to fill in a hole is called a
+    patch. Then with a 4-coloring scheme, we can identify these
+    patches with 2 bits. In some specific cases, they can be
+    identified even with 2-coloring which needs only 1 bit. Similar
+    to CPM, the neighbors' information are used in geometry coding.
+    Their experiment results show that connectivity coding cost is
+    about 6 bpv and geometry coding cost is about 16-22 bpv with
+    12-bit quantization resolution.
+
+    Some single rate coding algorithms are also extended to code
+    progressive meshes based on vertex removal. Bajaj, Pascucci and
+    Zhuang \cite{319426} extended layered decomposition algorithm
+    \cite{789628} so that it can support coding of progressive meshes
+    of arbitrary topology. The connectivity cost is about 10-17 bpv
+    and the geometry cost is about 30 bpv. Alliez and Desbrun
+    \cite{383281} extended their valence-driven conquest
+    method \cite{alliez01valencedriven}to code progressive manifold
+    meshes. The efficiency of their method is quite good: on average
+    3.7 bpv for connectivity coding and 10-16 bpv for geometry coding
+    with 10 to 12-bit quantization resolution. For a mesh with high
+    regularity and uniformity, the cost can be even much less.
+
+    Another kind of extension of PM is to extend it to derectly encode non-manifold meshes. 
+    Popovic and Hoppe \cite{258852} proposed Progressive simplicial Complexes (PSC), in
+    which vertex unification and generalized vertex split are used instead of edge
+    collapse and vertex split. Since these two transformations are no
+    longer topology type preserved, topology type may change in the
+    simplification. More bits are need, however, to encode the
+    connectivity, because more vertices are involved in vertex
+    unification than edge collapse. The connectivity coding cost is about $log_{2}V
+    + 7$ bpv in PSC, bigger than $log_{2}V + 5$ bpv in PM. Moreover,
+    the computation complexity of PSC is high. Therefore, the
+    authors suggest to use a hybrid PM + PSC to reduce the cost and
+    improve the efficiency since even in non-manifold meshes most areas
+    are locally manifold.
+
+    \subsubsection*{Vertex clustering based}
+    Progressive transmission of mesh can also be achieved with vertex
+    clustering based simplification. These methods can efficiently
+    code the geometry data compared with methods based on progressive
+    mesh.
+
+    Gandoin and Devillers \cite{566591} proposed a scheme based on
+    kd-tree decomposition. In geometry coding, first one big cell
+    including all the vertices are generated, and the total number of
+    vertices is encoded with 32 bit integer. Then in each following
+    step, one cell is divided to two cells and the number of vertices
+    in first cell is encoded to $log_{2}p$ bits with arithmetic coder.
+    Here $p$ represents the number of vertices in the parent cell (see Figure \ref{kdtree}).
+    \begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{kdtree.eps}
+    \caption{Kd-tree geometry coding in the 2D case.\cite{technologies:peng}}\label{kdtree}
+    \end{figure}
+    This process finishes when the subdivision accuracy is enough to
+    reconstruct the original model. Intuitively, this method save the
+    coding cost by use one number to tell the position information of
+    a lot of vertices. The authors prove that in the worst case, the
+    total cost for geometry is $(Q - log_{2}V + 2.402)V$, where $Q$
+    represents how many bits to represent the coordinates of vertices
+    without compression and V represents the total number of vertices.
+    Therefore, bigger the number of vertices, more efficient this coding scheme. 
+    The method for coding connectivity in \cite{566591}, however, is not mature. 
+    Later, Devillers and Gandoin
+    \cite{devillers00geometric} proposed a connectivity coding method based on edge
+    collapse and vertex unification (more
+    general case of vertex split). The efficiency is reported to be 
+    comparable to the progressive mesh based methods. Peng and Kuo
+    \cite{1073237} proposed a octree decomposition based method with
+    better efficiency but more expensive computation. They each time
+    divide one cell to eight sub-cells and encode the permutation of
+    non-empty children instead of number of vertices. In addition,
+    prediction of this permutation is made with considering the
+    information of neighbors. Compared with Kd-tree decomposition
+    scheme, this method is reported improve the geometry coding
+    efficiency around $10\%-20\%$, and may go up to $50\%-60\%$ for
+    meshes with highly regular geometry data or tight clustering of
+    vertices.
+
+    Besides the efficiency of geometry coding, 
+    some other advantages of vertex clustering based methods exist. 
+    First, these schemes can be applied to any mesh
+    topology including the non-manifold meshes. 
+    Second, no quantization is required, 
+    and any precision can be achieved with
+    enough subdivisions. 
+    Third, the selective refinement can be
+    achieved by only subdividing a subset of the cells.
+
+    Several drawbacks exist too, however. First, in the initial
+    stage, the quality of the received model is much worse than its counterpart in progressive
+    mesh, since vertex clustering method uniformly simplify 
+    the model without considering the quality. 
+    Second, it is harder to encode connectivity and property
+    information, especially the latter, with these schemes compared 
+    with to encode them with progressive meshes.
+
+    \subsubsection*{Re-meshing based}
+    If we only want to keep the shape of a model and do not need to
+    keep the accurate topology in transmission, re-meshing based
+    method can be used. In these methods, geometry information is
+    considered to be much more important than the connectivity and properties
+    information. Therefore, a new mesh can be generated before
+    transmission such that the connectivity is changed to have some
+    attractive quality. For example, we can change a irregular mesh
+    into a semi-regular mesh with similar shape. In a semi-regular
+    triangle mesh, the valence of most vertices is six, and therefore
+    the connectivity information can be coded almost without cost.
+    Although the re-meshing based algorithms are successful in
+    \emph{shape} coding, they are not lossless methods, so they are
+    not related to our current plan. 
+    Therefore, we do not introduce them in detail here. 
+    More details about these algorithms can be seen in the survey by Allienz and Gotsman
+    \cite{recent:alliez}, the survey by Peng, Kim and Kuo
+    \cite{technologies:peng} and the references therein.
+    \subsection{Target in This Thesis}
+    \section{3D streaming}
+    \subsection{Error Resilient Streaming}
+    Given the background in progressive mesh, we now describe
+    related research in network transmissions of progressive mesh. 
+    Three main classes of work exist 
+    -- error resilient compression, error control, and
+    packetization.
+
+    Existing work in robust mesh compression aims to
+    reduce dependencies among the mesh \cite{error:Park,error:Yan}.
+    Similar to introducing key frames or restart marker in video/image
+    coding, mesh
+    segmentation is used to reduce the affected range of one
+    packet loss. In robust mesh compression, a mesh is typically
+    divided into several independent parts and then coded separately.
+    Therefore the effect of one packet loss is confined to the part to which
+    it belongs. The finer the partition is, the fewer the affected vertices
+    are.  The coding efficiency, however, will decrease
+    due to more redundancies and less correlation.
+
+    Al-Regib and Altunbasak \cite{unequal:Al-Regib} proposed an
+    unequal error protection method to improve the resilience of
+    progressive 3D mesh based on CPM (compressed progressive meshes). Forward error
+    correction (FEC) codes are added to the
+    base mesh and additional levels-of-detail information to maximize 
+    the decoded mesh quality.  The method is similar to FEC protection 
+    of video data.
+    As argued in the previous section, we believe that for streaming
+    of 3D meshes, retransmission is always a better choice (except in
+    cases such as multicast where retransmission is not scalable).
+    Chen et al. \cite{chen05hybrid} also applied FEC to streaming
+    progressive meshes. They analyzed several transmission schemes:
+    TCP only, UDP only, TCP with UDP, and UDP with FEC, and studied
+    their effects experimentally on the transmission time and decoded
+    mesh quality.
+    Al-Regib et al. proposed an application layer protocol, 3TP,
+    for streaming of 3D models \cite{3tpregib}, combining both TCP 
+    and UDP.  In 3TP, important packets are sent using
+    TCP, while the rest are sent with UDP to minimize delay.
+    
+    \subsection{Packetization}
+    Packetization of different model is tackled by
+    Harris III and Karvets in \cite{harris:design}.   They proposed
+    a protocol named On-Demand Graphic Transport Protocol (OGP)
+    for transmitting 3D models represented as a tree of bounding volumes.
+    A key component of the protocol is to decide which bounding volumes
+    to send.  OGP begins with packing the largest possible subtree at
+    the root and continues to pack the nodes in the subtree of
+    acknowledged nodes in breadth-first order.  
+    Gu and Ooi \cite{Gu:Packetization} were the first to look at
+    the packetization problem for progressive meshes.  They model
+    the packetization problem as a graph problem where the objective
+    is to equally partition the graph into $k$ partitions with minimum
+    cut size.  The problem is shown to be NP-complete and a heuristic
+    is proposed.  They, however, assume that every vertex split is
+    equally important.  In practice, the importance of vertex splits can
+    vary considerably.  
+    \subsection{View-Dependent Streaming}
+    The view-dependent approach first appeared as 
+    a dynamic simplification method used for adaptive rendering of a complex 3D mesh
+    \cite{258843, 258847}. Only vertex splits that contribute to the rendered
+    image will be rendered, allowing real-time rendering of a complex mesh
+    even with limited rendering capability.
+    Besides progressive mesh, other multi-resolution representations, 
+    such as vertex-clustering  and subdivision scheme,
+    are used in view-dependent refinement systems \cite{245627, efficient:Alliez,602344}.
+
+    Later, the view-dependent approach is used in progressive 
+	streaming of 3D meshes.     In the scheme proposed by Southern et al. \cite{363375},  the client is stateless and
+    maintains only the visible data. 
+    To et al. \cite{To1999}
+    and Kim et al. \cite{kim:view} proposed that received data are stored
+    in the receiver even after they become invisible, 
+    so they need not be resent when they are visible again. 
+    In these papers, view-dependent approaches mainly aim at addressing
+    limited rendering capability. 
+    
+    Yang et al. \cite{progressive:Yang} and
+     Zheng et al. \cite{zheng:interactive}, on the other hand, use
+     view-dependent streaming to address limited network bandwidth.
+     Yang et al. proposed a scheme where the server chooses the appropriate resolution
+     according to the available network bandwidth.
+     Zheng et al. \cite{zheng:interactive} use prediction to
+     reduce the effect of network latency and 
+     compensate the round-trip delay with the rendering time.
+     These systems use sender-driven approach and do not address
+     server scalability issues.
+
+    %\subsection{Reduce Dependency}
+%\label{ss:reduce-dependency}
+    The main challenge of these view-dependent schemes is 
+    finding an appropriate subset of vertex splits to generate a 
+    satisfactory rendered image on the client side.
+    The flexibility of choosing a subset of vertices,
+    hence, is crucial in view-dependent streaming. But this flexibility is
+    restricted by the dependency among the vertex splits.
+    For a manifold mesh, a vertex split operation depends on the existence of (a)
+    the vertex to be split ($V_s$ in Figure \ref{dstream:split}), (b) two
+    cut neighbors ($V_l, V_r$ in Figure \ref{dstream:split}). More dependencies exist if artificial
+    folds are strictly forbidden \cite{258843, 258847}, but in this paper we
+    ignore these dependencies since we can tolerate temporary folds in our scheme.
+
+     To et al. \cite{To1999} further remove the second dependency.
+     In their method, if a cut neighbor does not exist during a vertex split,
+     its ancestor will be used as the cut neighbor instead.
+     Kim and Lee \cite{kim01truly} improve this method so that the final mesh
+     can keep the original connectivity. 
+     %In their paper, when the original cut neighbor
+     %is below the vertex front, its active ancestor is chosen instead. If the original
+     %cut neighbor is above the vertex front, then we choose a proper active descendant of it.
+     %As long as the two cut neighbors are not the same vertex, the vertex split can be processed.
+     Kim et al. \cite{multiresolution:kim} propose a better scheme that enables
+     an ordinary progressive mesh to be split in random order.
+     This method is applied in our protocol to reduce the cut neighbor dependency
+     and will be described in further details in Section \ref{s:dstream:protocol}.
+
+     The flexibility in choosing split order, however, increases the difficulty
+     in developing an effective encoding scheme. Most compression
+     algorithms for progressive mesh %\cite{280834,319426, 614450, 383281,602153}
+     choose a specific order of vertex splits
+     to reduce redundancy by exploring the correlation
+     between consecutive vertex splits.
+     Moreover, compressed data can only be sequentially decoded
+     so we cannot change the sending order. One solution
+     proposed by Yang et al. \cite{progressive:Yang}
+     is to divide the whole mesh into several segments and encode them
+     separately to trade off between flexibility and compression efficiency.
+     The weakness is that the size of the base mesh is relatively large
+     since the original vertices in the border of segments are kept in the base
+     mesh. Furthermore, the quality of the base mesh is uneven.
+
+     Some related work \cite{multiresolution:kim, random:yoon}
+     have proposed compression algorithms that allow random splitting of a mesh without
+     sacrificing compression efficiency.   These algorithms are not designed for 
+	 network transmission, but our scheme extended several ideas from Kim et al. \cite{multiresolution:kim}
+     and applied them in view-dependent streaming.  
+\begin{comment}
+    \subsection{Comparison of Progressive Coding Algorithms}\label{effieciency_flexibility}
+    Only coding methods that support progressively lossless transmission
+    of meshes are compared here, since other methods are out of scope
+    of this paper. The efficiency is the factor considered by most
+    papers studying coding and compression. For view-independent
+    streaming over an error-free network, the efficiency maybe the
+    only factor to be considered. For streaming over a
+    network with packet loss, however, the dependency between packets should be
+    considered since one packet loss may affect other packets. For
+    view-dependent streaming, the flexibility to choose packets to
+    send also needs consideration. Therefore, in our comparison of
+    algorithms, their efficiency, dependency between data, and
+    flexibility in sending order are all considered.
+
+    \subsubsection*{Efficiency}
+    We give the comparison of the efficiency of the progressive
+    algorithms in Table \ref{efficiency}. It is worth noting that the
+    results are related to the models used in the experiments and not
+    all the models used in their experiments are the same. Therefore,
+    it is just a coarse comparison.
+
+    From this table, we can see that the valence-driven algorithm
+    proposed by Alliez and Desbrun \cite{383281} has the
+    best efficiency in the class of progressive mesh based algorithms
+    and its efficiency is comparable with the single-rate coding
+    algorithms. Moreover, the algorithms based on vertex clustering
+    proposed by Gandoin et al.\cite{566591} and the one proposed by
+    Peng el al.\cite{1073237} are also outstanding.
+\begin{table}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Category&Algorithm&connectivity&geometry&applicability\\
+&&cost (bpv)&cost (bpv)&\\
+\hline
+Progressive&Hoppe\cite{hoppe96progressive}&O($Vlog_{2}V$)&-&manifold\\
+meshes&Hoppe\cite{efficient:hoppe}&10.4&21-36(12)&manifold\\
+&Popovic et al.\cite{258852}&O($Vlog_{2}V$)&-&arbitrary\\
+&Karni et al.\cite{602153}&4.5&-&manifold\\
+&Taubin et al.\cite{280834}&7-10&20-40(6)&manifold\\
+&Pajarola et al.\cite{614450}&7&12-15(8,10,12)&manifold\\
+&Alliez et al.\cite{383281}&3.7&10-16(10,12)&manifold\\
+&Cohen-Or et al.\cite{319358}&6&16-22(12)&arbitrary\\
+&Bajaj et al.\cite{319426}&10-17&30(10,12)&arbitrary\\
+\hline
+vertex&Gandoin et al.\cite{566591}&3.5*&15.7*(10,12)&arbitrary\\
+clustering&Peng et al.\cite{1073237}&$<$\cite{566591}&$<$\cite{566591}&arbitrary\\
+\hline
+\end{tabular}
+\caption{Comparison of the efficiency of progressive coding
+    algorithms. In the column of geometry cost, the value inside the
+    parenthesis represents the quantification resolution of the models
+    used in the experiments. *: the result of Gandoin et
+    al.\cite{566591} is for manifold meshes and results for
+    non-manifold meshes are 8.2/17.1.}\label{efficiency}
+\end{table}
+
+    \subsubsection*{Dependency between data}
+    The dependency can be categorized into two class: dependency
+    between refinement operations and dependency caused by coding. We
+    introduce the former first. For an vertex split operation for a
+    manifold mesh (see figure \ref{simplification} in page
+    \pageref{simplification}), the parent node $s$ and the two
+    neighbor nodes $l$ and $r$ are needed. Therefore, this vertex
+    split depends on the vertex split operations generating $s$, $l$
+    and $r$. Hence, typically one operation depends on three
+    operations. In vertex insertion, all the neighbor vertices are
+    needed and hence the operation depends on the vertex insertions
+    generating all the neighbor vertices. Since the average valence of
+    a vertex is six, one operation in average depends on six operations.
+    The dependency between the refinement operations can be
+    represented as a directed acyclic graph (DAG) (see Figure \ref{dependency}(A)). 
+    For point-based models such as QSplat \cite{rusinkiewicz:qsplat,364350}, 
+    the dependency is simpler since no connectivity information is considered. 
+    Only the dependency between parents and children exists. 
+    Therefore, the dependency of QSplat can be represented as a tree (see Figure \ref{dependency}(B)).
+\begin{figure}
+\centering
+\includegraphics[width=0.7\textwidth]{dependency.eps}
+\caption{Dependency: (A)DAG, (B)tree, and (C)chain. vs: vertex split or vertex insertion. r: general refinement.}\label{dependency}
+\end{figure}
+
+    The coding algorithms itself will cause dependency. In
+    Hoppe\cite{efficient:hoppe} and Karni et al.\cite{602153}, the
+    sequence of operations has been decided and the difference of
+    geometry between two successive vertex split operations is
+    encoded. Therefore, every operation depends its previous one. 
+    This kind of dependency can be represented as a chain (see Figure \ref{dependency}(C)).
+    In those algorithms to group a lot of operations together and
+    encode them as a whole \cite{280834, 614450, 383281,
+    319358, 319426}, the unit is a group of refinements instead of a
+    single refinement. The dependency is still a chain, but the node
+    of a chain includes many refinements. Therefore, when they are
+    packed into packets, one node should be packed into many packets.
+    In the vertex clustering based algorithms \cite{566591, 1073237},
+    if all data are coded with arithmetic coder, then one bit error
+    will cause the following bits not be able to be decoded.
+    Therefore, without segmentation the dependency of these algorithms
+    are also a chain.
+
+    The dependency as a chain is not suitable for streaming in a lossy network. 
+    Once a packet is lost, every following packet sent cannot be decoded 
+    until the lost packet is retransmitted.
+    To reduce these kind of dependency, however, may reduce efficiency. 
+    For example, in Hoppe\cite{hoppe96progressive}, 
+    every refinement is coded independently, 
+    but ${\lceil}log_{2}V{\rceil}$ bits should be used in coding the index of the vertex split
+    operation and hence the cost of connectivity is O$(V{\lceil}log_{2}V{\rceil})$. 
+    How to find a balance between more efficiency and less dependency 
+    becomes a topic for research. Some related papers are introduced in section \ref{segmentation}.
+
+    \subsubsection*{Flexibility in sending order}
+    In view-dependent streaming, flexibility in sending order is
+    important to ensure only the needed part is transmitted. 
+    The flexibility, however, depends on both the dependency
+    between refinements and the granularity of refinements. 
+    First, If the mesh is encoded before it is transmitted, 
+    the chain dependency disables any flexibility. 
+    Second, for the algorithms grouping refinements
+    together, the coarse granularity also reduces the flexibility.
+
+    A tradeoff between efficiency and flexibility also needs to be
+    considered. For example, since every refinement is encoded
+    independently in Hoppe\cite{hoppe96progressive}, its flexibility
+    is the best during all the progressive meshes based algorithms but
+    at the cost of lowest efficiency. The algorithms based on vertex
+    clustering \cite{566591, 1073237} have even better flexibility
+    since one operation depends on only one parent. To keep
+    this kind of flexibility, however, the arithmetic coder cannot be
+    applied to a large data unit since it will reduce efficiency. A
+    balance between efficiency and flexibility is also a challenging problem. 
+    Some papers about how to increase the flexibility are introduced in section \ref{flexibility}
+    
+\end{comment}
+\begin{comment}
     \section{View-dependent Streaming}
     \label{s:intro:view_dependent}
     View-dependent technique is first proposed in adaptive rendering of complex 3D meshes. 
@@ -329,6 +1274,7 @@ Wei Tsang OOI}
     which is essential in view-dependent streaming, with little loss of compression efficiency. 
     Although their methods are designed for local accessing of meshes, 
     it is possible to extend them to be used in network transmission. 
+\end{comment}
     \section{Problem Statement}
     \label{s:intro:problem}
     (summary)
