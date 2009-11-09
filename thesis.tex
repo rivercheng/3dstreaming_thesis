@@ -287,6 +287,29 @@ vertex.\label{mesh_non_mesh}}\
     $D$ is the set of discrete attributes associated to face $f \in
     K$ and $S$ is the set of scalar attributes associated to corners $(v, f)$ in $S$.
     
+    Besides meshes, point-based representations are also used in the practice.
+    A point-based geometry representation can be considered as a 
+    sampling of a continuous surface.  The result are a set of 3D points. 
+    %These points are optionally associated with the normal vectors 
+    %and other attributes, such as color and material properties. 
+    To bridge the gaps between neighboring point samples, 
+    bounding spheres \cite{rusinkiewicz:qsplat, 364350} or surface splats \cite{383300} are used as rendering primitives. 
+    More details about point based model can be seen in the survey by Kobbelt and Botsch \cite{DBLP:journals/cg/KobbeltB04} 
+    and the PhD thesis of Wand \cite{wand:point}.  
+    
+    Moreover, some other representations also exist, such as simple solid models used in Second Life
+    and generalized cylinders used in representing plants \cite{plant:seb, compact:mondet}.
+
+    %\subsection{Choice in This Thesis}
+    This thesis concentrates on meshes because of following reasons:
+    \begin{itemize}
+        \item Most rendering hardwares are optimized for meshes, so other model need to be convert
+            to mesh before rendering either explicitly or implicitly. 
+        \item Without connectivity information in the model, point-based model is relatively easier to deal with
+            than meshes. Therefore, adapting techniques used in streaming meshes to streaming point-based model
+            is easier than the opposite direction.
+    \end{itemize}
+
     \subsection{Coding and Compression}
     A mesh is encoded first before it can be stored or
     transmitted. Coding is to represent a mesh with a sequence of
