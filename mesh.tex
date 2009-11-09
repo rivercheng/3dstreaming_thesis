@@ -12,47 +12,6 @@
 
 \section{Introduction}
 \label{s:model:intro}
-    Advances in 3D scanning technology and mesh reconstruction
-    algorithms have lowered the barrier in creating complex mesh
-    objects and sharing them over the network.  For instance,
-    software such as
-    ZBrush is enabling easy creation of complex digital sculpture.
-    The Stanford's Digital Michelangelo Project
-    \cite{levoy00digital} digitized statues made by Michelangelo
-    and provided a software, ScanView \cite{koller04protected},
-    to allow users to remotely view the 3D version of the statues.
-    Similar projects include the Digital Sculpture Project \cite{deroos2004dsp}
-    and the project to digitize Rodin's sculptures \cite{miyazaki2006dab}. 
-    Second Life, an online virtual world, is driven mostly by 
-    user-created 3D objects, which are downloaded 
-    on demand as users explore the virtual world.  
-    These signs suggest that an increasing amount of
-    3D mesh data will be available for remote viewing over
-    the Internet.
-
-    This paper targets at networked applications that require 3D meshes with high quality,
-    such as virtual museum and virtual earth
-    The amount of data constituting a high quality 3D mesh can be
-    huge. For example, the statue of David, from the Digital
-    Michelangelo Project, consists of 2 billion polygons.  After
-    lossless compression, the total data size is 32 GB.  To reduce
-    waiting time when downloading such a huge amount of data, a common
-    technique for remote viewing is to encode a 3D mesh
-    progressively \cite{lod}, allowing a low resolution version
-    of the mesh to be transmitted and rendered with lower latency.
-    The refinement information is continuously being transmitted,
-    and the quality of the rendered model is incrementally improved
-    over time.  Such progressive rendering is also useful in the
-    case of virtual worlds such as Second Life. 
-    In such applications, even though the models are typically smaller and simpler, 
-    an arbitrary scene can contain numerous objects.
-    Furthermore, such applications are interactive in nature.
-    It is thus desirable for users to quickly visualize a coarse version
-    of the scene first, instead of waiting for full objects to be
-    downloaded before they can be displayed.
-    %Note that our target applications are not 3D games, where strict high
-    %interactivity is required and high quality 3D meshes are not commonly used.
-
     Progressive coding of meshes, much like progressive coding of
     video, introduces dependencies between data.
     Dependencies between data units can cause delay in decoding
@@ -69,7 +28,7 @@
     have been well studied in the literature \cite{boyce98}.   Multi-resolution 3D
     objects also have dependencies between different level of details.
         For progressive meshes, the mesh is refined by successive
-    \textit{vertex splits} (see Figure~\ref{model:split}).  Thus,
+    \textit{vertex splits} (see Figure~\ref{split2}).  Thus,
     dependencies exist between the original vertex and its one
     ring (the direct neighbors of the vertex)
     and the vertices and triangles created by the vertex split.
@@ -123,30 +82,6 @@
     giving us insights into the importance of dependencies on the
     decoded mesh quality.
 
-    %Now we clarify the scope of this paper.
-    %First, although some other representations
-    %of 3D objects exist, such as pointed based representations, we concentrate on 3D meshes. 
-    %We are not saying 
-    %mesh is the only or the best representation, but it is the most popular one.
-    %Moreover, progressive mesh supports finer granularity of progressivity compared with progressive pointed based methods.
-    %Nonetheless, our model actually can be applied to any partially ordered data. 
-    %For example, we successfully applied it on streaming of digitized plants \cite{plant:seb}
-    %Second, in our implementation, only manifold meshes are supported. Most Statues could be represented 
-    %as manifold-meshes, and every non-manifold meshes could be transformed to manifold meshes.
-    %Third, we only consider static meshes in this paper, and to support the animation is an interesting 
-    %future research topic.  
-    %(Geraldine)Let us now clarify the scope of our paper. 
-    %First, the analysis and strategy we proposed to apply to any partially ordered data 
-%    (Multi-resolution 3D models are indeed partially ordered chunks), 
-%    e.g. pointed based model organized as QSplat tree. 
-%    Here we concentrate on progressive 3D meshes. 
-%    Meshes are not necessarily the best representation, 
-%    but they are the most popular one. 
-%    Moreover, progressive mesh supports finer granularity of progressivity 
-%    than other multi-resolution representations. 
-%    Nonetheless, our model has actually being applied to other partially ordered data, 
-%    digitized plants \cite{plant:seb}.
-
     Our analytical model is general and can be applied to any 
     partially-ordered data without playback deadline.  We
     choose to concentrate on progressive 3D meshes (which are indeed 
@@ -158,18 +93,12 @@
     organized as QSplat trees \cite{rusinkiewicz:qsplat} and digitized plants.  
     We have actually applied our analytical model to the latter \cite{plant:seb}.
     
-    A preliminary version of this analytical model was previously published 
-    \cite{cheng07analytical}.  In this journal version, we extended our work
-    with detailed proofs and analysis, as well as extensive validation of our 
-    model under a variety of network conditions using different progressive mesh models.
+    %A preliminary version of this analytical model was previously published 
+    %\cite{cheng07analytical}.  In this journal version, we extended our work
+    %with detailed proofs and analysis, as well as extensive validation of our 
+    %model under a variety of network conditions using different progressive mesh models.
 
-    The rest of the paper consists of six sections. Section~\ref{s:model:bg} provides the background on this paper.
-    We describe progressive mesh and how it
-    introduces dependencies (Section~\ref{s:model:mesh})
-    and present related work in the area
-    of 3D objects streaming (Section~\ref{s:model:related}).
-    %Section~\ref{s:metric} introduces our evaluation metric
-    %for intermediate decoded mesh quality.
+    The rest of this chapter consists of five sections. 
     Section~\ref{s:model:model} introduces our analytical model.
     We then describe the applications of our model.
     In Section~\ref{s:model:effect}, we study two hypothetical extreme
@@ -190,171 +119,6 @@
     Section~\ref{s:model:conclude} concludes by
     reflecting on the insights we gain from our model and its
     implications.
-
-\section{Background and Related Work}
-\label{s:model:bg}
-\subsection{Progressive Mesh}
-\label{s:model:mesh}
-
-    Progressive transmission and rendering of 3D objects
-    requires multi-resolution representations of data. One such 
-    representation, progressive mesh, is proposed by Hoppe
-    \cite{hoppe96progressive}.
-    The technique is based on an
-    operation called \textit{edge collapse}, and its reverse
-    operation, \textit{vertex split}.  Given a (non-progressive)
-    3D mesh, the technique applies a series of edge collapses,
-    simplifying the model by reducing the number of vertices and
-    faces.  The final, simplified model obtained after this
-    process becomes the \textit{base model}.  Given a base model,
-    we can reconstruct the original model by reversing
-    the edge collapse operations through \textit{vertex splits},
-    incrementally adding new vertices and faces. So, a
-    progressive mesh can be represented by the base
-    model and a series of vertex splits.  There are
-    dependencies between vertex splits and the base model, as well as
-    among the vertex splits.  A vertex split
-    operation might need a vertex or a face created by another
-    vertex split as input.  Figure~\ref{model:split} illustrates edge
-    collapse and vertex split operations.
-
-    \begin{figure}
-    \begin{minipage}[b]{0.5\linewidth}
-    \centering
-    \epsfig{file = figures/split2.eps, height = 0.9in}
-    \caption{Edge collapse and its reverse vertex split\label{model:split}}
-    \end{minipage}
-    \hspace{0.2cm}
-    \begin{minipage}[b]{0.5\linewidth}
-    \centering
-    \epsfig{file = figures/dag1.eps, height = 1.2in}
-    \caption{Dependency between vertex splits represented as a DAG.\label{model:dag2}}
-    \end{minipage}
-    \end{figure}
-
-    %% Here we added the paragraph to justify the choice of the model
-  Progressive meshes are well adapted for streaming since
-  they offer the finest level of progressivity --
-  it allows refinement at the granularity of vertices. 
-  This progressivity is crucial for our
-  application since a streamed vertex split only depends on
-  the vertex splits that generated its neighbors, and not on other
-  refinement operations of the same level (like for
-  subdivision surfaces). Therefore, only dependencies among
-  the vertex splits are crucial.
-
-    Many extensions and variations to Hoppe's
-    progressive mesh have been proposed (e.g.,
-    \cite{614450,319358,383281,multiresolution:chen}).  The main idea
-    behind these extensions is to combine multiple
-    operations into one, thereby further reducing the
-    redundancy and improving the efficiency. In particular, Pajarola and 
-    Rossignac proposed a compressed progressive mesh (CPM) representation to reduce
-    the size of a progressive mesh \cite{614450}. While this paper
-    only considers the original progressive mesh, our
-    model is general enough to model many of these
-    extensions. 
-
-    Significant differences exist between progressive mesh
-    streaming and video streaming.  First, in video streaming,
-    every packet should be received in time, or it will not
-    be played back.  Hence, generally sending new data is more
-    important than re-sending old data. On the contrary,
-    in streaming of a progressive mesh, old data is
-    usually more important than new one, since the
-    reconstruction begins with the most significant refinement.
-    Given this observation, retransmission of a lost packet is
-    not only useful, but it should also take priority
-    over transmission of new packets.
-
-    Second, in progressive mesh, there is no strict order
-    of vertex splits rendering order, unlike in video where
-    frames must be displayed in sequence. A received vertex split
-    can be rendered immediately as long as all the vertex splits
-    it depends on have been received.  When a packet is lost, the
-    subsequent received packets may still be decodable.  Those
-    vertex splits received afterwards that depend on the
-    lost packet, however, have to wait until the lost packet
-    is retransmitted successfully before they can be displayed.
-    This observation hinted that we should reduce the dependencies
-    between packets as much as possible, since dependencies cause
-    delay in rendering details generated by vertex splits.
-
-    Third, a video frame is usually larger than a packet,
-    causing the streaming application to split the video frame
-    into several packets.  On the other hand, in progressive mesh,
-    a vertex split is small (in the order of 10 - 15 bytes).  Thus,
-    before the application transmits the mesh, it needs to group
-    vertex splits into packets.   This \textit{packetization}
-    process affects the dependencies among the packets, which in
-    turn affects the delay in rendering if some packets are lost.
-\\
-\subsection{Related Work}
-\label{s:model:related}
-
-    Given the background in progressive mesh, we now describe
-    related research in network transmissions of progressive mesh. 
-    Three main classes of work exist 
-    -- error resilient compression, error control, and
-    packetization.
-
-    Existing work in robust mesh compression aims to
-    reduce dependencies among the mesh \cite{error:Park,error:Yan}.
-    Similar to introducing key frames or restart marker in video/image
-    coding, mesh
-    segmentation is used to reduce the affected range of one
-    packet loss. In robust mesh compression, a mesh is typically
-    divided into several independent parts and then coded separately.
-    Therefore the effect of one packet loss is confined to the part to which
-    it belongs. The finer the partition is, the fewer the affected vertices
-    are.  The coding efficiency, however, will decrease
-    due to more redundancies and less correlation.
-
-    Al-Regib and Altunbasak \cite{unequal:Al-Regib} proposed an
-    unequal error protection method to improve the resilience of
-    progressive 3D mesh based on CPM (compressed progressive meshes). Forward error
-    correction (FEC) codes are added to the
-    base mesh and additional levels-of-detail information to maximize 
-    the decoded mesh quality.  The method is similar to FEC protection 
-    of video data.
-    As argued in the previous section, we believe that for streaming
-    of 3D meshes, retransmission is always a better choice (except in
-    cases such as multicast where retransmission is not scalable).
-    Chen et al. \cite{chen05hybrid} also applied FEC to streaming
-    progressive meshes. They analyzed several transmission schemes:
-    TCP only, UDP only, TCP with UDP, and UDP with FEC, and studied
-    their effects experimentally on the transmission time and decoded
-    mesh quality.
-    Al-Regib et al. proposed an application layer protocol, 3TP,
-    for streaming of 3D models \cite{3tpregib}, combining both TCP 
-    and UDP.  In 3TP, important packets are sent using
-    TCP, while the rest are sent with UDP to minimize delay.
-
-    
-    Packetization of different model is tackled by
-    Harris III and Karvets in \cite{harris:design}.   They proposed
-    a protocol named On-Demand Graphic Transport Protocol (OGP)
-    for transmitting 3D models represented as a tree of bounding volumes.
-    A key component of the protocol is to decide which bounding volumes
-    to send.  OGP begins with packing the largest possible subtree at
-    the root and continues to pack the nodes in the subtree of
-    acknowledged nodes in breadth-first order.  
-    Gu and Ooi \cite{Gu:Packetization} were the first to look at
-    the packetization problem for progressive meshes.  They model
-    the packetization problem as a graph problem where the objective
-    is to equally partition the graph into $k$ partitions with minimum
-    cut size.  The problem is shown to be NP-complete and a heuristic
-    is proposed.  They, however, assume that every vertex split is
-    equally important.  In practice, the importance of vertex splits can
-    vary considerably.  
-
-    These existing studies are mainly concerned with dependencies
-    (packetization and mesh segmentation) and importance
-    of mesh data (unequal error protection and use of reliable protocol), 
-    two factors that affect the quality of decoded meshes.  None, however,
-    have looked at both factors and characterize 
-    their effect on quality.  We aim at achieving this by proposing
-    an analytical model.
 
 \section{Analytical Model}
 \label{s:model:model}
@@ -382,13 +146,11 @@
     can be decoded only after the packet containing it and all its
     parent packets are received.
 
-\if0
 \begin{figure}
 \centering
 \epsfig{file = figures/dag1.eps, height = 1.2in}
 \caption{Dependency between vertex splits represented as a DAG.\label{model:dag2}}
 \end{figure}
-\fi
 
     Let $B$ be the average
     sending rate\footnote{decided either by the available bandwidth or by TCP friendly requirement} and $p$ be the packet loss rate.
@@ -485,9 +247,9 @@ $S_i = i$.
     total transmissions after time $T_d$ when there are
     $i - T_d + 1$ known successful transmissions is $(i - T_d +1)/(1-p)$.
     Hence, we have 
-    %\begin{displaymath}
-        $E[S_i]          = (i - T_d + 1)\frac{1}{1-p} + T_d - 1$.
-    %\end{displaymath}
+    \begin{displaymath}
+        E[S_i]          = (i - T_d + 1)\frac{1}{1-p} + T_d - 1.
+    \end{displaymath}
     %Between time $0$ and time $i+k$ there are $i+k+1$ time slots.
     %Among them, $i+1$ slots are used to send new packets (packet $0$
     %to packet $i$) and $k$ slots are used for retransmissions.
@@ -669,7 +431,7 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
 
     This section discusses the effects of dependencies
     on the number of decodable packets, as a function of
-    $p$ and $T_d$.  As mentioned in Section~\ref{s:model:mesh},
+    $p$ and $T_d$.  As mentioned in Section~\ref{ss:intro:packetization},
     packetization at the sender may affect
     decoded mesh quality.  We quantify 
     this effect by estimating the number of
@@ -722,7 +484,9 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
     \end{displaymath}
     The expected number of successful transmissions at time $t$ is
     \begin{eqnarray*}
-    E\big[\sum_{i=0}{t}a_i\big] = \sum_{i=0}{t}E[a_i] = \sum_{i=0}{t}(1-p) = (t+1)(1-p)
+    E\big[\sum_{i=0}{t}a_i\big] &=& \sum_{i=0}{t}E[a_i]\\
+                                &=& \sum_{i=0}{t}(1-p)\\
+                                &=& (t+1)(1-p)
     \end{eqnarray*}
     %The number of successful transmission at time $t$ is equivalent to
     %the number of successful Bernoulli trials out of $t+1$
@@ -748,7 +512,10 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
     
     We therefore first derive a close form formula for $\Delta_t$, which is 
     the increase of the expected number of packets decodable at time $t$,
-    that is, $\Delta_t = E[N_{d,t}] - E[N_{d,t-1}]$. 
+    that is, 
+    \begin{displaymath}
+        \Delta_t = E[N_{d,t}] - E[N_{d,t-1}]. 
+    \end{displaymath}
     We let $\Delta_0$ be $(1-p)$ since
     the expected number of packets decodable at time 0 is $(1-p)$.
 
@@ -856,8 +623,8 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
     be transmitted. Therefore, 
     \begin{align*}
      &E[N_{d,t}|_\pOlost] - E[N_{d,t-1}] & \\
-    =&\sum_{i=0}^{b-1}[(1-p^{n})-(1-p^{n+1})](1-p^{n+1})^{i} = \dfrac{p-1}{p}(1- (1-p^{n+1})^b) \\
-    %=& \dfrac{p-1}{p}(1- (1-p^{n+1})^b)\\
+    =&\sum_{i=0}^{b-1}[(1-p^{n})-(1-p^{n+1})](1-p^{n+1})^{i}\\
+    =&\dfrac{p-1}{p}(1- (1-p^{n+1})^b) \\
     \end{align*}
     Hence, the lemma still holds in this case.
     \end{proof}
@@ -867,10 +634,9 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
     \begin{lemma}
     %\label{t:worst}
     \label{l:model:worst}
-    %\[
-        %\Delta_t = (1-p)(1-p^{n+1})^b,
-        $\Delta_t = (1-p)(1-p^{n+1})^b$,
-    %\]
+    \[
+        \Delta_t = (1-p)(1-p^{n+1})^b,
+    \]
 where $t=nT_d+b$ and $n,b\in\mathbb{Z^+}; 0 \le b<T_d$.
     %\end{theorem}
     \end{lemma}
@@ -885,7 +651,8 @@ where $t=nT_d+b$ and $n,b\in\mathbb{Z^+}; 0 \le b<T_d$.
     \intertext{when $t>0$, from Eqn \ref{e:model:p0received} and Lemma~\ref{l:model:p0lost}}
              %&= (1-p) + (p-1)(1-(1-p^{n+1})^b) \\
              %&= (1-p)(1-p^{n+1})^b.
-             &= (1-p)+(p-1)(1-(1-p^{n+1})^b)=(1-p)(1-p^{n+1})^b.
+             &= (1-p)+(p-1)(1-(1-p^{n+1})^b)\\
+             &=(1-p)(1-p^{n+1})^b.
     \end{align*}
     when $t=0$, the above formula still holds because $\Delta_0 = 1-p$.
     \end{proof}
@@ -912,7 +679,11 @@ where $t=nT_d+b$ and $n,b\in\mathbb{Z^+}; 0 \le b<T_d$.
     \begin{proof}
     We have $E[N_{d,t}] = \sum_{i=0}^{t}\Delta_t$, and from Lemma~\ref{l:model:worst}, we
     find that the $\Delta_t$ during each $T_d$ is a part of geometric series. From
-    $\sum_{i=0}^nq^i = \dfrac{1-q^{n+1}}{1-q}$, we can prove this theorem.
+    \begin{displaymath}
+        \sum_{i=0}^nq^i = \dfrac{1-q^{n+1}}{1-q}, 
+    \end{displaymath}
+    we can prove this theorem.
+
     \end{proof}
 
 \subsection{Insights}
@@ -940,8 +711,8 @@ where $t=nT_d+b$ and $n,b\in\mathbb{Z^+}; 0 \le b<T_d$.
     f(i) - f(i-1) &=& (1-p)\sum_{j=2}^{T_d}\Big[(-1)^j\binom{T_d}{j}p^{(j-1)i}\Big];\\
     f(i)          &=& (1-p)\sum_{j=2}^{T_d}\Big[(-1)^{j}\binom{T_d}{j}\sum_{k=1}^i p^{(j - 1)k}\Big];\\
     f(\infty)     &=& (1-p)\sum_{j=2}^{T_d}\Big[(-1)^{j}\binom{T_d}{j}\frac{p^{j-1}}{1-p^{j-1}}\Big]\\
-                  &\leq& \sum_{j=2}^{T_d}\Big[\binom{T_d}{j}\frac{(-p)^{j}}{p}\Big] = \frac{1}{p}[(1-p)^{T_d} -1 + T_{d}p]\\
-    %              &=& \frac{1}{p}[(1 - p)^{T_d} - 1 + T_{d}p]
+                  &\leq& \sum_{j=2}^{T_d}\Big[\binom{T_d}{j}\frac{(-p)^{j}}{p}\Big]\\ 
+                  &=& \frac{1}{p}[(1 - p)^{T_d} - 1 + T_{d}p]
     \end{eqnarray*}
     Therefore, we can see the difference is upper-bounded.
     Since when $p$ is small, $\sum_{k=1}^i p^k$ converges to $\frac{p}{1-p}$ quickly,
