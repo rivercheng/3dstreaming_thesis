@@ -29,6 +29,8 @@
 \title{Streaming of High-Resolution Progressive Meshes Over Network}
 \author{Wei CHENG\\
 National University of Singapore\\
+\\
+\\
 SuperVisor\\
 Wei Tsang OOI}
 \begin{document}
@@ -182,7 +184,13 @@ Wei Tsang OOI}
     with laser scanner and reconstruction softwares.
     For example, the Stanford's Digital Michelangelo Project
     has digitalized several famous statues of Michelangelo
-    \cite{levoy00digital} [figure1]. Similar projects include 
+    \cite{levoy00digital} (See Figure \ref{f:intro:scanner}. 
+    Similar projects include 
+\begin{figure}[htbp!]
+\centering
+\epsfig{file=scanner.eps, height=0.3\textwidth}
+\caption{Stanford's Digital Michelangelo Project. The head of David Statue is being scanned.}\label{f:intro:scanner}
+\end{figure}
     the Digital Sculpture Project \cite{deroos2004dsp}
     and the project to digitize Rodin's sculptures \cite{miyazaki2006dab}. 
     Second, artists can directly create high-resolution 3D models with
@@ -197,25 +205,32 @@ Wei Tsang OOI}
 \caption{Complex digital sculptures created with ZBrush.}\label{f:intro:zbrush}
 \end{figure}
 
-    High-resolution 3D models are essential in digital museum 
-    applications. Compared with physical museums, a digital museum
-    has many advantages. People can visit a digital museum from
+    Sharing high-resolution 3D models over network is useful in many
+    applications. Digital museum exhibiting 3D models of artifacts
+    is an example. 
+    Exhibiting high-resolution 3D models of artifacts instead of the
+    artifacts themselves has many advantages. 
+    People can view the artifacts from
     anywhere, at anytime, and without any travel cost. 
-    Visitors can interact with a exhibited artifact
-    in any way they want, without worrying about damaging it
+    Visitors can interact with exhibited artifacts
+    in any way they want, without worrying about damaging them 
     or interfering other visitors. 
     Moreover, the museum can exhibit artifacts, however precious they are, 
     safely without worrying about corrosion and stealing.
 
-    High-resolution 3D models are useful in some other applications too. 
+    High-resolution 3D models are useful in other networked applications too. 
     For example, virtual world applications,
-    such as Second Life, may become more realistic and interested by
-    supporting high-resolution 3D models. Virtual Earth applications, 
+    such as Second Life, may become more realistic and interesting by
+    supporting high-resolution 3D models. 
+    Commercial users could show their products as 3D models to potential users all over 
+    the world. Sculptors could demonstrate their artworks freely without renting an gallery.
+    As another example, Virtual Earth applications, 
     such as Google Earth, could represent many landmark buildings or statues
-    (e.g. Statue of Liberty) as high-resolution 3D models to attract
-    more visitors.
+    (e.g. Statue of Liberty) as high-resolution 3D models to serve
+    the visitors better.
 
-    High resolution 3D models may take long time to download completely
+    When used in networked applications, 
+    high resolution 3D models may take long time to download completely
     for display at the client. 
     For example, the Stanford model of the David statue, with 28 million vertices and
     56 million triangles, is still 70 MB in size with
@@ -286,10 +301,7 @@ Wei Tsang OOI}
     \subsection{Quantitatively Determining the Effect of Dependency}
     In progressive streaming, the quality of the mesh on the receiver
     increases over time.
-    %, and plotting this quality versus time gives
-    %us a \emph{quality curve}. 
     Because vertex splits contribute differently to the quality, 
-    %the quality curve 
     how quality improves
     depends on the decoding order of the vertex splits,
     which in turn depends on the sending order of the vertex splits.
@@ -314,8 +326,6 @@ Wei Tsang OOI}
     Hence, another consideration in choosing sending order
     is to minimize the dependency among packets so that most
     received vertex splits can be decoded without waiting.
-    %Hence, the effect of dependency needs to 
-    %be considered in choosing the sending order of vertex splits,
     
     To find a proper trade-off between sending most important vertex
     split first and to minimize the dependency among packets, we 
@@ -339,8 +349,10 @@ Wei Tsang OOI}
     Moreover, the visual contributions of visible
     vertex splits (how much they can improve the rendered image)
     also depend on the view-point of the user.
-    Hence, choosing the sending order according to the viewpoint of the user, 
-    so called \emph{view-dependent streaming}, is a natural choice, especially
+    Hence, choosing the sending order and sending subset 
+    according to the viewpoint of the user, 
+    so called \emph{view-dependent streaming}, 
+    is a natural choice, especially
     for high-resolution meshes.
     
     In existing solutions to view-dependent streaming,  
@@ -367,8 +379,9 @@ Wei Tsang OOI}
     \end{itemize}
 
     \subsection{Patterns of User Behaviors in viewing 3D Meshes}
-    In a view-dependent steaming system, the streaming order of data highly
-    depends on the interactivity of users. Designing a satisfying system
+    In a view-dependent steaming system, the sending order and sending subset 
+    of data highly depends on the interactivity of users. 
+    Designing a satisfying system
     requires a understanding of user behaviors in viewing 3D meshes.
     For example, if user actions are somewhat predictable, pre-fetching can 
     be used to reduce the response time. If we know in advance that some parts
@@ -393,7 +406,8 @@ Wei Tsang OOI}
     \subsection{P2P View-Dependent Progressive Mesh Streaming System}
     The receiver-driven protocol significantly reduces the computing cost at the sender,
     but the bandwidth can remain the bottleneck if each receiver receives data
-    from the same sender. Peer-to-peer (P2P) technique is a common solution to increase
+    from the same sender and the number of receivers becomes large. 
+    Peer-to-peer (P2P) technique is a common solution to increase
     the scalability without incurring high infrastructural cost. 
     Applying the P2P technique into progressive mesh streaming system
     is considerably simplified by our receiver-driven protocol since 
@@ -405,7 +419,8 @@ Wei Tsang OOI}
     may choose to look at different facets, or zoom into different level.
     Therefore, each peer may choose a unique sending order of
     vertex splits. Hence, how to group vertex splits into chunks is not
-    straightforward. Moreover, it is difficult for a peer to keep receiving
+    straightforward. Moreover, since peers may have different subsets of the
+    mesh, it is difficult for a peer to keep receiving
     needed data from another peer for a long time, and  
     a peer would have to continuously look for peers to retrieve the mesh data from, 
     which makes content discovery more challenging.
@@ -413,9 +428,10 @@ Wei Tsang OOI}
     Hence, the last objective of this thesis is 
     \begin{itemize}
         \item
+            to solve chunking and content discovery problems introduced by 
+            the flexibility in choosing sending order and sending subset, and
             to implement a prototype of P2P view-dependent mesh streaming system
             based on the receiver-driven protocol proposed in this thesis.
-            The emphasis is to solve chunking and content discovery problems. 
     \end{itemize}
     
     \subsection{Scope}
@@ -434,13 +450,13 @@ Wei Tsang OOI}
   \section{Contributions}
   \label{s:intro:objectives}
     In this section, We introduce the contributions of this thesis by
-    csummarizing how we achieve the objectives introduced in 
+    summarizing how we achieve the objectives introduced in 
     Section \ref{s:intro:objectives} and their significances.
     
     \subsection{Objective 1}
     \begin{itemize}
         \item
-            to quantitatively analyze the effect of dependency on 
+            To quantitatively analyze the effect of dependency on 
             the rendered quality of progressive meshes 
             during transmission over lossy network, and to find
             a proper sending order to improve the quality as quick
@@ -455,10 +471,10 @@ Wei Tsang OOI}
     vertex split before transmission. Consequently, 
     we can analytically evaluate different sending orders without simulations.
     
-    Hence, our model can help in developing a sending
+    Moreover, our model can help in developing a sending
     strategy to improve the quality as soon as possible,
     and a greedy strategy is given in the thesis as an example. 
-    Furthermore, we derive closed-form expressions in two extreme cases,
+    Further, we derive closed-form expressions in two extreme cases,
     providing insights to the importance of dependencies on the
     decoded mesh quality. The main insight is that if each lost packet
     is immediately retransmitted upon the packet loss is detected, 
@@ -482,7 +498,7 @@ Wei Tsang OOI}
     \subsection{Objective 2}
     \begin{itemize}
         \item
-            to implement 
+            To implement 
             a receiver-driven view-dependent streaming system, where
             the visibility decision is done by the receiver instead of the sender,
             to make the sender stateless.
@@ -498,8 +514,8 @@ Wei Tsang OOI}
     can explicitly request data to split it. 
     We avoid explicitly including the IDs in the vertex splits,
     as it will significantly increase the data size.
-    Third, how to efficiently compress the vertex splits without
-    sacrificing the flexibility in choosing sending order
+    Third, the vertex splits need to be efficiently compressed without
+    sacrificing the flexibility in choosing sending order.
     
     For the first problem, we find that although it is difficult
     for the receiver to accurately measure
@@ -536,22 +552,19 @@ We log the user's actions while they interact and view the meshes in a mock onli
 Then we analyze these traces to derive the patterns of user behaviors.
 
 The contributions of our user study are:
-\begin{enumerate}
-    \item
-        The analysis of user traces reveals that 
+First, the analysis of user traces reveals that 
         user actions are predictable to certain extent. 
         Hence, pre-fetching based on our analysis becomes possible.
-    \item
-        Locality exists in both data and viewpoint access. By
+        Second, 
+        locality exists in both data and viewpoint access. By
         storing the most popular mesh data in caching proxies, 
         the server overhead could be significantly reduced. 
         Moreover, caching rendered images can be useful in remote rendering,
         and caching faces and textures is useful in improving rendering speed.
-    \item
+        Finally,
         We develop a method to generate random user behaviors similar to real ones
         and use them in simulations, 
         which are useful in testing protocols and measuring system performance.
-\end{enumerate}
 
     \subsection{Objective 4}
     \begin{itemize}
@@ -588,6 +601,13 @@ The contributions of our user study are:
     simulation results show that server overhead can be
     reduced by 90\%. Meanwhile,  average response time and
     control overhead are low.
+
+    Our results indicate that with the help of P2P technique,
+    sharing high-resolution
+    3D models to a large number of users over network is affordable
+    to small companies, and even single persons. We believe this is
+    essential for networked applications using high-resolution 3D models
+    become popular.
 
     In next chapter, we will introduce some backgrounds and related works.
     The following four chapters will introduce how we achieve our objectives in detail.
@@ -1072,6 +1092,7 @@ vertex.\label{mesh_non_mesh}}\
     how to implement a scalable 
     view-dependent streaming system without incurring high infrastructural cost.
 
+\begin{comment}
     In a view-dependent steaming system, the streaming order of data highly
     depends on the interactivity of users. Designing a satisfying system
     requires a understanding of user behaviors in viewing 3D meshes.
@@ -1080,13 +1101,15 @@ vertex.\label{mesh_non_mesh}}\
     and Hinckley et al. \cite{hinckley97usability}). 
     As far as we know, there is no studies before us which study user behavior
     from the system design point of view.
+\end{comment}
     
 
-\include{mesh}
-\include{dstream}
-\include{mm09-3dstreaming}
-\include{p2p}
+%\include{mesh}
+%\include{dstream}
+%\include{mm09-3dstreaming}
+%\include{p2p}
 
+\begin{comment}
 \chapter{Conclusion}
 \label{c:conclusion}
 This research concentrated on streaming of progressive meshes over network. 
@@ -1178,6 +1201,7 @@ Improving the rendering efficiency of the progressive mesh during the streaming
 could be an interesting research problem.  
 During the streaming, a progressive mesh with only partial modification is frequently re-rendered, 
 so it is possible to exploit the similarity between two consecutive meshes to improve the rendering speed.
+\end{comment}
 \bibliographystyle{abbrv}
 \bibliography{thesis}
 \end{document}
