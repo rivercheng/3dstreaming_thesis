@@ -31,7 +31,7 @@
 National University of Singapore\\
 \\
 \\
-SuperVisor\\
+Supervisor\\
 Wei Tsang OOI}
 \begin{document}
 \maketitle
@@ -184,12 +184,13 @@ Wei Tsang OOI}
     with laser scanner and reconstruction softwares.
     For example, the Stanford's Digital Michelangelo Project
     has digitalized several famous statues of Michelangelo
-    \cite{levoy00digital} (See Figure \ref{f:intro:scanner}. 
+    \cite{levoy00digital} (See Figure \ref{f:intro:scanner}). 
     Similar projects include 
 \begin{figure}[htbp!]
 \centering
 \epsfig{file=scanner.eps, height=0.3\textwidth}
-\caption{Stanford's Digital Michelangelo Project. The head of David Statue is being scanned.}\label{f:intro:scanner}
+\caption{Stanford's Digital Michelangelo Project. The head of David Statue is being 
+scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:intro:scanner}
 \end{figure}
     the Digital Sculpture Project \cite{deroos2004dsp}
     and the project to digitize Rodin's sculptures \cite{miyazaki2006dab}. 
@@ -202,7 +203,8 @@ Wei Tsang OOI}
 &
 \epsfig{file=zbrush2.eps, height=0.3\textwidth}
 \end{tabular}
-\caption{Complex digital sculptures created with ZBrush.}\label{f:intro:zbrush}
+\caption{Complex digital sculptures created with ZBrush
+(image source: http://www.evermotion.org/vbulletin/showthread.php?t=64128).}\label{f:intro:zbrush}
 \end{figure}
 
     Sharing high-resolution 3D models over network is useful in many
@@ -216,7 +218,7 @@ Wei Tsang OOI}
     in any way they want, without worrying about damaging them 
     or interfering other visitors. 
     Moreover, the museum can exhibit artifacts, however precious they are, 
-    safely without worrying about corrosion and stealing.
+    safely without worrying about corrosion and theft.
 
     High-resolution 3D models are useful in other networked applications too. 
     For example, virtual world applications,
@@ -224,7 +226,7 @@ Wei Tsang OOI}
     supporting high-resolution 3D models. 
     Commercial users could show their products as 3D models to potential users all over 
     the world. Sculptors could demonstrate their artworks freely without renting an gallery.
-    As another example, Virtual Earth applications, 
+    As another example, virtual earth applications, 
     such as Google Earth, could represent many landmark buildings or statues
     (e.g. Statue of Liberty) as high-resolution 3D models to serve
     the visitors better.
@@ -240,7 +242,7 @@ Wei Tsang OOI}
     the streaming technology can be used to transmit 3D models. 
     The 3D streaming technology enables users to render the partially received data as a preview, 
     and then improve the quality when more data are available. 
-    Users can decide how many data to receive based on their requirement of quality
+    Users can decide how much data to receive based on their requirement of quality
     and the rendering ability of their hardware.
 
 \begin{figure}[htbp!]
@@ -248,7 +250,7 @@ Wei Tsang OOI}
 \epsfig{file=split2.eps, width=0.5\textwidth}
 \caption{Edge collapse and vertex split}\label{f:intro:split2}
 \end{figure}
-    One popular representation to support 3D streaming, progressive mesh, 
+    One popular representation to support 3D streaming, \textit{progressive mesh}, 
     is proposed by Hoppe \cite{hoppe96progressive}.
     The technique is based on an
     operation called \textit{edge collapse}, and its reverse
@@ -285,13 +287,11 @@ Wei Tsang OOI}
     Whereas in 3D streaming, especially when high-resolution 3D models are used,
     users may consume different subset of the data, and in various orders.
     
-    Concequently, flexibility in choosing sending order and sending subset 
-    in 3D streaming.
     This flexibility is important in streaming of high-resolution 3D models, 
     because streaming a huge 3D model in a fix order may waste much time and bandwidth in 
     transmitting data not useful to the user. 
-    To ensure this flexibility in streaming system is an important consideration
-    in choosing representation and coding schemes, and details are discussed
+    Ensuring this flexibility in streaming system is an important consideration
+    in choosing representation and coding schemes. The details are discussed
     in Chapter \ref{c:related}.
     Meanwhile, this flexibility introduces some new research questions, 
     which are introduced in next section. 
@@ -305,21 +305,21 @@ Wei Tsang OOI}
     how quality improves
     depends on the decoding order of the vertex splits,
     which in turn depends on the sending order of the vertex splits.
-    Because of the flexibility existed in choosing sending order,
+    Because of the flexibility in choosing sending order,
     it is possible to choose a sending order so that the 
     quality on the receiver increases as fast as possible.
 
     A natural method is to send vertex splits in the descending order
     of their contribution to the quality of the received mesh. 
-    This strategy, however, is not always optimal, 
-    because dependency also plays an important role
-    when the mesh is transmitted over a lossy network.
+    This strategy, however, is not always optimal 
+    when the mesh is transmitted over a lossy network,
+    because dependency also plays an important role in choosing sending order.
     
     The progressive coding of meshes introduces dependencies among 
     the vertex splits, and the descendants cannot be decoded
     before their ancestors are all decoded. Therefore, 
     when a progressive mesh is transmitted over a lossy network,
-    a packet loss will disable the decoding of the following
+    a packet loss will delay the decoding of the following
     vertex splits if they depend on this lost packet. 
     These successfully received vertex splits cannot be 
     decoded until the lost packet is successfully retransmitted. 
@@ -327,12 +327,16 @@ Wei Tsang OOI}
     is to minimize the dependency among packets so that most
     received vertex splits can be decoded without waiting.
     
-    To find a proper trade-off between sending most important vertex
-    split first and to minimize the dependency among packets, we 
-    need to quantitatively know the effect of dependency. This task
-    is non-trivial as this effect depends on both network condition (random
-    packet losses) and the property of meshes (dependency among vertex splits).
-    Therefore, the first research objective in this thesis is
+    Therefore, to choose a proper sending order, it is essential 
+    to find a proper trade-off between sending most important vertex
+    split first and to minimize the dependency among packets, and 
+    it requires us to quantify the effect of dependency. 
+    To quantify the effect of dependency is non-trivial, because
+    this effect depends on which packets are lost during transmission.
+    Packet losses happen randomly, so the effect of dependency is 
+    random and can only be estimated based on probability theory.
+    
+    In summary, the first research objective in this thesis is
     \begin{itemize}
         \item
             to quantitatively analyze the effect of dependency on 
@@ -367,15 +371,31 @@ Wei Tsang OOI}
     many receivers with caching proxy and peer-to-peer system,
     two common solutions to scalability. 
 
-    Therefore, the second objective in this thesis is 
+    Therefore, it is important to design a stateless sender in
+    a scalable view-dependent mesh streaming system. As a result,
+    the receiver needs to explicit request the vertex splits from
+    the server, we call it \textit{receiver-driven} approach.
+    
+    To design an receiver-driven view-dependent mesh streaming
+    system is challenging. Among all the challenges, the most important
+    one is how the receiver determine the visibility and visual contribution
+    of vertex splits before receiving them. The receiver does not have
+    the complete data as the sender, so the receiver has to estimate
+    the visibility and visual contribution of vertex splits based on 
+    partially received data. Moreover, the sender being stateless increases
+    the difficulty in compressing data, because now the sender is not aware
+    of the sending order of the vertex splits, and most existed compression
+    are not applicable since they require specific sending orders.
+    As a result, we need to find an efficient 
+    compression algorithm which does not rely on the sending order.
+
+    In summary, the second objective in this thesis is 
     \begin{itemize}
         \item
-            to implement 
+            to design and implement
             a receiver-driven view-dependent streaming system, where
             the visibility decision is done by the receiver instead of the sender,
-            to make the sender stateless.
-            Then caching proxy and peer-to-peer techniques can be used to increase the 
-            scalability of the progressive mesh streaming system.
+            to make the sender stateless and improve the scalability of the system.
     \end{itemize}
 
     \subsection{Patterns of User Behaviors in viewing 3D Meshes}
@@ -387,12 +407,21 @@ Wei Tsang OOI}
     be used to reduce the response time. If we know in advance that some parts
     of a huge mesh are requested most frequently, they can be 
     cached to significantly reduce server overhead.
+
+    The first step of understanding user behaviors is to collect the traces of 
+    how user interact with the high-resolution 3D models. Because there are no
+    existed popular applications, we need to implement our own application and
+    design the data collecting process.
+    After collecting the data, we need to develop proper methods to analyze them
+    and try to derive some patterns. This task is challenging because of the high
+    flexibility in users' interaction.
     
     Most previous work on user interactions with 3D objects focused on design
     of specific interaction techniques (e.g., the study by Chen et al. \cite{chen88study}
     and Hinckley et al. \cite{hinckley97usability}). 
     As far as we know, there is no studies before us which study user behavior
     from the system design point of view.
+    
     Therefore, the third objective of this thesis is 
     \begin{itemize}
         \item
@@ -409,59 +438,71 @@ Wei Tsang OOI}
     from the same sender and the number of receivers becomes large. 
     Peer-to-peer (P2P) technique is a common solution to increase
     the scalability without incurring high infrastructural cost. 
+    As a result, applying P2P technique in view-dependent mesh steaming
+    system enables small companies and personal users to public
+    their high-resolution 3D models. Hence, P2P technique is essential
+    for applications using high-resolution 3D models to become popular.
+    
     Applying the P2P technique into progressive mesh streaming system
     is considerably simplified by our receiver-driven protocol since 
     the sender is stateless and free of expensive computations.
-    Whereas, the implementation is still challenging because the flexibility
-    of choosing the sending order and sending subset.
+    The implementation is still challenging due to the flexibility
+    in choosing the sending order and subset to send.
     
     In P2P mesh streaming, users 
-    may choose to look at different facets, or zoom into different level.
+    may choose to look at different facets or zoom into different level.
     Therefore, each peer may choose a unique sending order of
     vertex splits. Hence, how to group vertex splits into chunks is not
-    straightforward. Moreover, since peers may have different subsets of the
+    straightforward. Moreover, since peers may download different subsets of the
     mesh, it is difficult for a peer to keep receiving
-    needed data from another peer for a long time, and  
-    a peer would have to continuously look for peers to retrieve the mesh data from, 
+    needed data from the same peer.  
+    A peer would have to continuously look for peers to retrieve the mesh data from, 
     which makes content discovery more challenging.
 
-    Hence, the last objective of this thesis is 
+    In summary, the last objective of this thesis is 
     \begin{itemize}
         \item
-            to solve chunking and content discovery problems introduced by 
+            to investigate chunking and content discovery problems introduced by 
             the flexibility in choosing sending order and sending subset, and
             to implement a prototype of P2P view-dependent mesh streaming system
             based on the receiver-driven protocol proposed in this thesis.
     \end{itemize}
     
     \subsection{Scope}
-    Only streaming of static 3D objects is considered in this thesis. 
-    Streaming of 3D animations beyonds the scope of this thesis. 
-    Moreover, streaming of 3D scenes is not concerned in this thesis.
-    Instead, this thesis concentrates on streaming of one large mesh.
-    Nonetheless, streaming of 3D scenes becomes easier when mature methods
-    of streaming of single objects exist because a 3D scene is the collection
-    of multiple single meshes.
-    Finally, this thesis focuses on the streaming of progressive meshes. 
-    Streaming of other representations of 3D objects is not discussed in this thesis,
-    but the methods proposed in this thesis should be possible
-    extended to support streaming of other representations with some modifications.
-    
+    \begin{itemize}
+        \item
+            Only streaming of static 3D objects is considered in this thesis. 
+            Streaming of 3D animations beyonds the scope of this thesis. 
+        \item
+            Streaming of 3D scenes is not concerned in this thesis.
+            Instead, this thesis concentrates on streaming of one large mesh.
+            Nonetheless, streaming of 3D scenes becomes easier when mature methods
+            of streaming of single objects exist because a 3D scene is the collection
+            of multiple single meshes.
+        \item
+            This thesis focuses on the streaming of progressive meshes. 
+            Streaming of other representations of 3D objects is not discussed in this thesis,
+            but the methods proposed in this thesis should be possible
+            extended to support streaming of other representations with some modifications.
+        \item
+            Textures are not considered in this thesis. Texture coordinates could be assigned
+            to vertex splits similar to the geometry data, so all topics in this thesis could
+            be applicable to progressive meshes with textures with minimal modifications. How
+            to generate a progressive mesh from an ordinary mesh with textures, however, remains
+            a challenging problem, which is out of the scope of this thesis.
+    \end{itemize}
   \section{Contributions}
-  \label{s:intro:objectives}
+  \label{s:intro:contributions}
     In this section, We introduce the contributions of this thesis by
     summarizing how we achieve the objectives introduced in 
     Section \ref{s:intro:objectives} and their significances.
     
-    \subsection{Objective 1}
-    \begin{itemize}
-        \item
-            To quantitatively analyze the effect of dependency on 
-            the rendered quality of progressive meshes 
-            during transmission over lossy network, and to find
-            a proper sending order to improve the quality as quick
-            as possible, considering both the mesh property and network condition. 
-    \end{itemize}
+    \subsection{Analytical Model of Progressive Mesh Streaming}
+    Our first objective is to quantify the effect of dependency
+    on the rendered quality of progressive meshes when they are
+    transmitted over lossy network, so we can find proper sending
+    order to improve the quality as quick as possible,
+    considering both the mesh property and network condition. 
             
     To achieve this objective, an analytical model is proposed
     to estimate the decoding time of each vertex split by considering both
@@ -495,16 +536,9 @@ Wei Tsang OOI}
     organized as QSplat trees \cite{rusinkiewicz:qsplat} and digitized plants.  
     We have actually applied our analytical model to the latter \cite{plant:seb}.
     
-    \subsection{Objective 2}
-    \begin{itemize}
-        \item
-            To implement 
-            a receiver-driven view-dependent streaming system, where
-            the visibility decision is done by the receiver instead of the sender,
-            to make the sender stateless.
-            Then caching proxy and peer-to-peer techniques can be used to increase the 
-            scalability of the progressive mesh streaming system.
-    \end{itemize}
+    \subsection{Receiver-driven View-dependent Mesh Streaming System}
+    Our second objective is to implement a receiver-driven view-dependent streaming system,
+    so that the visibility decision is done by the receiver and the sender is stateless.
     
     In implementing the receiver-driven protocol, we solved three main problems.
     First, the receiver has to decide the visual contribution 
@@ -537,22 +571,15 @@ Wei Tsang OOI}
     Therefore, the receiver-driven approach may eventually
     make possible the view-dependent streaming of high-resolution meshes to huge number of receivers.
     
-    \subsection{Objective 3}
-    \begin{itemize}
-        \item
-            to study user behavior from 
-            the system design point of view, such as predictability (for prefetching)
-            and locality of access patterns (for caching), similar to the spirit
-            of the landmark studies for the Web \cite{huberman98web} and file system
-            \cite {ousterhout85trace}. 
-    \end{itemize}
+    \subsection{Analyze User Behaviors in Interacting with Meshes}
+    Our third objective is to study user behavior from the system design point of view, 
+    such as predictability and access pattern.
+    We conducted a user experiment with 37 users interacting with 9 meshes.
+    We log the user's actions while they interact and view the meshes in a mock online shop.
+    Then we analyze these traces to derive the patterns of user behaviors.
 
-We conducted a user experiment with 37 users interacting with 9 meshes.
-We log the user's actions while they interact and view the meshes in a mock online shop.
-Then we analyze these traces to derive the patterns of user behaviors.
-
-The contributions of our user study are:
-First, the analysis of user traces reveals that 
+    The contributions of our user study are:
+    First, the analysis of user traces reveals that 
         user actions are predictable to certain extent. 
         Hence, pre-fetching based on our analysis becomes possible.
         Second, 
@@ -566,13 +593,10 @@ First, the analysis of user traces reveals that
         and use them in simulations, 
         which are useful in testing protocols and measuring system performance.
 
-    \subsection{Objective 4}
-    \begin{itemize}
-        \item
-            to implement a prototype of P2P view-dependent mesh streaming system
-            based on the receiver-driven protocol proposed in this thesis.
-            The emphasis is to solve chunking and content discovery problems. 
-    \end{itemize}
+    \subsection{Peer Assisted View-Dependent Progressive Mesh Streaming}
+    The final objective in this thesis is to implement a prototype of 
+    P2P view-dependent mesh streaming system
+    based on the receiver-driven protocol proposed in this thesis.
     
     Before implementing the system, 
     we compare and contrast P2P mesh streaming to P2P
@@ -935,7 +959,7 @@ vertex.\label{mesh_non_mesh}}\
     have proposed compression algorithms that allow random splitting of a mesh without
     sacrificing compression efficiency. This method is neat since it achieves comparable
     efficiency with other compression methods but keeps the largest flexibility.
-    This algorithm, however. are not designed for 
+    This algorithm, however, is not designed for 
 	network transmission.  We extend it in this thesis and more details are introduced
     in Chapter \ref{c:rdstream}.  
     
