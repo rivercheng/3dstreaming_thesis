@@ -2,11 +2,11 @@
 \label{c:user}
 \section{Introduction}
 
-Advances in 3D scanning, range data collection, and digital sculpting techniques have 
-eased the creation of high quality 3D meshes.
-These meshes are increasingly being shared over the Internet through progressive streaming, in applications such as virtual earth, virtual art gallery, and online shops.  
-3D meshes are typically data rich and demand high network bandwidth and
-computational power. For example, a regular mesh like the \textit{Thai Statue} (Figure \ref{fig:3dmodels}, left) has 5 million vertices (122 MB after gzip) takes 16 minutes to download even at 1 Mbps.  When these meshes are 
+High-resolution 3D meshes are typically data rich and demand high network bandwidth and
+computational power. 
+For example, a regular mesh like the \textit{Thai Statue} (Figure \ref{fig:3dmodels}, left) 
+has 5 million vertices (122 MB after gzip) takes 16 minutes to download even at 1 Mbps.  
+When these meshes are 
 viewed on portable devices with
 low bandwidth and slow CPUs, delays in both transmitting and
 rendering become unavoidable. To minimize negative user experience, the
@@ -22,23 +22,26 @@ techniques
 This paper, however, studies
 user behavior from the system design point of view, 
 such as predictability (for prefetching) and locality of access patterns (for caching),
-similar to the spirit of the landmark studies for the Web \cite{huberman98web} and file system \cite{ousterhout85trace}.  No such prior study exists for progressive meshes.  This paper presents our first step towards filling 
+similar to the spirit of the landmark studies for the Web \cite{huberman98web} and file system \cite{ousterhout85trace}.  
+No such prior study exists for progressive meshes.  
+This chapter presents our first step towards filling 
 this gap.
 
 We conducted 
 a user experiment with 37 users interacting with 9 meshes.
-We log the user's actions while they interact and view the meshes in a mock online shop.  We present the analysis of these traces in this paper, and highlight findings that are significant to the design of efficient and scalable progressive mesh streaming systems.  In particular, we found that (i) in certain scenarios, user actions are highly predictable, making pre-fetching useful in these cases; (ii) users' viewpoint concentrates on part of the meshes, making caching these popular spots useful. %We also develop a simple user model, which can be used to generate synthetic traces for evaluating large-scale progressive mesh streaming systems.
-
-%\section{Background}
-%
-%No similar study has been done on user bahaviour of users with 
-%progressive streaming of 3D model wich we know of.  \todo{not very useful as its own section.  Perhaps remove?}
-
+We log the user's actions while they interact and view the meshes in a mock online shop.  
+We present the analysis of these traces in this paper, 
+and highlight findings that are significant to the design of efficient 
+and scalable progressive mesh streaming systems.  
+In particular, we found that 
+(i) in certain scenarios, user actions are highly predictable, making pre-fetching useful in these cases; 
+(ii) users' viewpoint concentrates on part of the meshes, making caching these popular spots useful. 
+We also develop a simple user model, which can be used to generate synthetic traces for evaluating large-scale progressive mesh streaming systems.
 \begin{figure}[htp]
 \centering
-\includegraphics[height=0.18\textwidth]{figs/thai}
-\includegraphics[height=0.18\textwidth]{figs/dragon}
-\includegraphics[height=0.18\textwidth]{figs/happy} 
+\includegraphics[height=0.3\textwidth]{figs/thai}
+\includegraphics[height=0.3\textwidth]{figs/dragon}
+\includegraphics[height=0.3\textwidth]{figs/happy} 
 \caption{Meshes used in experiment.  Left to right: 
 Thai Statue (5 million vertices), Dragon (3.6 million vertices), and Happy Buddha (0.5 million vertices).}
 \label{fig:3dmodels}
@@ -190,8 +193,8 @@ The session length fits the \textit{log-normal} distribution.
 \begin{figure}[htp]
 \begin{center}
 \begin{tabular}{cc}
-\epsfig{file=figs/unconditionalThinkTimeResults/sessionLengthdistribution.eps, width=0.23\textwidth,angle=270}&
-\epsfig{file=figs/unconditionalThinkTimeResults/Inter-operationTimeDistribution.eps, width=0.23\textwidth, angle = 270}\\
+\epsfig{file=figs/unconditionalThinkTimeResults/sessionLengthdistribution.eps, width=0.4\textwidth,angle=270}&
+\epsfig{file=figs/unconditionalThinkTimeResults/Inter-operationTimeDistribution.eps, width=0.4\textwidth, angle = 270}\\
 \end{tabular}
 \caption{\label{fig:session-length} (a) Session Length and (b) Inter-stroke Time}
 \end{center}
@@ -265,8 +268,8 @@ The mean and maximum think time are shown in Table \ref{t:TimeTable}. We note th
 \begin{figure}[htp]
 \begin{center}
 \begin{tabular}{cc}
-\epsfig{file=figs/unconditionalThinkTimeResults/ThinkTimeDistribution3.eps, width=0.23\textwidth, angle = 270}&
-\epsfig{file=figs/conditionalThinkTimeResults1/ConditionalThinkTimeDistribution1hugenormal.eps, width=0.23\textwidth, angle = 270}\\
+\epsfig{file=figs/unconditionalThinkTimeResults/ThinkTimeDistribution3.eps, width=0.4\textwidth, angle = 270}&
+\epsfig{file=figs/conditionalThinkTimeResults1/ConditionalThinkTimeDistribution1hugenormal.eps, width=0.4\textwidth, angle = 270}\\
 \end{tabular}
 \caption{\label{fig:think-time} Think Time (x-axis in log scale).}
 \end{center}
@@ -310,12 +313,12 @@ on viewpoints.  Past history of user interactions for a particular mesh, however
 \begin{figure*}[htp!]
 \begin{center}
 \begin{tabular}{ccc}
-\epsfig{file=figs/traceHistogram0/UnActionEventFrequency.eps, width=0.25\textwidth}&
-\epsfig{file=figs/traceHistogram0/ConditionalActionFrequency-hugenormal.eps, width=0.25\textwidth}&
-\epsfig{file=figs/traceHistogram0/ConditionalActionFrequency-dragonnormal.eps, width=0.25\textwidth}\\
-\epsfig{file=figs/traceHistogram0/Inter-operationprobability-hugenormal.eps, width=0.25\textwidth}&
-\epsfig{file=figs/traceHistogram0/conditionalInteractionProbability/hugenormal/Inter-operationProbability-hugenormal-ZOOMIN.eps, width=0.25\textwidth}&
-\epsfig{file=figs/traceHistogram0/conditionalInteractionProbability/dragonnormal/Inter-operationProbability-dragonnormal-MOVEDOWN.eps, width=0.25\textwidth}
+\epsfig{file=figs/traceHistogram0/UnActionEventFrequency.eps, width=0.31\textwidth}&
+\epsfig{file=figs/traceHistogram0/ConditionalActionFrequency-hugenormal.eps, width=0.31\textwidth}&
+\epsfig{file=figs/traceHistogram0/ConditionalActionFrequency-dragonnormal.eps, width=0.31\textwidth}\\
+\epsfig{file=figs/traceHistogram0/Inter-operationprobability-hugenormal.eps, width=0.31\textwidth}&
+\epsfig{file=figs/traceHistogram0/conditionalInteractionProbability/hugenormal/Inter-operationProbability-hugenormal-ZOOMIN.eps, width=0.31\textwidth}&
+\epsfig{file=figs/traceHistogram0/conditionalInteractionProbability/dragonnormal/Inter-operationProbability-dragonnormal-MOVEDOWN.eps, width=0.31\textwidth}
 \end{tabular}
 \caption{\label{fig:UnActionEventFrequency} Frequency of User Actions}
 \end{center}
@@ -377,8 +380,8 @@ chunks, the proxy can achieve more than 70\% hit rate for
     \begin{figure}[htp]
         \begin{center}
         \begin{tabular}{cc}
-            \epsfig{file=RequestCountCDF2.eps, width = 0.22\textwidth}&
-            \epsfig{file=vpCDFpercentage.eps, width = 0.22\textwidth}\\
+            \epsfig{file=RequestCountCDF2.eps, width = 0.4\textwidth}&
+            \epsfig{file=vpCDFpercentage.eps, width = 0.4\textwidth}\\
         \end{tabular}
     \end{center}
         %\caption{Normalized cumulative access count of mesh (left: chunks, right: pre-rendered images) versus rank.\label{fig:CDF}}
@@ -446,8 +449,8 @@ leading to more evenly distributed viewpoints around the mesh.
     
 \begin{figure}[htp!]
 \begin{center}
- \epsfig{file=buddha.eps, height=0.2\textwidth}
- \epsfig{file=faceCache.eps, width=0.2\textwidth}
+ \epsfig{file=buddha.eps, height=0.4\textwidth}
+ \epsfig{file=faceCache.eps, height=0.4\textwidth}
 \caption{(a) The normalized number of views for each face. (b) The hit rate if we partially cache faces on the graphic card.\label{fig:heat_map}}
 \end{center}
 \end{figure}
