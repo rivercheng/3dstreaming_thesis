@@ -122,13 +122,13 @@ Wei Tsang OOI}
     and varying sending rate. The values predicted from our model match the measured
     value reasonably well in all cases except when losses are too bursty.
     
-    To further improve the quality curve, the view-point of the 
+    To further improve the quality curve, the viewpoint of the 
     user can be considered in deciding the sending order.
     %Usually, users can only see a part of a mesh, so sending non-visible data
     %before visible data wastes bandwidth. Moreover, 
     Non-visible vertex splits do not need to be sent, and 
     the visual contributions of visible vertex splits (how much they can improve the rendered image)
-    also depend on the view-point of the user.
+    also depend on the viewpoint of the user.
     Hence, choosing the sending order according to the viewpoint of the user, so called
     \emph{view-dependent streaming}, is a natural choice.
     
@@ -209,7 +209,8 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
 
     Sharing high-resolution 3D models over network is useful in many
     applications. Digital museum exhibiting 3D models of artifacts
-    is an example. 
+    is an example\footnote{For example, Dr. Andre Stork and his teams are working
+    on a project named ``History in 3D'', http://www.fraunhofer.de/en/press/research-news/2009/11/history-in-3d.jsp.}. 
     Exhibiting high-resolution 3D models of artifacts instead of the
     artifacts themselves has many advantages. 
     People can view the artifacts from
@@ -219,6 +220,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     or interfering other visitors. 
     Moreover, the museum can exhibit artifacts, however precious they are, 
     safely without worrying about corrosion and theft.
+
 
     High-resolution 3D models are useful in other networked applications too. 
     For example, virtual world applications,
@@ -352,7 +354,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     Sending non-visible data before visible data wastes bandwidth. 
     Moreover, the visual contributions of visible
     vertex splits (how much they can improve the rendered image)
-    also depend on the view-point of the user.
+    also depend on the viewpoint of the user.
     Hence, choosing the sending order and sending subset 
     according to the viewpoint of the user, 
     so called \emph{view-dependent streaming}, 
@@ -384,7 +386,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     the visibility and visual contribution of vertex splits based on 
     partially received data. Moreover, the sender being stateless increases
     the difficulty in compressing data, because now the sender is not aware
-    of the sending order of the vertex splits, and most existed compression
+    of the sending order of the vertex splits, and most existed compression algorithms
     are not applicable since they require specific sending orders.
     As a result, we need to find an efficient 
     compression algorithm which does not rely on the sending order.
@@ -400,7 +402,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
 
     \subsection{Patterns of User Behaviors in viewing 3D Meshes}
     In a view-dependent steaming system, the sending order and sending subset 
-    of data highly depends on the interactivity of users. 
+    of data highly depend on the interactivity of users. 
     Designing a satisfying system
     requires a understanding of user behaviors in viewing 3D meshes.
     For example, if user actions are somewhat predictable, pre-fetching can 
@@ -487,9 +489,8 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
         \item
             Textures are not considered in this thesis. Texture coordinates could be assigned
             to vertex splits similar to the geometry data, so all topics in this thesis could
-            be applicable to progressive meshes with textures with minimal modifications. How
-            to generate a progressive mesh from an ordinary mesh with textures, however, remains
-            a challenging problem, which is out of the scope of this thesis.
+            be applicable to progressive meshes with textures (e.g. joint geometry/texture progressive coded meshes 
+            \cite{joint:okuda}) with minor modifications. 
     \end{itemize}
   \section{Contributions}
   \label{s:intro:contributions}
@@ -519,7 +520,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     providing insights to the importance of dependencies on the
     decoded mesh quality. The main insight is that if each lost packet
     is immediately retransmitted upon the packet loss is detected, 
-    then the dependencies only matters in the first several round trip times. 
+    then the dependency only matters in the first several round trip times. 
     Therefore, the effect of dependency is only significant in the applications
     requiring high interactivity. 
 
@@ -540,7 +541,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     Our second objective is to implement a receiver-driven view-dependent streaming system,
     so that the visibility decision is done by the receiver and the sender is stateless.
     
-    In implementing the receiver-driven protocol, we solved three main problems.
+    In implementing the receiver-driven protocol, we have three main problems.
     First, the receiver has to decide the visual contribution 
     of a vertex split before receiving it.
     Second, the receiver needs to know the unique ID
@@ -559,7 +560,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     
     To uniquely identify each vertex, we borrow the idea from Kim and Lee \cite{kim01truly}.
     In this system, IDs can be deduced by the receiver without any extra information. 
-    We also adapted and extended the compression algorithm proposed by Kim et al. \cite{multiresolution:kim}
+    We also adapt and extend the compression algorithm proposed by Kim et al. \cite{multiresolution:kim}
     to achieve the comparable compression ration with high flexibility in choosing 
     sending order.
     
@@ -574,7 +575,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     \subsection{Analyze User Behaviors in Interacting with Meshes}
     Our third objective is to study user behavior from the system design point of view, 
     such as predictability and access pattern.
-    We conducted a user experiment with 37 users interacting with 9 meshes.
+    We have conducted a user experiment with 37 users interacting with 9 meshes.
     We log the user's actions while they interact and view the meshes in a mock online shop.
     Then we analyze these traces to derive the patterns of user behaviors.
 
@@ -633,11 +634,11 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     essential for networked applications using high-resolution 3D models
     become popular.
 
-    In next chapter, we will introduce some backgrounds and related works.
-    The following four chapters will introduce how we achieve our objectives in detail.
+    In next chapter, we introduce some backgrounds and related works.
+    The following four chapters introduce how we achieve our objectives in detail.
     Chapter \ref{c:model} introduces our analytical model and its applications, and
     Chapter \ref{c:rdstream} describes our receiver-driven view-dependent streaming
-    protocol in detail. The result of our user study and its analysis is introduced
+    protocol in detail. The result of our user study and its analysis are introduced
     in Chapter \ref{c:user} and topics about implementing P2P mesh streaming systems
     are discussed in Chapter \ref{c:p2p}. Finally, the whole thesis is concluded in
     Chapter \ref{c:conclusion}.
@@ -650,6 +651,25 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     Currently the most popular representation of 3D objects is polygonal meshes, 
     especially the triangle meshes, because most graphic cards are optimized for triangle meshes. 
 
+    Besides meshes, point-based representations are also used in the practice.
+    A point-based geometry representation can be considered as a 
+    sampling of a continuous surface.  The result are a set of 3D points. 
+    To bridge the gaps between neighboring point samples, 
+    bounding spheres \cite{rusinkiewicz:qsplat, 364350} or surface splats \cite{383300} are used as rendering primitives. 
+    More details about point based models can be seen in the survey by Kobbelt and Botsch \cite{DBLP:journals/cg/KobbeltB04} 
+    and the PhD thesis of Wand \cite{wand:point}.  
+    Moreover, some other representations also exist, such as simple solid models used in Second Life
+    and generalized cylinders used in representing plants \cite{plant:seb, compact:mondet}.
+
+    This thesis concentrates on meshes because of following reasons:
+    \begin{itemize}
+        \item Most rendering hardwares are optimized for meshes, so other model need to be convert
+            to mesh before rendering either explicitly or implicitly. 
+        \item Without connectivity information in the model, point-based model is relatively easier to deal with
+            than meshes. Therefore, adapting techniques used in streaming meshes to streaming point-based model
+            is easier than the opposite direction.
+    \end{itemize}
+    
     A triangle mesh can be donated as a tuple $(K, V)$, where $K$ is a
     \emph{simplicial complex} including all the mesh simplices 
     (vertices, edges and triangles) and $V =\{v_{1}, v_{2}, ...,
@@ -698,29 +718,6 @@ vertex.\label{mesh_non_mesh}}\
     Then, polygonal meshes can be represented by $(K, V, D, S)$ where
     $D$ is the set of discrete attributes associated to face $f \in
     K$ and $S$ is the set of scalar attributes associated to corners $(v, f)$ in $S$.
-    
-    Besides meshes, point-based representations are also used in the practice.
-    A point-based geometry representation can be considered as a 
-    sampling of a continuous surface.  The result are a set of 3D points. 
-    %These points are optionally associated with the normal vectors 
-    %and other attributes, such as color and material properties. 
-    To bridge the gaps between neighboring point samples, 
-    bounding spheres \cite{rusinkiewicz:qsplat, 364350} or surface splats \cite{383300} are used as rendering primitives. 
-    More details about point based model can be seen in the survey by Kobbelt and Botsch \cite{DBLP:journals/cg/KobbeltB04} 
-    and the PhD thesis of Wand \cite{wand:point}.  
-    
-    Moreover, some other representations also exist, such as simple solid models used in Second Life
-    and generalized cylinders used in representing plants \cite{plant:seb, compact:mondet}.
-
-    %\subsection{Choice in This Thesis}
-    This thesis concentrates on meshes because of following reasons:
-    \begin{itemize}
-        \item Most rendering hardwares are optimized for meshes, so other model need to be convert
-            to mesh before rendering either explicitly or implicitly. 
-        \item Without connectivity information in the model, point-based model is relatively easier to deal with
-            than meshes. Therefore, adapting techniques used in streaming meshes to streaming point-based model
-            is easier than the opposite direction.
-    \end{itemize}
 
     \section{Coding and Compression}
     A mesh is encoded first before it can be stored or
@@ -826,7 +823,7 @@ vertex.\label{mesh_non_mesh}}\
         \item[Vertex Clustering Based] 
             In vertex clustering based schemes, space is divided into cells
             following regular structure such as kd-tree \cite{566591} and 
-            octree \cite{1073237}. All vertices inside a cell is represented
+            octree \cite{1073237}. All vertices inside a cell are represented
             by one delegate. Cells can be further divided into smaller cells
             and the quality of reconstructed model increases. Vertex clustering
             based coding can code geometry information efficiently, but it is 
@@ -846,7 +843,7 @@ vertex.\label{mesh_non_mesh}}\
             \cite{recent:alliez}, the survey by Peng, Kim and Kuo
             \cite{technologies:peng} and the references therein.
             Besides losing the correct topology information,
-            re-meshing based method usually code a mesh as a whole, 
+            re-meshing based methods usually code a mesh as a whole, 
             so there is no flexibility in streaming order.
 
         \item[Progressive Mesh Based]
@@ -890,8 +887,8 @@ vertex.\label{mesh_non_mesh}}\
     
     Many compression methods are proposed to reduce this cost.
     Hoppe \cite{efficient:hoppe} present an efficient implementation,
-    in which the vertex splits is ordered such that next one
-    is as close to current one as possible, and reduce the cost
+    in which the vertex splits are ordered such that next one
+    is as close to current one as possible. This method reduces the cost
     from $O(Vlog_{2}V)$ to $O(V)$.
     Karni, Bogomjakov, and Gotsman \cite{602153}, 
     also use specific order of vertex split to reduce the cost of connectivity. 
@@ -900,7 +897,7 @@ vertex.\label{mesh_non_mesh}}\
     be encoded with in average 4.5 bpv. 
 
     Another idea is to group many vertex splits together, 
-    and efficiency will be improved at the cost of coarser granularity. 
+    and efficiency can be improved at the cost of coarser granularity. 
     Taubin, Gu\'{e}ziec, Horn, and Lazarus \cite{280834} proposed the
     progressive forest split scheme (PFS), in which several edge
     collapse operations are combined together and the inverse operation splits a
@@ -939,12 +936,12 @@ vertex.\label{mesh_non_mesh}}\
     but in this thesis we ignore these dependencies since we can 
     tolerate temporary folds in our scheme.
      
-    To et al. \cite{To1999} further remove the second dependency.
+    To et al. \cite{To1999} further removed the second dependency.
     In their method, if a cut neighbor does not exist during a vertex split,
-    its ancestor will be used as the cut neighbor instead.
-    Kim and Lee \cite{kim01truly} improve this method so that the final mesh
+    its ancestor are used as the cut neighbor instead.
+    Kim and Lee \cite{kim01truly} improved this method so that the final mesh
     can keep the original connectivity. 
-    Kim et al. \cite{multiresolution:kim} propose a better scheme that enables
+    Kim et al. \cite{multiresolution:kim} proposed a better scheme that enables
     an ordinary progressive mesh to be split in random order.
 
     These methods increase the flexibility, but reduce coding efficiency.
@@ -956,7 +953,7 @@ vertex.\label{mesh_non_mesh}}\
     mesh. Furthermore, the quality of the base mesh is uneven.
 
     Kim et al. \cite{multiresolution:kim}
-    have proposed compression algorithms that allow random splitting of a mesh without
+    have proposed a compression algorithm that allows random splitting of a mesh without
     sacrificing compression efficiency. This method is neat since it achieves comparable
     efficiency with other compression methods but keeps the largest flexibility.
     This algorithm, however, is not designed for 
@@ -982,7 +979,7 @@ vertex.\label{mesh_non_mesh}}\
     investigated how to intelligently select either TCP or UDP for
     transmissions to trade off reliability and end-to-end delay.  Li et
     al. have also considered SCTP with partial reliability.
-    Harris III and Kravets \cite{harris:design} propose a new
+    Harris III and Kravets \cite{harris:design} proposed a new
     transport protocol that exploits loss tolerance and
     partially-ordered property of 3D objects organized into trees of
     bounding volumes.
@@ -990,17 +987,6 @@ vertex.\label{mesh_non_mesh}}\
     At the application layer, the major error control techniques: error
     resilient coding, error protection, retransmission, and error
     concealment \cite{Park2003}, have all been applied to mesh streaming.  
-    %Park et al.
-    %\cite{error:Park} and Yan et al. \cite{error:Yan} focus on how to best
-    %segment a progressive mesh into smaller partitions such that it is
-    %more resilient to losses.  Al-Regib et al. \cite{1061349} consider a
-    %joint-source channel coding method to determine appropriate level of
-    %error protection to use.  Chen et al. \cite{chen05hybrid} also use
-    %FEC for transmission of 3D data.  Error concealment is considered by
-    %Park et al. \cite{Park2003}.  
-    %Cheng et al. \cite{cheng07analytical}
-    %argue for retransmissions as the main error control method, while
-    %Tian \cite{Tian2006} uses selective retransmission in their system.
     
     Existing work in robust mesh compression aims to
     reduce dependencies among the mesh \cite{error:Park,error:Yan}.
@@ -1010,7 +996,7 @@ vertex.\label{mesh_non_mesh}}\
     divided into several independent parts and then coded separately.
     Therefore the effect of one packet loss is confined to the part to which
     it belongs. The finer the partition is, the fewer the affected vertices
-    are.  The coding efficiency, however, will decrease
+    are.  The coding efficiency, however, decreases
     due to more redundancies and less correlation.
 
     Al-Regib and Altunbasak \cite{unequal:Al-Regib} proposed an
@@ -1026,10 +1012,15 @@ vertex.\label{mesh_non_mesh}}\
     TCP only, UDP only, TCP with UDP, and UDP with FEC, and studied
     their effects experimentally on the transmission time and decoded
     mesh quality.
+
+    Cheng et al. \cite{loss:cheng} proposed a sending strategy of mesh
+    with textures based on subsampling. 
+    Their objective is to optimize the perceptial quality, which depends 
+    on both geometry quality and texture quality. 
     
     Some studies use retransmission to recover the packet loss.
     For example, Tian \cite{Tian2006} uses selective retransmission in their system.
-    We think retransmission is more suitable than FEC when the feedback
+    We think that retransmission is more suitable than FEC when the feedback
     channel is available, because there is no playback deadline in streaming
     of 3D meshes and data is always useful.
 
@@ -1107,6 +1098,11 @@ vertex.\label{mesh_non_mesh}}\
     Zheng et al. \cite{zheng:interactive} use prediction to
     reduce the effect of network latency and 
     compensate the round-trip delay with the rendering time.
+    Moreover, Yang et al. \cite{optimized:yang} proposed an joined 
+    optimizing transmission method based on a general rate-distortion
+    model that considers both mesh and texture data. Their method
+    allocates bits between mesh and texture to optimize the display 
+    quality at every stage of progressive transmission.
      
     These systems use sender-driven approach and do not address
     server scalability issues. Due to the stateful design, 
@@ -1130,7 +1126,7 @@ vertex.\label{mesh_non_mesh}}\
 
 %\include{mesh}
 %\include{dstream}
-\include{mm09-3dstreaming}
+%\include{mm09-3dstreaming}
 %\include{p2p}
 
 \begin{comment}
