@@ -2,12 +2,9 @@
 \label{c:user}
 \section{Introduction}
 
-High-resolution 3D meshes are typically data rich and demand high network bandwidth and
-computational power. 
-For example, a regular mesh like the \textit{Thai Statue} (Figure \ref{fig:3dmodels}, left) 
-has 5 million vertices (122 MB after gzip) takes 16 minutes to download even at 1 Mbps.  
-When these meshes are 
-viewed on portable devices with
+High-resolution 3D meshes are typically data rich and demand high network bandwidth. 
+One solution and computational power. 
+When these meshes are viewed on portable devices with
 low bandwidth and slow CPUs, delays in both transmitting and
 rendering become unavoidable. To minimize negative user experience, the
 streaming system needs to prioritize data chunks according to user needs and
@@ -15,22 +12,30 @@ efficiently cache the most frequently viewed data.  Designing such
 systems requires a thorough understanding of user behaviors in viewing 3D
 meshes.
 
+Moreover, if we could derive certain pattern in users' interaction with
+high-resolution meshes, we could create a large number of synthetic traces,
+which simulate users' actions, and these traces can be used in modeling system
+performance during simulations. This method is much cheaper than collecting 
+a large number of traces from real users and can be used in developing and evaluating
+prototypes. For example, we use the random traces we generated to test our P2P mesh
+streaming systems introduced in next Chapter.
+
 Most previous work on user interactions with 3D objects
 focused on design of specific interaction
 techniques
 (e.g., the study by Chen et. al \cite{chen88study} and Hinckley et. al \cite{hinckley97usability}). 
-This paper, however, studies
+In this thesis, however, we study
 user behavior from the system design point of view, 
 such as predictability (for prefetching) and locality of access patterns (for caching),
 similar to the spirit of the landmark studies for the Web \cite{huberman98web} and file system \cite{ousterhout85trace}.  
-No such prior study exists for progressive meshes.  
-This chapter presents our first step towards filling 
+No such prior study exists for progressive meshes. This chapter presents our first step towards filling 
 this gap.
 
-We conducted 
-a user experiment with 37 users interacting with 9 meshes.
+We conducted a user experiment\footnote{Thanks for Ransi De Silva for conducting this experiment.}
+with 37 users interacting with 9 meshes.
 We log the user's actions while they interact and view the meshes in a mock online shop.  
-We present the analysis of these traces in this paper, 
+We present the analysis of these traces in this paper\footnote{Dan Liu helps in part of the analysis (session time,
+think time, and predictability).}, 
 and highlight findings that are significant to the design of efficient 
 and scalable progressive mesh streaming systems.  
 In particular, we found that 
@@ -48,17 +53,10 @@ Thai Statue (5 million vertices), Dragon (3.6 million vertices), and Happy Buddh
 \end{figure}
 
 \section{User Study}
-%\textbf{Meshes}. We use three 3D meshes that are freely available at
-%the Stanford 3D Scanning Repository\footnote{http://graphics.stanford.edu/data/3Dscanrep/} for our experiment, namely,   
-%\textit{Thai Statue}, \textit{Dragon}, and \textit{Happy Buddha}.  The meshes are shown in Figure
-%\ref{fig:3dmodels}. Each of these meshes have unique characteristics. 
-%\textit{Happy Buddha} has distinct
-%front and back faces. \textit{Dragon} is horizontally oriented and has no such distinction.  \textit{Thai Statue} is vertically oriented and has three components: the dragons head at the
-%bottom, the elephants head in the middle, and a human figure at the top.
-%This statue has three symmetric sides, so it does not have a distinct front or back, either.
 
 \textbf{Meshes}. Three 3D meshes are chosen from the freely available
-Stanford 3D Scanning Repository\footnote{http://graphics.stanford.edu/data/3Dscanrep/}: \textit{Happy Buddha}, \textit{Dragon}, and \textit{Thai Statue}.
+Stanford 3D Scanning Repository\footnote{http://graphics.stanford.edu/data/3Dscanrep/}:
+\textit{Happy Buddha}, \textit{Dragon}, and \textit{Thai Statue}.
 These meshes vary in complexity (amount of vertices), orientation, and
 symmetry in space from default viewing direction. \textit{Happy Buddha} is the
 simplest, is vertically oriented, and has a default viewing direction
@@ -76,9 +74,8 @@ form a triangular cylinder. There are three possible default
 viewing directions, one each from three corners of the triangular mesh. The
 \textit{Thai Statue} is included as an example of complex compound mesh.
 
-We replicate each mesh above twice, generating nine
-meshes in total.  We added one localized
-visual defect, by denting a small region, to each replicated mesh 
+We replicate each mesh above twice, generating nine meshes in total.  
+We added one localized visual defect, by denting a small region, to each replicated mesh 
 without changing its number of vertices or faces. The reason for adding the defects will be explained later. 
 The location and nature of the
 defects vary between the meshes. As \textit{Happy Buddha} is
@@ -243,8 +240,12 @@ Happy Buddha&47&98&403&13\\
 %\end{table}
 
 \subsection{Think Time}
-We refer to the time between two key strokes as \textit{inter-stroke time}. Consecutive key strokes of the same type with inter-stroke time smaller than 20 $m$s are grouped together as one \textit{operation}. The time between two operations is \textit{think time}. 
-We choose the threshold of 20 $m$s because there is an obvious gap between 5 $m$s and 35 $m$s in the CDF of inter-stroke times for all meshes (see Figure \ref{fig:session-length}(b)).
+We refer to the time between two key strokes as \textit{inter-stroke time}. 
+Consecutive key strokes of the same type with inter-stroke time smaller than 20 $m$s
+are grouped together as one \textit{operation}. 
+The time between two operations is \textit{think time}. 
+We choose the threshold of 20 $m$s because there is an obvious gap between 5 $m$s and 35 $m$s
+in the CDF of inter-stroke times for all meshes (see Figure \ref{fig:session-length}(b)).
 %shows part of the inter-stroke time distributions. A gap exists between 5 $m$s and 35 $m$s approximately. 
 %For larger values, the inter-stroke times follow similar distribution among different meshes. 
 %Therefore, we select 20 $m$s as the threshold. 
@@ -261,7 +262,13 @@ We choose the threshold of 20 $m$s because there is an obvious gap between 5 $m$
 
 %First, we give the results without considering the different viewpoint regions. 
 
-We find that think time follows similar distributions for all of the three meshes (Figure \ref{fig:think-time}(a)). About 90\% of the think time is smaller than a second. There is a jump in the curve of think time distribution for all the three meshes -- about 5\% of the think time clusters around 0.5 seconds. We hypothesize that this is related to the 0.4-second round trip time in our experiments.  After a user performs an operation, it takes 0.4 seconds before the user can see progressive refinement of the mesh (although the system responses to the change in viewpoint \textit{immediately}). Some users might wait for the refinement to come before the next operation.
+We find that think time follows similar distributions for all of the three meshes (Figure \ref{fig:think-time}(a)). 
+About 90\% of the think time is smaller than a second. There is a jump in the curve of think time distribution for all the three meshes -- 
+about 5\% of the think time clusters around 0.5 seconds. 
+We hypothesize that this is related to the 0.4-second round trip time in our experiments. 
+After a user performs an operation, it takes 0.4 seconds before the user can see progressive refinement of the mesh
+(although the system responses to the change in viewpoint \textit{immediately}). 
+Some users might wait for the refinement to come before the next operation.
 
 The mean and maximum think time are shown in Table \ref{t:TimeTable}. We note that the maximum is up to 50 times larger than the mean.
 
@@ -282,13 +289,21 @@ classify the viewpoints into 4 regions: front-far (FF), front-near
 affected by the viewpoint (see Figure \ref{fig:think-time}(b)). 
 
 \subsection{Operations}
-Besides the session length and think time, it is also interesting to see if user actions are predictable. If so, pre-fetching can be used to improve the mesh quality and reduce response time.  
+Besides the session length and think time, 
+it is also interesting to see if user actions are predictable. 
+If so, pre-fetching can be used to improve the mesh quality and reduce response time.  
 
 Figure \ref{fig:UnActionEventFrequency}(a) shows the probability of occurrences of 12 different operations on the traces from each of 9 meshes,
 displayed as a bubble chart. The bubble size indicates the probability of an operation occurring for a mesh.
-We can see that the most frequently used operations are revolving (rotate around y-axis) and zooming.  Further, zooming in is used more frequently than zooming out, indicating that users tend to zoom in to a comfortable distance to see the mesh with more details.  Indeed, we observe that many users zoom in first, and then revolve around the y-axis.  %We believe that this behavior, however, is not general and depends on the screen size.
+We can see that the most frequently used operations are revolving (rotate around y-axis) and zooming.  
+Further, zooming in is used more frequently than zooming out, 
+indicating that users tend to zoom in to a comfortable distance to see the mesh with more details.  
+Indeed, we observe that many users zoom in first, 
+and then revolve around the y-axis.  %We believe that this behavior, however, is not general and depends on the screen size.
 
-With these distributions, we can do a simple prediction of the next operation to be taken by a user without any other information.  The prediction could be more accurate, however, if we consider 
+With these distributions, we can do a simple prediction of the next operation to be taken 
+by a user without any other information.  
+The prediction could be more accurate, however, if we consider 
 the current viewpoint of the user and the previous action of the user.
 
 We first examine whether the probability of an operation relates to
@@ -306,9 +321,12 @@ default view, since \textit{Dragon} has less details than \textit{Thai
 Statue} and can be viewed comfortably with the default distance.
 Second, users frequently tilt, possibly due to 
 the horizontal orientation of \textit{Dragon}.  Our
-findings indicate that the viewpoint affects the probability of taking a next operation, but this effect depends on the size and shape of the mesh,
+findings indicate that the viewpoint affects the probability of taking a next operation, 
+but this effect depends on the size and shape of the mesh,
 and thus is difficult to have a general framework for prediction based
-on viewpoints.  Past history of user interactions for a particular mesh, however, could be used for more accurate mesh-specific prediction.
+on viewpoints.  
+Past history of user interactions for a particular mesh, 
+however, could be used for more accurate mesh-specific prediction.
 
 \begin{figure*}[htp!]
 \begin{center}
@@ -346,9 +364,14 @@ operation together.
 Figure \ref{fig:UnActionEventFrequency}(e) shows the
 probability of taking a given operation in a given viewpoint region
 when the previous operation is zooming in for \textit{Thai
-Statue}.  Figure \ref{fig:UnActionEventFrequency}(f) gives such probability when the previous operation of moving down for \textit{Dragon}. Both
+Statue}.  
+Figure \ref{fig:UnActionEventFrequency}(f) gives such probability 
+when the previous operation of moving down for \textit{Dragon}. Both
 figures show that the dependence on viewpoint is non-negligible, but 
-is still predictable for a given mesh.  For instance, zooming out is more frequent after zooming in, if the viewpoint is nearer to the mesh.  This behavior is expected.  Finer division of viewpoint regions should yield more accurate prediction.
+is still predictable for a given mesh.  
+For instance, zooming out is more frequent after zooming in, 
+if the viewpoint is nearer to the mesh.  
+This behavior is expected.  Finer division of viewpoint regions should yield more accurate prediction.
 
 \subsection{Access Pattern}
 Proxy caching of meshes is useful in reducing the service load.  
@@ -356,7 +379,7 @@ In this section, we show that the user traces exhibit access
 patterns that can lead to efficient caching.
 
 \textbf{Caching for Mesh Streaming}.
-In mesh streaming, vertices are often grouped into chunks \cite{cheng08receiver}
+In progressive mesh streaming, vertice splits are often grouped into chunks
 for transmission. These chunks can be cached at a proxy to reduce server overhead.
 To study the usefulness of proxy caching, we look at the access pattern to chunks. 
 
@@ -369,8 +392,11 @@ in decreasing order of the access count, and plot the cumulative
 access count versus rank in Figure \ref{fig:CDF}(a).  We
 normalize both axes to between 0 and 1 so that we can plot
 all three meshes on the same graph.  
-Figure \ref{fig:CDF}(a) shows how many requests we can satisfy (i.e., hit rate) by storing the most frequently requested chunks in a proxy. 
-The x-axis denotes the number of chunks stored in the proxy, as a fraction of total number of chunks requested.
+Figure \ref{fig:CDF}(a) shows how many requests we can satisfy (i.e., hit rate) 
+by storing the most frequently requested chunks in a proxy. 
+The x-axis denotes the number of chunks stored in the proxy, 
+as a fraction of total number of chunks requested
+(note: not the total number of all chunks).
 It can be observed that by building a static
 cache that stores 20\% of the most frequently accessed
 chunks, the proxy can achieve more than 70\% hit rate for
@@ -415,12 +441,12 @@ in the graphic card memory.
 %Since changing the stored data in graphic card memory is usually expensive, so 
 %the stored data cannot be adaptively changed.
 
-We replay all the user traces, and %whenever the viewpoint changes 
-count the number of times each face is viewed.
-%we add the access number of the visible faces by one. 
-%Therefore, the access number of a face is the count of viewpoints at 
-%which it is visible (revisiting to a previously visited viewpoint is also counted
-%since the mesh will still be rendered). 
+We replay all the user traces, and whenever the viewpoint changes 
+%count the number of times each face is viewed.
+we add the access number of the visible faces by one. 
+Therefore, the access number of a face is the count of viewpoints at 
+which it is visible (revisiting to a previously visited viewpoint is also counted
+since the mesh will still be rendered). 
 We normalized the number of views of each face and visualize them with
  a heat map (Figure \ref{fig:heat_map}(a)). 
 %duration of different parts of the ``Happy Buddha'' mesh obtained by
@@ -455,6 +481,57 @@ leading to more evenly distributed viewpoints around the mesh.
 \end{center}
 \end{figure}
 
+\section{Generating Synthetic Traces}
+To test the effectiveness and performance of a system, we often need many user traces. It is expensive to collect a large number 
+of real traces. A cheaper way is to derive a transition matrix from the collected traces, and then following the transition
+matrix, we can generate as many traces as we want.
+
+Fist We define the state as a 6-tuple: {x, y, z, ax, ay, az}, which represents the coordinates on 6 axises. 
+According to the observation introduced above, simple Markov chain is not approprate here, because
+the previous states affect on the transition probability. The most accurate way needs to consider all the
+history, but to be simple we could only consider one step back, that is (State-prev, State-current) decides 
+(State-next). It is called second order Markov Chain. 
+
+Notice that (State-prev, State-current) is equivelant to (State-current, last-operation), so we change the 
+state to {x, y, z, ax, ay, az, last-operation}. As a result, now the transition probability only depends on 
+the current state. Now We can derive the transition matrix from the real traces, and following it, we can generate
+synthetic traces.
+
+This method, however, has limitations when the number of collected traces is small. First, if a viewpoint is 
+never accessed by the real traces, it will not accessed by synthetic traces either. Therefore, no matter how
+many synthetic traces are generated, the number of accessed viewpoints are still limited. Second, most of the
+states has only one sample. In other words, the next state is determined. Therefore, after several steps, the
+synthetic trace follows the exact path with one of the real traces. Therefore, the synthetic traces are not 
+random enough.
+
+The limitation above can only be solved by collecting a large number of real traces. Without enough real traces,
+we need to simplify the model at the cost of accuracy. We proposed a simplified model as follows:
+\subsection{Simplified Model}
+First, we categorized the action to three groups: \textit{continue}, \textit{reverse}, and \textit{change}. 
+``Continue'' means the next operation is same to the last operation, ``reverse'' means the next operation
+is the reverse of the last operation, ``change'' means the next operation changes to moving along a new axis.
+
+Then we assume that the probability of ``continue'', ``reverse'', and ``change'' only depends on the coordinates
+on current \textit{active axis}. We define ``active axis'' as the axis the coordinates of which is changed by last operation.
+We think the coordinates of the current axis affects these probability the most. For example, if the last operation
+is ``Move Up'', then if we move to near the edge of the mesh, the probability of continue decreases and the probability
+of reverse increases. When we move back to the center of the mesh, the probability of change increases. Now, the transition
+probability only depends on (active axis value, last-operation), the number of available samples increases a lot compared
+with the second order Markov chain method. 
+
+A further step is needed if ``change'' is selected. First, we need to select a new axis to move along. Here, we 
+assume the next action tends to increase the stability of the system. We define \textit{stability} of a certain 
+axis value as the percentage of the samples having this value, then we define \textit{instability} as the reciprocal 
+of the stability. Then we let the probability of choosing an axis to be proportional to its instability.  
+
+Next, we need to choose a direction. The direction can be decided to choose the side has higher stability. 
+\subsection{Verification}
+First, we compare this simplified model with second order Markov model. Due to the limited sample size, we 
+select the states that have more than 30 samples. 
+
+Second, we compare the popularity at each axis. 
+
+Third, we compare the popularity of the most frequently accessed viewpoints.
 \section{Conclusion}
 The analysis of user traces reveals that 
 user actions are predictable to certain extent. The
