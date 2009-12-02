@@ -1,7 +1,6 @@
-\chapter{User Study}
+\chapter{Understanding User Behahaviors}
 \label{c:user}
 \section{Introduction}
-
 High-resolution 3D meshes are typically data rich and demand high network bandwidth. 
 One solution and computational power. 
 When these meshes are viewed on portable devices with
@@ -53,7 +52,6 @@ Thai Statue (5 million vertices), Dragon (3.6 million vertices), and Happy Buddh
 \end{figure}
 
 \section{User Study}
-
 \textbf{Meshes}. Three 3D meshes are chosen from the freely available
 Stanford 3D Scanning Repository\footnote{http://graphics.stanford.edu/data/3Dscanrep/}:
 \textit{Happy Buddha}, \textit{Dragon}, and \textit{Thai Statue}.
@@ -87,39 +85,11 @@ considerably.
 
 The meshes are encoded progressively and streamed over a simulated network of 320Kbps and 400ms round trip time.  
 
-%\textbf{Procedure.}
-%The participants in our user experiments were given the task of
-%purchasing antique statues through an online catalog of meshes. A
-%catalog of nine items were created from the nine meshes above. The
-%experiment was conducted in a room on campus, one user at a time, on a
-%standard desktop computer.  The participants were given a brief
-%training about the keyboard commands that could be used to view and
-%interact with the 3D meshes and were allowed time to practice on a
-%simple object before starting the experiment.
-%
-%A simple user interface allows the participants choose items from the
-%catalog.  The three statues are shown to the user one after another.
-%The showing order is randomized from one participant to another to remove possible bias in user behavior due to viewing order.  
-%For each statue, three items (i.e., three versions, one original and
-%two with defects) are shown on the same screen.  To motivate the participants to examine the meshes, the participants were
-%told before the experiment that two of the items contains minor
-%defects and that they were required to purchase the items without
-%defects. Each item on screen can be viewed in any order and if
-%required, multiple times. Each time a participant selects an item, a
-%new viewing window (width of 14cm and height of 15cm, with a resolution of 500x500 pixels) opens and the 3D
-%mesh corresponding to that item is progressively streamed and
-%rendered. The participant is free to interact with the mesh until
-%they decide to close the viewing window.
-% 
-%Once all three items of a statue
-%have been viewed, user would mark the item to be purchased and move on to the next statue. User must go through all three statues to complete the experiment.
-%
-%During the experiment, users' key strokes and viewpoint transformations were logged for offline analysis.  The available keys along with its abbreviations are as follows, revolve clockwise (REC) and anti-clockwise (REAN), rotate clockwise (ROC) and anti-clockwise (ROAN), move up (MU), move down (MD), move right (MR), move left (ML), tilt back (TB), tilt forward (TF), zoom in (ZIN) and zoom out (ZOUT). The \textit{rotate}, \textit{revolve}, and \textit{tilt} operations refer to rotating about the z-axis, y-axis, and x-axis, respectively. The axes follow the standard OpenGL convention.
-%The rotate operation refers to rotation about the z-axis; the revolve operation refers to rotating about y-axis; and the tilt operation refers to rotation about the x-axis.  
+\textbf{Participants.}
+A total of 37 (25 male and 12 female) participants, aged 19 to 36
+(mean 23), mostly from the university community participated in the
+experiment. None had any visual handicaps.
 
-%A relaxed environment was maintained in the experimentation area.  It was 
-%observed that some participants talked with their accompanying friends during the experiment.  One participant answered a phone call during the experiment. While such behavior does 
-%effect our traces, real world viewing would also include such behavior and thus these traces were not filtered out in analysis.
 \textbf{Design and Procedure}
 Our experiment mimics the following general real world scenario. Customers
 are shopping in an online antique store. Each product in the store has a
@@ -142,7 +112,8 @@ The participants were first instructed about the keyboard commands
 to view and interact with the 3D meshes, and given brief practice of
 these commands on a simple mesh before starting the experiment. The
 participants were presented with an user interface mimicking an online
-catalog with three products.  For each product, images of three items (i.e., three versions, one original and two with defects) are shown on the screen.
+catalog with three products.  For each product, images of three items 
+(i.e., three versions, one original and two with defects) are shown on the screen.
 The order of the products are randomized to avoid order effects.
 The participants' job is to pick the best item among the three. Each item 
 can be viewed in any order and if desired, multiple times.  When 
@@ -155,24 +126,75 @@ They would mark the item to be purchased after viewing all three items and
 move on to the next product. Each participant must go through all three products to
 complete the experiment.
 
-During the experiment, users' key press actions and view point
-transformations were logged for offline analysis. The available keys along
-with its abbreviations are as follows, revolve clockwise (REC) and
-anti-clockwise (REAN), rotate clockwise (ROC) and anti-clockwise (ROAN),
-move up (MU), move down (MD), move right (MR), move left (ML), tilt back
-(TB), tilt forward (TF), zoom in (ZIN) and zoom out (ZOUT). The rotate,
-revolve, and tilt operations refer to rotating about the z-axis, y-axis, and
-x-axis, respectively. The axes follow the standard OpenGL convention. 
+\textbf{Experiment Records}
+During the experiment, users' key press actions and viewpoints
+were logged for offline analysis. We first define the viewpoints
+and actions in detail as follows.
 
-\textbf{Participants.}
-%A total of 37 paid participants (25 male and 12 female) participated in the experiment.
-%The participants were mostly from the international student community from our university.  The average age of the group was 23 and none of the participants had any visual handicaps.
-A total of 25 male and 12 female participants, aged 19 to 36
-(mean 23), mostly from the university community participated in the
-experiment. None had any visual handicaps.
+A viewpoint indicates the position and direction of the user's eye.
+It can be represented as a 6-tuple, ($x, y, z, ax, ay, az$). The former
+three values indicate the position of the viewpoint, 
+and the latter three values indicate the angles. 
+The meaning of the 6 values can be seen from Figure
+\ref{f:user:viewpoint}. The default viewpoint is ($0, 0, 0, 0, 0, 0$), which
+is in a position where the user looks at the center of the mesh
+(more precisely, the center of the bounding box of the mesh) and with
+all the mesh being visible.
+\begin{figure}
+    \centering
+    \epsfig{file=viewpoint.eps, width=0.4\textwidth}
+    \caption{The meaning of ($x, y, z, ax, ay, az$).}
+    \label{f:user:viewpoint}
+\end{figure}
+
+To facilitate the analysis, the 6 values are all discrete. The unit of $x$, 
+$y$, and $z$ is the one tenth of the bounding length, which is the edge length
+of the bounding box of the mesh. The unit of ax, ay, and az is 10$\degree$,
+and their range is $[0, 1, \cdots, 35]$.
+
+An action taken by the user will change one of the six values by one unit.
+Table \ref{t:user:action} lists out the name, the abbreviation, the result,
+and the corresponding key (or key combination) of each action\footnote{
+There is a small inconsistency in our design. When moving and zooming, 
+we move the viewpoint of the user, 
+but when rotating, we rotate the mesh. 
+In other words, when we press ALT + $rightarrow$, 
+we move ourselves to the right side of the mesh. 
+When we press $rightarrow$, however, we revolve the statue to right. 
+Fortunately, users accept this setting well and without confusion.}.
+
+\begin{table}
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+        Name & Abbreviation & Result & key/key combination \\
+        \hline
+        move right & MR     & $x + 1$  & ALT + $\rightarrow$\\
+        move left  & ML     & $x - 1$  & ALT + $\leftarrow$\\
+        move up    & MU     & $y + 1$  & ALT + $\uparrow$\\
+        move down  & MD     & $y - 1$  & ALT + $\downarrow$\\
+        zoom out   & ZO     & $z + 1$  & $\downarrow$\\
+        zoom in    & ZI     & $z - 1$  & $\uparrow$\\
+        tilt backward & TB  & $ax + 10\degree$ & CTRL + $\downarrow$\\
+        tilt forward & TF   & $ax - 10\degree$ & CTRL + $\uparrow$\\
+        revolve anticlockwise & REAN & $ay + 10\degree$ & $\rightarrow$\\
+        revolve clockwise & RED & $ay - 10\degree$ & $\leftarrow$\\
+        rotate  anticlockwise & ROAN & $az + 10\degree$ & CTRL + $\leftarrow$\\\
+        rotate  clockwise & ROC &  $az - 10\degree$ & CTRL + $\rightarrow$\\
+        reset      & RS     & $all = 0$  & R \\
+        quit       & Q      & quit     & Q \\
+        \hline
+    \end{tabular}
+    \caption{Introduction of the actions.}\label{t:user:action}
+\end{table}
+
+
+As a result, a user session can be seen as a random process 
+with viewpoints as the states. Each action transits
+the system from one state to next state, until the QUIT
+action stops the system.
 
 \section{Results and Implications}
-
 In this section, we present our analysis on the user behavior. We present only on the analysis of the original (non-defect) statues, unless otherwise specified.
 In addition, we also discuss what implications these results have on system design.
 
@@ -288,91 +310,6 @@ classify the viewpoints into 4 regions: front-far (FF), front-near
 \textit{far/near}. We find that the think time distribution is not
 affected by the viewpoint (see Figure \ref{fig:think-time}(b)). 
 
-\subsection{Operations}
-Besides the session length and think time, 
-it is also interesting to see if user actions are predictable. 
-If so, pre-fetching can be used to improve the mesh quality and reduce response time.  
-
-Figure \ref{fig:UnActionEventFrequency}(a) shows the probability of occurrences of 12 different operations on the traces from each of 9 meshes,
-displayed as a bubble chart. The bubble size indicates the probability of an operation occurring for a mesh.
-We can see that the most frequently used operations are revolving (rotate around y-axis) and zooming.  
-Further, zooming in is used more frequently than zooming out, 
-indicating that users tend to zoom in to a comfortable distance to see the mesh with more details.  
-Indeed, we observe that many users zoom in first, 
-and then revolve around the y-axis.  %We believe that this behavior, however, is not general and depends on the screen size.
-
-With these distributions, we can do a simple prediction of the next operation to be taken 
-by a user without any other information.  
-The prediction could be more accurate, however, if we consider 
-the current viewpoint of the user and the previous action of the user.
-
-We first examine whether the probability of an operation relates to
-the viewpoint of the users.  Figure
-\ref{fig:UnActionEventFrequency}(b) shows that the distribution of
-operations is different in the 16 regions for \textit{Thai Statue}.
-For example, the probability of zooming in (ZIN)
-is higher in the right-top, front-far region (RTFF).  Since
-the default viewpoint lies in this region, users tend to zoom in to a
-comfortable distance first and then move to other regions.  
-\textit{Dragon} (Figure
-\ref{fig:UnActionEventFrequency}(c)), however, shows different
-behavior.  First, zoom-in is not as frequent in the
-default view, since \textit{Dragon} has less details than \textit{Thai
-Statue} and can be viewed comfortably with the default distance.
-Second, users frequently tilt, possibly due to 
-the horizontal orientation of \textit{Dragon}.  Our
-findings indicate that the viewpoint affects the probability of taking a next operation, 
-but this effect depends on the size and shape of the mesh,
-and thus is difficult to have a general framework for prediction based
-on viewpoints.  
-Past history of user interactions for a particular mesh, 
-however, could be used for more accurate mesh-specific prediction.
-
-\begin{figure*}[htp!]
-\begin{center}
-\begin{tabular}{ccc}
-\epsfig{file=figs/traceHistogram0/UnActionEventFrequency.eps, width=0.31\textwidth}&
-\epsfig{file=figs/traceHistogram0/ConditionalActionFrequency-hugenormal.eps, width=0.31\textwidth}&
-\epsfig{file=figs/traceHistogram0/ConditionalActionFrequency-dragonnormal.eps, width=0.31\textwidth}\\
-\epsfig{file=figs/traceHistogram0/Inter-operationprobability-hugenormal.eps, width=0.31\textwidth}&
-\epsfig{file=figs/traceHistogram0/conditionalInteractionProbability/hugenormal/Inter-operationProbability-hugenormal-ZOOMIN.eps, width=0.31\textwidth}&
-\epsfig{file=figs/traceHistogram0/conditionalInteractionProbability/dragonnormal/Inter-operationProbability-dragonnormal-MOVEDOWN.eps, width=0.31\textwidth}
-\end{tabular}
-\caption{\label{fig:UnActionEventFrequency} Frequency of User Actions}
-\end{center}
-\end{figure*}
-%\epsfig{file=figs/traceHistogram0/Inter-operationprobability-dragonnormal.eps, width=0.28\textwidth}&
-%\epsfig{file=figs/traceHistogram0/Inter-operationprobability-happynormal.eps, width=0.28\textwidth}\\
-
-Figure \ref{fig:UnActionEventFrequency}(d) shows the conditional 
-probability of taking the next operation given the previous operation 
-for \textit{Thai Statue}.
-The shaded diagonal shows that the same operation has the significantly larger probability (e.g., more than 0.93 for revolving) of being taken next.
-The other meshes exhibit the similar pattern. 
-Such high predictability points to the efficacy of pre-fetching as a
-way to reduce response time and improve the viewing quality. 
-
-%\begin{figure}[htp]
-%\begin{center}
-%\epsfig{file=figs/traceHistogram0/Inter-operationprobability-hugenormal.eps, width=0.3\textwidth}
-%\caption[Inter-ops Probability Thai Statue]{\label{fig:inter-opsProbHuge} Inter-operation Probability (Thai Statue)}
-%\end{center}
-%\end{figure}
-
-Finally, we consider the dependencies on viewpoint and previous
-operation together.  
-Figure \ref{fig:UnActionEventFrequency}(e) shows the
-probability of taking a given operation in a given viewpoint region
-when the previous operation is zooming in for \textit{Thai
-Statue}.  
-Figure \ref{fig:UnActionEventFrequency}(f) gives such probability 
-when the previous operation of moving down for \textit{Dragon}. Both
-figures show that the dependence on viewpoint is non-negligible, but 
-is still predictable for a given mesh.  
-For instance, zooming out is more frequent after zooming in, 
-if the viewpoint is nearer to the mesh.  
-This behavior is expected.  Finer division of viewpoint regions should yield more accurate prediction.
-
 \subsection{Access Pattern}
 Proxy caching of meshes is useful in reducing the service load.  
 In this section, we show that the user traces exhibit access
@@ -480,6 +417,91 @@ leading to more evenly distributed viewpoints around the mesh.
 \caption{(a) The normalized number of views for each face. (b) The hit rate if we partially cache faces on the graphic card.\label{fig:heat_map}}
 \end{center}
 \end{figure}
+
+\subsection{Operations}
+Besides the session length and think time, 
+it is also interesting to see if user actions are predictable. 
+If so, pre-fetching can be used to improve the mesh quality and reduce response time.  
+
+Figure \ref{fig:UnActionEventFrequency}(a) shows the probability of occurrences of 12 different operations on the traces from each of 9 meshes,
+displayed as a bubble chart. The bubble size indicates the probability of an operation occurring for a mesh.
+We can see that the most frequently used operations are revolving (rotate around y-axis) and zooming.  
+Further, zooming in is used more frequently than zooming out, 
+indicating that users tend to zoom in to a comfortable distance to see the mesh with more details.  
+Indeed, we observe that many users zoom in first, 
+and then revolve around the y-axis.  %We believe that this behavior, however, is not general and depends on the screen size.
+
+With these distributions, we can do a simple prediction of the next operation to be taken 
+by a user without any other information.  
+The prediction could be more accurate, however, if we consider 
+the current viewpoint of the user and the previous action of the user.
+
+We first examine whether the probability of an operation relates to
+the viewpoint of the users.  Figure
+\ref{fig:UnActionEventFrequency}(b) shows that the distribution of
+operations is different in the 16 regions for \textit{Thai Statue}.
+For example, the probability of zooming in (ZIN)
+is higher in the right-top, front-far region (RTFF).  Since
+the default viewpoint lies in this region, users tend to zoom in to a
+comfortable distance first and then move to other regions.  
+\textit{Dragon} (Figure
+\ref{fig:UnActionEventFrequency}(c)), however, shows different
+behavior.  First, zoom-in is not as frequent in the
+default view, since \textit{Dragon} has less details than \textit{Thai
+Statue} and can be viewed comfortably with the default distance.
+Second, users frequently tilt, possibly due to 
+the horizontal orientation of \textit{Dragon}.  Our
+findings indicate that the viewpoint affects the probability of taking a next operation, 
+but this effect depends on the size and shape of the mesh,
+and thus is difficult to have a general framework for prediction based
+on viewpoints.  
+Past history of user interactions for a particular mesh, 
+however, could be used for more accurate mesh-specific prediction.
+
+\begin{figure*}[htp!]
+\begin{center}
+\begin{tabular}{ccc}
+\epsfig{file=figs/traceHistogram0/UnActionEventFrequency.eps, width=0.31\textwidth}&
+\epsfig{file=figs/traceHistogram0/ConditionalActionFrequency-hugenormal.eps, width=0.31\textwidth}&
+\epsfig{file=figs/traceHistogram0/ConditionalActionFrequency-dragonnormal.eps, width=0.31\textwidth}\\
+\epsfig{file=figs/traceHistogram0/Inter-operationprobability-hugenormal.eps, width=0.31\textwidth}&
+\epsfig{file=figs/traceHistogram0/conditionalInteractionProbability/hugenormal/Inter-operationProbability-hugenormal-ZOOMIN.eps, width=0.31\textwidth}&
+\epsfig{file=figs/traceHistogram0/conditionalInteractionProbability/dragonnormal/Inter-operationProbability-dragonnormal-MOVEDOWN.eps, width=0.31\textwidth}
+\end{tabular}
+\caption{\label{fig:UnActionEventFrequency} Frequency of User Actions}
+\end{center}
+\end{figure*}
+%\epsfig{file=figs/traceHistogram0/Inter-operationprobability-dragonnormal.eps, width=0.28\textwidth}&
+%\epsfig{file=figs/traceHistogram0/Inter-operationprobability-happynormal.eps, width=0.28\textwidth}\\
+
+Figure \ref{fig:UnActionEventFrequency}(d) shows the conditional 
+probability of taking the next operation given the previous operation 
+for \textit{Thai Statue}.
+The shaded diagonal shows that the same operation has the significantly larger probability (e.g., more than 0.93 for revolving) of being taken next.
+The other meshes exhibit the similar pattern. 
+Such high predictability points to the efficacy of pre-fetching as a
+way to reduce response time and improve the viewing quality. 
+
+%\begin{figure}[htp]
+%\begin{center}
+%\epsfig{file=figs/traceHistogram0/Inter-operationprobability-hugenormal.eps, width=0.3\textwidth}
+%\caption[Inter-ops Probability Thai Statue]{\label{fig:inter-opsProbHuge} Inter-operation Probability (Thai Statue)}
+%\end{center}
+%\end{figure}
+
+Finally, we consider the dependencies on viewpoint and previous
+operation together.  
+Figure \ref{fig:UnActionEventFrequency}(e) shows the
+probability of taking a given operation in a given viewpoint region
+when the previous operation is zooming in for \textit{Thai
+Statue}.  
+Figure \ref{fig:UnActionEventFrequency}(f) gives such probability 
+when the previous operation of moving down for \textit{Dragon}. Both
+figures show that the dependence on viewpoint is non-negligible, but 
+is still predictable for a given mesh.  
+For instance, zooming out is more frequent after zooming in, 
+if the viewpoint is nearer to the mesh.  
+This behavior is expected.  Finer division of viewpoint regions should yield more accurate prediction.
 
 \section{Generating Synthetic Traces}
 To test the effectiveness and performance of a system, we often need many user traces. It is expensive to collect a large number 
