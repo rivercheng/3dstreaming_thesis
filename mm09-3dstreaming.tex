@@ -52,6 +52,7 @@ Thai Statue (5 million vertices), Dragon (3.6 million vertices), and Happy Buddh
 \end{figure}
 
 \section{User Study}
+\label{s:user:study}
 \textbf{Meshes}. Three 3D meshes are chosen from the freely available
 Stanford 3D Scanning Repository\footnote{http://graphics.stanford.edu/data/3Dscanrep/}:
 \textit{Happy Buddha}, \textit{Dragon}, and \textit{Thai Statue}.
@@ -128,40 +129,41 @@ complete the experiment.
 
 \textbf{Experiment Records}
 During the experiment, users' key press actions and viewpoints
-were logged for offline analysis. We first define the viewpoints
-and actions in detail as follows.
+were logged for offline analysis. The representation of the viewpoints
+and actions are introduced in detail as follows.
 
 A viewpoint indicates the position and direction of the user's eye.
-It can be represented as a 6-tuple, ($x, y, z, ax, ay, az$). The former
-three values indicate the position of the viewpoint, 
-and the latter three values indicate the angles. 
-The meaning of the 6 values can be seen from Figure
-\ref{f:user:viewpoint}. The default viewpoint is ($0, 0, 0, 0, 0, 0$), which
-is in a position where the user looks at the center of the mesh
-(more precisely, the center of the bounding box of the mesh) and with
-all the mesh being visible.
+When the application is started, each user begins with the same default viewpoint,
+where the user looks at the center of the mesh (more precisely,  the center of the bounding box of the mesh)
+from a certain distance. 
+Then we use a 6-tuple, ($x, y, z, ax, ay, az$) to indicate the relative position of all the viewpoints. 
+The default viewpoint is ($0, 0, 0, 0, 0, 0$), and ($x, y, z, ax, ay, az$) means
+move the viewpoint $x$ units right, $y$ units up, and $z$ units further (out of the screen). 
+Then, we rotate the mesh $ax$ degree around $x$ axis, $ay$ degree around $y$ axis,
+and $az$ degree around $z$ axis. During the rotation, the center of the mesh is not moved.
+The direction of rotations are shown in the Figure \ref{f:user:viewpoint}.
 \begin{figure}
     \centering
-    \epsfig{file=viewpoint.eps, width=0.4\textwidth}
+    \epsfig{file=viewpoint.eps, width=0.3\textwidth}
     \caption{The meaning of ($x, y, z, ax, ay, az$).}
     \label{f:user:viewpoint}
 \end{figure}
-
-To facilitate the analysis, the 6 values are all discrete. The unit of $x$, 
+The unit of $x$, 
 $y$, and $z$ is the one tenth of the bounding length, which is the edge length
-of the bounding box of the mesh. The unit of ax, ay, and az is 10$\degree$,
+of the bounding box of the mesh. The unit of $ax$, $ay$, and $az$ is 10$\degree$,
 and their range is $[0, 1, \cdots, 35]$.
 
-An action taken by the user will change one of the six values by one unit.
+To facilitate the analysis, we ensure the six values are all integral. 
+Therefore, an action taken by the user will change one of the six values by one unit.
 Table \ref{t:user:action} lists out the name, the abbreviation, the result,
-and the corresponding key (or key combination) of each action\footnote{
-There is a small inconsistency in our design. When moving and zooming, 
-we move the viewpoint of the user, 
-but when rotating, we rotate the mesh. 
-In other words, when we press ALT + $rightarrow$, 
-we move ourselves to the right side of the mesh. 
-When we press $rightarrow$, however, we revolve the statue to right. 
-Fortunately, users accept this setting well and without confusion.}.
+and the corresponding key (or key combination) of each action.%\footnote{
+%There is a small inconsistency in our design. When moving and zooming, 
+%we move the viewpoint of the user, 
+%but when rotating, we rotate the mesh. 
+%In other words, when we press ALT + $rightarrow$, 
+%we move ourselves to the right side of the mesh. 
+%When we press $rightarrow$, however, we revolve the statue to right. 
+%Fortunately, users accept this setting well and without confusion.}.
 
 \begin{table}
     \centering
@@ -192,7 +194,9 @@ Fortunately, users accept this setting well and without confusion.}.
 As a result, a user session can be seen as a random process 
 with viewpoints as the states. Each action transits
 the system from one state to next state, until the QUIT
-action stops the system.
+action terminates the session. During the session, we record
+all the user actions and the time they happended, and we call these 
+records \textit{user trace}.
 
 \section{Results and Implications}
 In this section, we present our analysis on the user behavior. We present only on the analysis of the original (non-defect) statues, unless otherwise specified.
@@ -419,7 +423,7 @@ leading to more evenly distributed viewpoints around the mesh.
 \end{figure}
 
 \subsection{Operations}
-Besides the session length and think time, 
+Besides the session length, think time, and the access pattern.
 it is also interesting to see if user actions are predictable. 
 If so, pre-fetching can be used to improve the mesh quality and reduce response time.  
 
@@ -508,16 +512,22 @@ To test the effectiveness and performance of a system, we often need many user t
 of real traces. A cheaper way is to derive a transition matrix from the collected traces, and then following the transition
 matrix, we can generate as many traces as we want.
 
-Fist We define the state as a 6-tuple: {x, y, z, ax, ay, az}, which represents the coordinates on 6 axises. 
+Fist We define the state as the viewpoint, represented as a 6-tuple: {x, y, z, ax, ay, az}
+as introduced in Section \ref{s:user:study}.
 According to the observation introduced above, simple Markov chain is not approprate here, because
-the previous states affect on the transition probability. The most accurate way needs to consider all the
-history, but to be simple we could only consider one step back, that is (State-prev, State-current) decides 
-(State-next). It is called second order Markov Chain. 
+the previous states affect on the transition probability. The most accurate way needs to consider the whole
+history, but it is not practical. To make the analysis possible, we consider only one step back, 
+that is (State-prev, State-current) decides (State-next). It is called second order Markov chain. 
 
-Notice that (State-prev, State-current) is equivelant to (State-current, last-operation), so we change the 
-state to {x, y, z, ax, ay, az, last-operation}. As a result, now the transition probability only depends on 
-the current state. Now We can derive the transition matrix from the real traces, and following it, we can generate
-synthetic traces.
+We can reduce the second order Markov chain to single order one by defining the current state as
+(previous viewpoint, current viewpoint). After a user action, the new state becomes
+(current viewpoint, next viewpoint). As a result, we can assume the transition probability
+only depends on the current state.
+Notice that (previous viewpoint, current viewpoint) is equivelant to (current viewpoint, last-operation), 
+so we change the definition of the state to {x, y, z, ax, ay, az, last-operation}. 
+
+Then from the user traces, we can compute the transition probability for each existed states, and finally
+obtain the transition matrix. 
 
 This method, however, has limitations when the number of collected traces is small. First, if a viewpoint is 
 never accessed by the real traces, it will not accessed by synthetic traces either. Therefore, no matter how
