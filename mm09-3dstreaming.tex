@@ -441,7 +441,7 @@ leading to more evenly distributed viewpoints around the mesh.
 \end{center}
 \end{figure}
 
-\subsection{Operations}
+\subsection{Predictability}
 Besides the session length, think time, and the access pattern,
 it is also interesting to see if user actions are predictable. 
 If so, pre-fetching can be used to reduce response time when
@@ -459,10 +459,10 @@ The next action of a user, $A_n$, is a random variable with 14 possible values
 A naive way to predict the value of $A_n$ is based on the distribution 
 of $A_n$, which can be estimated from the frequency of each value in the traces we collected.  
 Then the $A_n$ can be predicted by choosing the value with highest probability.
-Figure \ref{fig:UnActionEventFrequency}
-(a) shows the frequency of occurrences of 12\footnote{We ignore RESET and QUIT 
+Figure \ref{f:user:frequency}
+shows the frequency of occurrences of 12 different actions\footnote{We ignore RESET and QUIT 
 in this figure because they have the lowest probability.}
-different operations on the traces from each of 9 meshes,
+on the traces from each of 9 meshes,
 displayed as a bubble chart. 
 The bubble size indicates the frequency of an operation occurring for a mesh.
 We can see that the most frequently used operations are two revolving (rotating around y-axis). 
@@ -474,6 +474,12 @@ the accuracy is $33.07\%$. % if we guess one action and $64.34\%$ if we guess tw
 %(if the real action is one of the predictions, we consider our prediction is accurate).
 The prediction could be more accurate if we consider more information,
 such as the previous action of the user and the current viewpoint of the user.
+\begin{figure}[htdp!]
+    \centering
+    \epsfig{file=figs/traceHistogram0/UnActionEventFrequency.eps, width=0.6\textwidth}
+    \caption{The frequency of 12 actions in the traces we collected.}
+    \label{f:user:frequency}
+\end{figure}
 
 From the traces we collected, the value of $A_n$ highly correlated
 with the value of $A_p$, the previous action taken by the user.
@@ -487,7 +493,8 @@ of being taken next. The other meshes exhibit the similar pattern.
 According to this observation, 
 we categorized the actions to two types: \textit{Continue}, \textit{Non-continue}. 
 The probability of Continue for three meshes can be seen in Figure \ref{f:user:cont_prob}.
-Therefore, always choosing Continue as the prediction has high accuracy. 
+Therefore, always choosing Continue as the prediction has high accuracy 
+(larger than $80\%$ for all meshes). 
 \begin{figure}[htdp!]
     \centering
     \epsfig{file=cont_prob_9.eps, width=0.7\textwidth}
@@ -495,11 +502,22 @@ Therefore, always choosing Continue as the prediction has high accuracy.
     \label{f:user:cont_prob}
 \end{figure}
 
+\begin{figure}
+    \centering
+    \epsfig{file=thai_2.eps, width=0.7\textwidth}
+    \caption{The probability of continuring the previous action for each combination of previous two actions (Thai Mesh).
+    'x' means the sample size of this combination is too small (less than 10 samples) to obtain reliable probability.}
+    \label{f:user:prev2}
+\end{figure}
 Next, we check whether consider one more action, the second latest action, is helpful. 
-From Figure \ref{}, we can see that the second latest action does not affect the 
-distribution of next action much. The prediction based on previous action and the
-one based on previous two actions are same in almost all cases. Therefore, we conclude
-that considering only the previous action is enough for the prediction.
+The probability of continuing the previous action under different combination of
+previous two actions for Thai Mesh is shown in Figure \ref{f:user:prev2}.
+In this figure, we can see that the second latest action does affect the 
+continue probability, but the effect is no significant for most cases. 
+We found that in larger than 99.9\% of the cases, 
+continuing the previous action still has the largest probability,
+so the prediction based on previous action and the one based on previous two actions are the same. 
+Therefore, we conclude that considering only the previous action is enough for the prediction.
 
 The other method is to consider the current viewpoint of the user.
 We first examine whether the probability of an operation relates to
