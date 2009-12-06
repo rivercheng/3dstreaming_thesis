@@ -133,12 +133,15 @@ were logged for offline analysis. The representation of the viewpoints
 and actions are introduced in detail as follows.
 
 A viewpoint indicates the position and direction of the user's eye.
+Users can change their viewpoints during the session. Changing the position of 
+viewpoint is relative to the positon of the mesh. Therefore, from another aspect, we can
+think that users are changing the position and direction of the mesh during the session.
 When the application is started, each user begins with the same default viewpoint,
 where the user looks at the center of the mesh (more precisely,  the center of the bounding box of the mesh)
 from a certain distance. 
-Then we use a 6-tuple, ($x, y, z, ax, ay, az$) to indicate the relative position of all the viewpoints. 
+Then we use a 6-tuple, ($x, y, z, ax, ay, az$) to indicate the relative position of the mesh. 
 The default viewpoint is ($0, 0, 0, 0, 0, 0$), and ($x, y, z, ax, ay, az$) means
-move the viewpoint $x$ units right, $y$ units up, and $z$ units further (out of the screen). 
+move the mesh $x$ units right, $y$ units up, and $z$ units closer (out of the screen). 
 Then, we rotate the mesh $ax$ degree around $x$ axis, $ay$ degree around $y$ axis,
 and $az$ degree around $z$ axis. During the rotation, the center of the mesh is not moved.
 The direction of rotations are shown in the Figure \ref{f:user:viewpoint}.
@@ -156,8 +159,13 @@ and their range is $[0, 1, \cdots, 35]$.
 To facilitate the analysis, we ensure the six values are all integral. 
 Therefore, an action taken by the user will change one of the six values by one unit.
 Table \ref{t:user:action} lists out the name, the abbreviation, the result,
-and the corresponding key (or key combination) of each action.%\footnote{
-%There is a small inconsistency in our design. When moving and zooming, 
+and the corresponding key (or key combination) of each action.\footnote{
+There is a small inconsistency in our design. 
+We use $uparrow$ to move the mesh closer and $downarrow$ to move the mesh
+further. It is more like moving viewpoint than moving the mesh. 
+It is the flaw in our design, but fortunately the users were used to it quickly
+during the experiments.}
+%When moving and zooming, 
 %we move the viewpoint of the user, 
 %but when rotating, we rotate the mesh. 
 %In other words, when we press ALT + $rightarrow$, 
@@ -175,8 +183,8 @@ and the corresponding key (or key combination) of each action.%\footnote{
         move left  & ML     & $x - 1$  & ALT + $\leftarrow$\\
         move up    & MU     & $y + 1$  & ALT + $\uparrow$\\
         move down  & MD     & $y - 1$  & ALT + $\downarrow$\\
-        zoom out   & ZO     & $z + 1$  & $\downarrow$\\
-        zoom in    & ZI     & $z - 1$  & $\uparrow$\\
+        zoom in    & ZI     & $z + 1$  & $\uparrow$\\
+        zoom out   & ZO     & $z - 1$  & $\downarrow$\\
         tilt backward & TB  & $ax + 10\degree$ & CTRL + $\downarrow$\\
         tilt forward & TF   & $ax - 10\degree$ & CTRL + $\uparrow$\\
         revolve anticlockwise & REAN & $ay + 10\degree$ & $\rightarrow$\\
@@ -194,9 +202,20 @@ and the corresponding key (or key combination) of each action.%\footnote{
 As a result, a user session can be seen as a random process 
 with viewpoints as the states. Each action transits
 the system from one state to next state, until the QUIT
-action terminates the session. During the session, we record
+action terminates the session (see Figure \ref{f:user:transition} as an example). 
+During the session, we record
 all the user actions and the time they happended, and we call these 
 records \textit{user trace}.
+Moreover, ($x, y, z, ax, ay, az$) can be seen as a point in a 6-dimension space, and
+the six axises in this space are $X$, $Y$, $Z$, $AX$, $AY$, $AZ$. 
+In this sense, a session is a random walk in the 6-dimension space.
+\begin{figure}
+    \centering
+    \epsfig{file=transition.eps, width=0.8\textwidth}
+    \caption{An example of a user session}
+    \label{f:user:transition}
+\end{figure}
+
 
 \section{Results and Implications}
 In this section, we present our analysis on the user behavior. We present only on the analysis of the original (non-defect) statues, unless otherwise specified.
@@ -423,23 +442,66 @@ leading to more evenly distributed viewpoints around the mesh.
 \end{figure}
 
 \subsection{Operations}
-Besides the session length, think time, and the access pattern.
+Besides the session length, think time, and the access pattern,
 it is also interesting to see if user actions are predictable. 
-If so, pre-fetching can be used to improve the mesh quality and reduce response time.  
+If so, pre-fetching can be used to reduce response time when
+users change their viewpoints. When the connection between the 
+receiver and the sender has limited bandwidth
+or long delay, the requests for vertex splits of new viewpoint 
+can be sent before the user changes the viewpoint based on 
+the prediction. Another case is that when the client has limited
+rendering power, the rendering of next viewpoint can be done
+in advance based on prediction to reduce the response time. 
+In both cases, the accuracy of the prediction is important.
 
-Figure \ref{fig:UnActionEventFrequency}(a) shows the probability of occurrences of 12 different operations on the traces from each of 9 meshes,
-displayed as a bubble chart. The bubble size indicates the probability of an operation occurring for a mesh.
-We can see that the most frequently used operations are revolving (rotate around y-axis) and zooming.  
-Further, zooming in is used more frequently than zooming out, 
-indicating that users tend to zoom in to a comfortable distance to see the mesh with more details.  
-Indeed, we observe that many users zoom in first, 
-and then revolve around the y-axis.  %We believe that this behavior, however, is not general and depends on the screen size.
+The next action of a user, $A_n$, is a random variable with 14 possible values
+(see Table \ref{t:user:action}). 
+A naive way to predict the value of $A_n$ is based on the distribution 
+of $A_n$, which can be estimated from the frequency of each value in the traces we collected.  
+Then the $A_n$ can be predicted by choosing the value with highest probability.
+Figure \ref{fig:UnActionEventFrequency}
+(a) shows the frequency of occurrences of 12\footnote{We ignore RESET and QUIT 
+in this figure because they have the lowest probability.}
+different operations on the traces from each of 9 meshes,
+displayed as a bubble chart. 
+The bubble size indicates the frequency of an operation occurring for a mesh.
+We can see that the most frequently used operations are two revolving (rotating around y-axis). 
+As a result, without any extra information, we can always predict the next action is 
+one of the two revolving.
+The accuracy of this prediction is low. 
+Take the Thai mesh as an example,
+the accuracy is $33.07\%$. % if we guess one action and $64.34\%$ if we guess two actions
+%(if the real action is one of the predictions, we consider our prediction is accurate).
+The prediction could be more accurate if we consider more information,
+such as the previous action of the user and the current viewpoint of the user.
 
-With these distributions, we can do a simple prediction of the next operation to be taken 
-by a user without any other information.  
-The prediction could be more accurate, however, if we consider 
-the current viewpoint of the user and the previous action of the user.
+From the traces we collected, the value of $A_n$ highly correlated
+with the value of $A_p$, the previous action taken by the user.
+Figure \ref{fig:UnActionEventFrequency}(d) shows the conditional 
+probability of taking the next operation given the previous action
+for \textit{Thai Statue}.
+The shaded diagonal shows that the same operation has the 
+significantly larger probability (e.g., more than 0.93 for revolving) 
+of being taken next. The other meshes exhibit the similar pattern. 
 
+According to this observation, 
+we categorized the actions to two types: \textit{Continue}, \textit{Non-continue}. 
+The probability of Continue for three meshes can be seen in Figure \ref{f:user:cont_prob}.
+Therefore, always choosing Continue as the prediction has high accuracy. 
+\begin{figure}[htdp!]
+    \centering
+    \epsfig{file=cont_prob_9.eps, width=0.7\textwidth}
+    \caption{The probability of continue the previous action for 9 meshes.}
+    \label{f:user:cont_prob}
+\end{figure}
+
+Next, we check whether consider one more action, the second latest action, is helpful. 
+From Figure \ref{}, we can see that the second latest action does not affect the 
+distribution of next action much. The prediction based on previous action and the
+one based on previous two actions are same in almost all cases. Therefore, we conclude
+that considering only the previous action is enough for the prediction.
+
+The other method is to consider the current viewpoint of the user.
 We first examine whether the probability of an operation relates to
 the viewpoint of the users.  Figure
 \ref{fig:UnActionEventFrequency}(b) shows that the distribution of
@@ -478,13 +540,6 @@ however, could be used for more accurate mesh-specific prediction.
 %\epsfig{file=figs/traceHistogram0/Inter-operationprobability-dragonnormal.eps, width=0.28\textwidth}&
 %\epsfig{file=figs/traceHistogram0/Inter-operationprobability-happynormal.eps, width=0.28\textwidth}\\
 
-Figure \ref{fig:UnActionEventFrequency}(d) shows the conditional 
-probability of taking the next operation given the previous operation 
-for \textit{Thai Statue}.
-The shaded diagonal shows that the same operation has the significantly larger probability (e.g., more than 0.93 for revolving) of being taken next.
-The other meshes exhibit the similar pattern. 
-Such high predictability points to the efficacy of pre-fetching as a
-way to reduce response time and improve the viewing quality. 
 
 %\begin{figure}[htp]
 %\begin{center}
@@ -508,48 +563,64 @@ if the viewpoint is nearer to the mesh.
 This behavior is expected.  Finer division of viewpoint regions should yield more accurate prediction.
 
 \section{Generating Synthetic Traces}
-To test the effectiveness and performance of a system, we often need many user traces. It is expensive to collect a large number 
-of real traces. A cheaper way is to derive a transition matrix from the collected traces, and then following the transition
-matrix, we can generate as many traces as we want.
+To test the effectiveness and performance of a system, we often need many user traces. 
+It is expensive to collect a large number 
+of real traces. 
+A cheaper way is to look a user trace as a Markov chain random process
+and derive its transition matrix from the collected traces, and then following the transition
+matrix, we can generate as many traces as we want with this Markov chain.
 
 Fist We define the state as the viewpoint, represented as a 6-tuple: {x, y, z, ax, ay, az}
 as introduced in Section \ref{s:user:study}.
-According to the observation introduced above, simple Markov chain is not approprate here, because
-the previous states affect on the transition probability. The most accurate way needs to consider the whole
-history, but it is not practical. To make the analysis possible, we consider only one step back, 
-that is (State-prev, State-current) decides (State-next). It is called second order Markov chain. 
+According to the observation introduced above, first order Markov chain is not approprate here, because
+the previous states affect on the transition probability. 
+It, however, is not practical to consider the whole history before. 
+To make the analysis possible, we consider only one more state backward and assume
+(State-prev, State-current) decides (State-next). In other words, we consider it as a second order Markov chain. 
 
-We can reduce the second order Markov chain to single order one by defining the current state as
-(previous viewpoint, current viewpoint). After a user action, the new state becomes
-(current viewpoint, next viewpoint). As a result, we can assume the transition probability
-only depends on the current state.
+We can reduce the second order Markov chain to first order one by defining the current state as
+(previous viewpoint, current viewpoint). After a user action, the new state becomes 
+(current viewpoint, next viewpoint) (See Figure \ref{f:user:reduction}(A)). 
+As a result, now we can assume the transition probability only depends on the current state.
 Notice that (previous viewpoint, current viewpoint) is equivelant to (current viewpoint, last-operation), 
-so we change the definition of the state to {x, y, z, ax, ay, az, last-operation}. 
+so we change the definition of the state to {last action, x, y, z, ax, ay, az} 
+(See Figure \ref{f:user:reduction}(B)).
+\begin{figure}
+    \centering
+    \epsfig{file=reduction.eps, width=0.8\textwidth}
+    \caption{(A), State = (previous viewpoint, next viewpoint); (B), State = (last action, x, y, z, ax, ay, az)}
+    \label{f:user:reduction}
+\end{figure}
 
-Then from the user traces, we can compute the transition probability for each existed states, and finally
-obtain the transition matrix. 
+Then each record in the user traces can be seen as a sample of this random process.
+From these samples, we can compute the transiton probability between two states, and hence
+the the transition matrix.
 
 This method, however, has limitations when the number of collected traces is small. First, if a viewpoint is 
 never accessed by the real traces, it will not accessed by synthetic traces either. Therefore, no matter how
-many synthetic traces are generated, the number of accessed viewpoints are still limited. Second, most of the
-states has only one sample. In other words, the next state is determined. Therefore, after several steps, the
-synthetic trace follows the exact path with one of the real traces. Therefore, the synthetic traces are not 
-random enough.
+many synthetic traces are generated, the number of accessed viewpoints are still limited. Second, due to
+the large sample space and limited number of samples, most of the states has only one sample. 
+In other words, in the transition matrix, the next states of most states are determined. 
+Therefore, after several steps, the synthetic trace follows the exact path as one of the real traces. 
+Therefore, the synthetic traces are not random enough.
 
 The limitation above can only be solved by collecting a large number of real traces. Without enough real traces,
 we need to simplify the model at the cost of accuracy. We proposed a simplified model as follows:
+
 \subsection{Simplified Model}
 First, we categorized the action to three groups: \textit{continue}, \textit{reverse}, and \textit{change}. 
 ``Continue'' means the next operation is same to the last operation, ``reverse'' means the next operation
 is the reverse of the last operation, ``change'' means the next operation changes to moving along a new axis.
 
-Then we assume that the probability of ``continue'', ``reverse'', and ``change'' only depends on the coordinates
-on current \textit{active axis}. We define ``active axis'' as the axis the coordinates of which is changed by last operation.
-We think the coordinates of the current axis affects these probability the most. For example, if the last operation
+Then we assume that the probability of ``continue'', ``reverse'', and ``change'' only depends on the
+coordinate on the \textit{current axis}, of which the coordinate is just changed by last action.
+We think the coordinates of the current axis affects these probability the most. 
+For example, if the last operation
 is ``Move Up'', then if we move to near the edge of the mesh, the probability of continue decreases and the probability
-of reverse increases. When we move back to the center of the mesh, the probability of change increases. Now, the transition
-probability only depends on (active axis value, last-operation), the number of available samples increases a lot compared
-with the second order Markov chain method. 
+of reverse increases. When we move back to the center of the mesh, the probability of change increases. 
+Now, the transition probability only depends on (cooridnate on current axis, last-operation), which is defined as 
+the state. As a result, the number of available samples of each state increases a lot compared
+with the first method. 
 
 A further step is needed if ``change'' is selected. First, we need to select a new axis to move along. Here, we 
 assume the next action tends to increase the stability of the system. We define \textit{stability} of a certain 
