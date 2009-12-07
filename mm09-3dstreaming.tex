@@ -287,8 +287,8 @@ Happy Buddha&47&98&403&13\\
 \subsection{Think Time}
 We refer to the time between two key strokes as \textit{inter-stroke time}. 
 Consecutive key strokes of the same type with inter-stroke time smaller than 20 $m$s
-are grouped together as one \textit{operation}. 
-The time between two operations is \textit{think time}. 
+are grouped together as one \textit{action}. 
+The time between two actions is \textit{think time}. 
 We choose the threshold of 20 $m$s because there is an obvious gap between 5 $m$s and 35 $m$s
 in the CDF of inter-stroke times for all meshes (see Figure \ref{fig:session-length}(b)).
 %shows part of the inter-stroke time distributions. A gap exists between 5 $m$s and 35 $m$s approximately. 
@@ -311,9 +311,9 @@ We find that think time follows similar distributions for all of the three meshe
 About 90\% of the think time is smaller than a second. There is a jump in the curve of think time distribution for all the three meshes -- 
 about 5\% of the think time clusters around 0.5 seconds. 
 We hypothesize that this is related to the 0.4-second round trip time in our experiments. 
-After a user performs an operation, it takes 0.4 seconds before the user can see progressive refinement of the mesh
+After a user performs an action, it takes 0.4 seconds before the user can see progressive refinement of the mesh
 (although the system responses to the change in viewpoint \textit{immediately}). 
-Some users might wait for the refinement to come before the next operation.
+Some users might wait for the refinement to come before the next action.
 
 The mean and maximum think time are shown in Table \ref{t:TimeTable}. We note that the maximum is up to 50 times larger than the mean.
 
@@ -343,7 +343,7 @@ In progressive mesh streaming, vertice splits are often grouped into chunks
 for transmission. These chunks can be cached at a proxy to reduce server overhead.
 To study the usefulness of proxy caching, we look at the access pattern to chunks. 
 
-We first replay the log of operations from the users, and generate
+We first replay the log of actions from the users, and generate
 a list of chunks accessed  by users during the experiment.  
 From these chunk traces, we count
 the number of times each chunk 
@@ -442,62 +442,76 @@ leading to more evenly distributed viewpoints around the mesh.
 \end{figure}
 
 \subsection{Predictability}
+\label{ss:user:predictability}
 Besides the session length, think time, and the access pattern,
 it is also interesting to see if user actions are predictable. 
 If so, pre-fetching can be used to reduce response time when
-users change their viewpoints. When the connection between the 
+users change their viewpoints. For example, when the connection between the 
 receiver and the sender has limited bandwidth
 or long delay, the requests for vertex splits of new viewpoint 
-can be sent before the user changes the viewpoint based on 
-the prediction. Another case is that when the client has limited
-rendering power, the rendering of next viewpoint can be done
+can be sent based on the prediction before the user changes the viewpoint.
+Another case is that when the client has limited
+rendering power, the next viewpoint can be rendered
 in advance based on prediction to reduce the response time. 
 In both cases, the accuracy of the prediction is important.
 
 The next action of a user, $A_n$, is a random variable with 14 possible values
 (see Table \ref{t:user:action}). 
 A naive way to predict the value of $A_n$ is based on the distribution 
-of $A_n$, which can be estimated from the frequency of each value in the traces we collected.  
-Then the $A_n$ can be predicted by choosing the value with highest probability.
+of $A_n$, which can be estimated as the frequency of each value in the traces
+we collected.  
+Then the $A_n$ can be predicted as the one with highest probability.
 Figure \ref{f:user:frequency}
 shows the frequency of occurrences of 12 different actions\footnote{We ignore RESET and QUIT 
 in this figure because they have the lowest probability.}
 on the traces from each of 9 meshes,
 displayed as a bubble chart. 
-The bubble size indicates the frequency of an operation occurring for a mesh.
-We can see that the most frequently used operations are two revolving (rotating around y-axis). 
+The bubble size indicates the frequency of an action occurring for a mesh.
+We can see that the most frequently used actions are two revolving (rotating around y-axis). 
 As a result, without any extra information, we can always predict the next action is 
 one of the two revolving.
-The accuracy of this prediction is low. 
+The accuracy of this prediction, however, is low. 
 Take the Thai mesh as an example,
 the accuracy is $33.07\%$. % if we guess one action and $64.34\%$ if we guess two actions
 %(if the real action is one of the predictions, we consider our prediction is accurate).
-The prediction could be more accurate if we consider more information,
+The prediction could be more accurate with more information,
 such as the previous action of the user and the current viewpoint of the user.
 \begin{figure}[htdp!]
     \centering
-    \epsfig{file=figs/traceHistogram0/UnActionEventFrequency.eps, width=0.6\textwidth}
+    \epsfig{file=figs/traceHistogram0/UnActionEventFrequency.eps, width=0.5\textwidth}
     \caption{The frequency of 12 actions in the traces we collected.}
     \label{f:user:frequency}
 \end{figure}
 
-From the traces we collected, the value of $A_n$ highly correlated
+\textbf{Considering Previous Action}
+From the traces we collected, the value of $A_n$ highly correlates
 with the value of $A_p$, the previous action taken by the user.
-Figure \ref{fig:UnActionEventFrequency}(d) shows the conditional 
-probability of taking the next operation given the previous action
+Figure \ref{f:user:prev_next_relation} shows the conditional 
+probability of taking the next action given the previous action
 for \textit{Thai Statue}.
-The shaded diagonal shows that the same operation has the 
+The shaded diagonal shows that the same action has the 
 significantly larger probability (e.g., more than 0.93 for revolving) 
 of being taken next. The other meshes exhibit the similar pattern. 
+\begin{figure}[htp!]
+    \centering
+    \begin{tabular}{c}
+        \epsfig{file=figs/traceHistogram0/Inter-operationprobability-hugenormal.eps, width=0.5\textwidth}\\
+        \epsfig{file=figs/traceHistogram0/Inter-operationprobability-dragonnormal.eps, width=0.5\textwidth}\\
+        \epsfig{file=figs/traceHistogram0/Inter-operationprobability-happynormal.eps, width=0.5\textwidth}
+    \end{tabular}
+\caption{The conditional probability of next action if the previous action is given.}
+\label{f:user:prev_next_relation}
+\end{figure}
 
 According to this observation, 
 we categorized the actions to two types: \textit{Continue}, \textit{Non-continue}. 
+Then we can predict the next action by choosing Continue unconditional.
 The probability of Continue for three meshes can be seen in Figure \ref{f:user:cont_prob}.
 Therefore, always choosing Continue as the prediction has high accuracy 
 (larger than $80\%$ for all meshes). 
 \begin{figure}[htdp!]
     \centering
-    \epsfig{file=cont_prob_9.eps, width=0.7\textwidth}
+    \epsfig{file=cont_prob_9.eps, width=0.5\textwidth}
     \caption{The probability of continue the previous action for 9 meshes.}
     \label{f:user:cont_prob}
 \end{figure}
@@ -505,108 +519,110 @@ Therefore, always choosing Continue as the prediction has high accuracy
 \begin{figure}
     \centering
     \epsfig{file=thai_2.eps, width=0.7\textwidth}
-    \caption{The probability of continuring the previous action for each combination of previous two actions (Thai Mesh).
+    \caption{The probability of continuing the previous action for each combination of previous two actions (Thai Mesh).
     'x' means the sample size of this combination is too small (less than 10 samples) to obtain reliable probability.}
     \label{f:user:prev2}
 \end{figure}
-Next, we check whether consider one more action, the second latest action, is helpful. 
+Next, we check whether it helps to consider one more action, the second latest action. 
 The probability of continuing the previous action under different combination of
 previous two actions for Thai Mesh is shown in Figure \ref{f:user:prev2}.
 In this figure, we can see that the second latest action does affect the 
-continue probability, but the effect is no significant for most cases. 
-We found that in larger than 99.9\% of the cases, 
+continue probability, but the effect is much less significant than the previous action. 
+Moreover, we found that in around 99.9\% of the cases, 
 continuing the previous action still has the largest probability,
-so the prediction based on previous action and the one based on previous two actions are the same. 
+so the prediction based on previous action and the one based on previous two actions are the same in
+most of the cases. 
 Therefore, we conclude that considering only the previous action is enough for the prediction.
 
+\textbf{Considering Viewpoint}
 The other method is to consider the current viewpoint of the user.
-We first examine whether the probability of an operation relates to
-the viewpoint of the users.  Figure
-\ref{fig:UnActionEventFrequency}(b) shows that the distribution of
-operations is different in the 16 regions for \textit{Thai Statue}.
-For example, the probability of zooming in (ZIN)
-is higher in the right-top, front-far region (RTFF).  Since
-the default viewpoint lies in this region, users tend to zoom in to a
-comfortable distance first and then move to other regions.  
-\textit{Dragon} (Figure
-\ref{fig:UnActionEventFrequency}(c)), however, shows different
-behavior.  First, zoom-in is not as frequent in the
-default view, since \textit{Dragon} has less details than \textit{Thai
-Statue} and can be viewed comfortably with the default distance.
-Second, users frequently tilt, possibly due to 
-the horizontal orientation of \textit{Dragon}.  Our
-findings indicate that the viewpoint affects the probability of taking a next operation, 
-but this effect depends on the size and shape of the mesh,
-and thus is difficult to have a general framework for prediction based
-on viewpoints.  
-Past history of user interactions for a particular mesh, 
-however, could be used for more accurate mesh-specific prediction.
+We compute the conditional distribution of next action $A_n$ on each viewpoint. 
+Then we always choose the action with highest conditional probability as the prediction.
 
-\begin{figure*}[htp!]
-\begin{center}
-\begin{tabular}{ccc}
-\epsfig{file=figs/traceHistogram0/UnActionEventFrequency.eps, width=0.31\textwidth}&
-\epsfig{file=figs/traceHistogram0/ConditionalActionFrequency-hugenormal.eps, width=0.31\textwidth}&
-\epsfig{file=figs/traceHistogram0/ConditionalActionFrequency-dragonnormal.eps, width=0.31\textwidth}\\
-\epsfig{file=figs/traceHistogram0/Inter-operationprobability-hugenormal.eps, width=0.31\textwidth}&
-\epsfig{file=figs/traceHistogram0/conditionalInteractionProbability/hugenormal/Inter-operationProbability-hugenormal-ZOOMIN.eps, width=0.31\textwidth}&
-\epsfig{file=figs/traceHistogram0/conditionalInteractionProbability/dragonnormal/Inter-operationProbability-dragonnormal-MOVEDOWN.eps, width=0.31\textwidth}
-\end{tabular}
-\caption{\label{fig:UnActionEventFrequency} Frequency of User Actions}
-\end{center}
-\end{figure*}
-%\epsfig{file=figs/traceHistogram0/Inter-operationprobability-dragonnormal.eps, width=0.28\textwidth}&
-%\epsfig{file=figs/traceHistogram0/Inter-operationprobability-happynormal.eps, width=0.28\textwidth}\\
+Since we estimate the distribution as the frequency of occurrence, enough
+number of samples are required to give reliable results. 
+By analysing the traces we collected, we find that majority of the samples are 
+on a small proportion of viewpoints, and for the rest viewpoints, we have no enough
+samples (See Figure \ref{f:user:sample_size_1}).
+\begin{figure}
+    \centering
+    \epsfig{file=sample_size_1.eps, width=0.5\textwidth}
+    \caption{The number of samples on all viewpoints, and the viewpoints are sorted from the most popular to the least popular.}
+    \label{f:user:sample_size_1}
+\end{figure}
+Including the viewpoints having few samples may exaggerate the accuracy.
+For example, the predictions on all the viewpoints having one sample are 
+always 100\%, which is not realistic.
+Therefore, we ignore all those viewpoints with less than 10 samples.
+The accuracy of this method can be seen in Figure \ref{f:user:accuracy_comp}.
+We can see that this method has lower accuracy than the one based on previous action.
+To improve the accuracy, we could consider both viewpoint and previous action.
 
+\textbf{Considering Viewpoint and Previous Action}
+Now we consider both current viewpoint and  previous action.
+Similarly, we compute the conditional distribution of next action $A_n$ for each combination. 
+Then we always choose the action with highest conditional probability as the prediction.
 
-%\begin{figure}[htp]
-%\begin{center}
-%\epsfig{file=figs/traceHistogram0/Inter-operationprobability-hugenormal.eps, width=0.3\textwidth}
-%\caption[Inter-ops Probability Thai Statue]{\label{fig:inter-opsProbHuge} Inter-operation Probability (Thai Statue)}
-%\end{center}
-%\end{figure}
+We have the same problem of lacking samples for many combinations (See Figure \ref{f:user:sample_size_2}).
+\begin{figure}
+    \centering
+    \epsfig{file=sample_size_2.eps, width=0.5\textwidth}
+    \caption{The number of samples on all combinations of viewpoint and previous action, and the combinations are sorted from the most popular to the least popular.}
+    \label{f:user:sample_size_2}
+\end{figure}
+We still ignore those state with  less than 10 samples.
+The accuracy of this method can be seen in Figure \ref{f:user:accuracy_comp}.
+This method has the highest accuracy among the four methods.
 
-Finally, we consider the dependencies on viewpoint and previous
-operation together.  
-Figure \ref{fig:UnActionEventFrequency}(e) shows the
-probability of taking a given operation in a given viewpoint region
-when the previous operation is zooming in for \textit{Thai
-Statue}.  
-Figure \ref{fig:UnActionEventFrequency}(f) gives such probability 
-when the previous operation of moving down for \textit{Dragon}. Both
-figures show that the dependence on viewpoint is non-negligible, but 
-is still predictable for a given mesh.  
-For instance, zooming out is more frequent after zooming in, 
-if the viewpoint is nearer to the mesh.  
-This behavior is expected.  Finer division of viewpoint regions should yield more accurate prediction.
+We compare the four methods in Figure \ref{f:user:accuracy_comp} for three meshes\footnote{
+To increase the sample size, we aggregate the data of the three version of the same mesh together.
+It is reasonable because the meshes has a defect are almost identical to the original one, 
+and users do not know which one has defect in advance. Therefore, their behavior are similar to
+all three versions of the same mesh.}.
+Our conclusion is that the user action is somewhat predictable and the prediction is simple.
+We can always predict the next action is same to the previous one without considering
+any extra information, and the accuracy is good enough. 
+Considering both previous action and viewpoint has the highest accuracy,
+but it depends on the statistics of user behavior and differs on every mesh. Hence, it can only 
+be done when enough number of user traces are already collected for a specific mesh. 
+The slightly better accuracy may not justify the much higher complexity.
+\begin{figure}
+    \centering
+    \epsfig{file=accuracy_comp.eps, width=0.65\textwidth}
+    \caption{The accuracy of four prediction methods.}
+    \label{f:user:accuracy_comp}
+\end{figure}
 
 \section{Generating Synthetic Traces}
 To test the effectiveness and performance of a system, we often need many user traces. 
-It is expensive to collect a large number 
-of real traces. 
-A cheaper way is to look a user trace as a Markov chain random process
-and derive its transition matrix from the collected traces, and then following the transition
-matrix, we can generate as many traces as we want with this Markov chain.
+It is expensive to collect a large number of real traces. 
+A cheaper way is consider a user trace as a Markov chain
+and derive the transition matrixrom from the collected traces.
+Then following the transition matrix, we can generate as many traces as we want.
 
 Fist We define the state as the viewpoint, represented as a 6-tuple: {x, y, z, ax, ay, az}
 as introduced in Section \ref{s:user:study}.
-According to the observation introduced above, first order Markov chain is not approprate here, because
+According to the observation that the previous actions highly affects the next action
+(Section \ref{ss:user:predictability}),
+first order Markov chain is not approprate here, because
 the previous states affect on the transition probability. 
 It, however, is not practical to consider the whole history before. 
 To make the analysis possible, we consider only one more state backward and assume
 (State-prev, State-current) decides (State-next). In other words, we consider it as a second order Markov chain. 
+As we introduced in Section \ref{ss:user:predictability}, the latest action affects the most, so
+this simplification by looking only one step back is reasonable.
 
-We can reduce the second order Markov chain to first order one by defining the current state as
+We can reduce the second order Markov chain to be first order by defining the current state as
 (previous viewpoint, current viewpoint). After a user action, the new state becomes 
 (current viewpoint, next viewpoint) (See Figure \ref{f:user:reduction}(A)). 
 As a result, now we can assume the transition probability only depends on the current state.
-Notice that (previous viewpoint, current viewpoint) is equivelant to (current viewpoint, last-operation), 
-so we change the definition of the state to {last action, x, y, z, ax, ay, az} 
+Notice that (previous viewpoint, current viewpoint) is equivelant to (current viewpoint, last-action), 
+so we change the definition of the state to {x, y, z, ax, ay, az, previous action} 
 (See Figure \ref{f:user:reduction}(B)).
 \begin{figure}
     \centering
-    \epsfig{file=reduction.eps, width=0.8\textwidth}
-    \caption{(A), State = (previous viewpoint, next viewpoint); (B), State = (last action, x, y, z, ax, ay, az)}
+    \epsfig{file=reduction.eps, width=0.6\textwidth}
+    \caption{(A), State = (previous viewpoint, current viewpoint); (B), State = (x, y, z, ax, ay, az, previous action)}
     \label{f:user:reduction}
 \end{figure}
 
@@ -617,8 +633,9 @@ the the transition matrix.
 This method, however, has limitations when the number of collected traces is small. First, if a viewpoint is 
 never accessed by the real traces, it will not accessed by synthetic traces either. Therefore, no matter how
 many synthetic traces are generated, the number of accessed viewpoints are still limited. Second, due to
-the large sample space and limited number of samples, most of the states has only one sample. 
-In other words, in the transition matrix, the next states of most states are determined. 
+the large sample space and limited number of samples, most of the states has only one sample
+(See Figure \ref{f:user:sample_size_2}). 
+In other words, in the transition matrix, the next states in most cases are determined. 
 Therefore, after several steps, the synthetic trace follows the exact path as one of the real traces. 
 Therefore, the synthetic traces are not random enough.
 
@@ -627,23 +644,27 @@ we need to simplify the model at the cost of accuracy. We proposed a simplified 
 
 \subsection{Simplified Model}
 First, we categorized the action to three groups: \textit{continue}, \textit{reverse}, and \textit{change}. 
-``Continue'' means the next operation is same to the last operation, ``reverse'' means the next operation
-is the reverse of the last operation, ``change'' means the next operation changes to moving along a new axis.
+``Continue'' means the next action is same to the previous action, ``reverse'' means the next action
+is the reverse of the previous action, ``change'' means the next action changes to moving along a new axis.
 
-Then we assume that the probability of ``continue'', ``reverse'', and ``change'' only depends on the
-coordinate on the \textit{current axis}, of which the coordinate is just changed by last action.
-We think the coordinates of the current axis affects these probability the most. 
-For example, if the last operation
-is ``Move Up'', then if we move to near the edge of the mesh, the probability of continue decreases and the probability
-of reverse increases. When we move back to the center of the mesh, the probability of change increases. 
-Now, the transition probability only depends on (cooridnate on current axis, last-operation), which is defined as 
-the state. As a result, the number of available samples of each state increases a lot compared
-with the first method. 
+An action only changes one coordinate in the 6-tuple. We call this coordinate \textit{related coordinate}.
+Hence, when user continue the previous action, only the related coordinate is changed. As a result, we 
+can assume the related coordinate affects the probability of ``continue'', ``reverse'', and ``change'' most.
+For example, when a user keeps pressing ``Move Left'', the mesh may nearly be out of the viewable area, 
+then the probability of ``continue'' decreases, and the probability of ``reverse'' increases. 
+Another example is that when the user keeps pressing ``Revolve Clockwise'' and find something interesting
+in the mesh from the current direction,
+the probability of ``continue'' decreases and the probability of ``change'' increases.
+
+Therefore, in this simplified model, we assume the probability of ``continue'', ``reverse'', and ``change''
+only depends on (previous action, related coordinate).
+As a result, the number of available samples of each state increases a lot compared with the first method. 
 
 A further step is needed if ``change'' is selected. First, we need to select a new axis to move along. Here, we 
-assume the next action tends to increase the stability of the system. We define \textit{stability} of a certain 
-axis value as the percentage of the samples having this value, then we define \textit{instability} as the reciprocal 
-of the stability. Then we let the probability of choosing an axis to be proportional to its instability.  
+assume the next action tends to increase the stability of the system. 
+We define \textit{stability} of a certain axis value as the percentage of the samples having this value, 
+then we define \textit{instability} as the reciprocal of the stability. 
+We set the probability of choosing an axis to be proportional to its instability.  
 
 Next, we need to choose a direction. The direction can be decided to choose the side has higher stability. 
 \subsection{Verification}
