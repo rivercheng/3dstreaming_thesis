@@ -141,7 +141,7 @@ where the user looks at the center of the mesh (more precisely,  the center of t
 from a certain distance. 
 Then we use a 6-tuple, ($x, y, z, ax, ay, az$) to indicate the relative position of the mesh. 
 The default viewpoint is ($0, 0, 0, 0, 0, 0$), and ($x, y, z, ax, ay, az$) means
-move the mesh $x$ units right, $y$ units up, and $z$ units closer (out of the screen). 
+move the mesh $x$ units right, $y$ units up, and $z$ units closer (i.e. out of the screen). 
 Then, we rotate the mesh $ax$ degree around $x$ axis, $ay$ degree around $y$ axis,
 and $az$ degree around $z$ axis. During the rotation, the center of the mesh is not moved.
 The direction of rotations are shown in the Figure \ref{f:user:viewpoint}.
@@ -600,24 +600,24 @@ A cheaper way is consider a user trace as a Markov chain
 and derive the transition matrixrom from the collected traces.
 Then following the transition matrix, we can generate as many traces as we want.
 
-Fist We define the state as the viewpoint, represented as a 6-tuple: {x, y, z, ax, ay, az}
+The state is the Markov chain can be the viewpoint, represented as a 6-tuple: {x, y, z, ax, ay, az}
 as introduced in Section \ref{s:user:study}.
 According to the observation that the previous actions highly affects the next action
 (Section \ref{ss:user:predictability}),
-first order Markov chain is not approprate here, because
+it is not a first order Markov chain because
 the previous states affect on the transition probability. 
 It, however, is not practical to consider the whole history before. 
-To make the analysis possible, we consider only one more state backward and assume
+To make the analysis possible, we consider only one step before and assume
 (State-prev, State-current) decides (State-next). In other words, we consider it as a second order Markov chain. 
 As we introduced in Section \ref{ss:user:predictability}, the latest action affects the most, so
-this simplification by looking only one step back is reasonable.
+this simplification is reasonable.
 
 We can reduce the second order Markov chain to be first order by defining the current state as
 (previous viewpoint, current viewpoint). After a user action, the new state becomes 
 (current viewpoint, next viewpoint) (See Figure \ref{f:user:reduction}(A)). 
-As a result, now we can assume the transition probability only depends on the current state.
+As a result, we can assume the transition probability only depends on the current state.
 Notice that (previous viewpoint, current viewpoint) is equivelant to (current viewpoint, last-action), 
-so we change the definition of the state to {x, y, z, ax, ay, az, previous action} 
+so we change the definition of the state to {$x, y, z, ax, ay, az, previous action$} 
 (See Figure \ref{f:user:reduction}(B)).
 \begin{figure}
     \centering
@@ -626,47 +626,162 @@ so we change the definition of the state to {x, y, z, ax, ay, az, previous actio
     \label{f:user:reduction}
 \end{figure}
 
-Then each record in the user traces can be seen as a sample of this random process.
-From these samples, we can compute the transiton probability between two states, and hence
-the the transition matrix.
+Each record in the user traces can be seen as a sample of this random process.
+From these samples, we can compute the transition probability between two states, and hence
+the transition matrix, with which we can generate random traces.
 
 This method, however, has limitations when the number of collected traces is small. First, if a viewpoint is 
 never accessed by the real traces, it will not accessed by synthetic traces either. Therefore, no matter how
-many synthetic traces are generated, the number of accessed viewpoints are still limited. Second, due to
-the large sample space and limited number of samples, most of the states has only one sample
+many synthetic traces are generated, the number of accessed viewpoints is upper-bounded. 
+Second, due to the large sample space and limited number of samples, most of the states has only one sample
 (See Figure \ref{f:user:sample_size_2}). 
-In other words, in the transition matrix, the next states in most cases are determined. 
+In other words, in the transition matrix, the next action for most states are determined. 
 Therefore, after several steps, the synthetic trace follows the exact path as one of the real traces. 
 Therefore, the synthetic traces are not random enough.
 
-The limitation above can only be solved by collecting a large number of real traces. Without enough real traces,
-we need to simplify the model at the cost of accuracy. We proposed a simplified model as follows:
+To address these two limitations, we propose a method to generate more random traces in the next section.
+It is based on a simplified model, which does not directly derive the transition matrix and follow it.
 
 \subsection{Simplified Model}
-First, we categorized the action to three groups: \textit{continue}, \textit{reverse}, and \textit{change}. 
-``Continue'' means the next action is same to the previous action, ``reverse'' means the next action
-is the reverse of the previous action, ``change'' means the next action changes to moving along a new axis.
+To generate a random trace, we need to determine the probability of each possible $A_n$ based on current
+state ($x,y,z,ax,ay,az, previous action$). Due to the limited number of samples, we cannot obtain the reliable
+transition probability for most of the states. As a result, we need to find a new way to determine the 
+conditional distribution of $A_n$.
 
-An action only changes one coordinate in the 6-tuple. We call this coordinate \textit{related coordinate}.
-Hence, when user continue the previous action, only the related coordinate is changed. As a result, we 
-can assume the related coordinate affects the probability of ``continue'', ``reverse'', and ``change'' most.
+To simplify the model, we need more understanding of user behaviors.
+According to our observation, continuing the previous action has the highest probability in most cases. 
+We think it is mainly because users tend to press the same key multiple times. If the user has decided to 
+change to a new action, then the previous action may have no effect on the next action.
+
+Therefore, we categorized the action to two groups: \textit{continue}, and \textit{change}. 
+We determine the next action in two steps:
+\begin{enumerate}
+    \item We determine the probability of ``continue'' and ``change'',
+i.e. $Pr(continue|_{current state})$ and $Pr(change|_{current state})$ respectively. Apparently, 
+we have
+\[
+Pr(change|_{current state}) = 1 - Pr(continue|_{current_state}).
+\]
+    \item We decide the distribution of $A_n$ if ``change'' is decided, i.e. $Pr(A_n |_{current state, A_n != A_p})$
+for each possible $A_n$. 
+\end{enumerate}
+We assume that only step 1 depends on the previous action, and step 2
+only depends on ($x,y,z,ax,ay,az$). 
+
+In step 1, the continue probability depends on the previous action and the 6-tuple ($x, y, z, ax, ay, az$).
+To simplify the model, we only consider the most important factor and ignore others. 
+As we know, an action only changes one coordinate in the 6-tuple. We call this coordinate \textit{corresponding coordinate}.
+For example, the corresponding coordinate of ``Move Left'' is $x$, and the corresponding coordinate of 
+``Revolving Clockwise'' is $ay$. 
+When users continue the previous action, only the corresponding coordinate is changed. As a result, we 
+only consider the corresponding coordinate in determining the continue probability. 
 For example, when a user keeps pressing ``Move Left'', the mesh may nearly be out of the viewable area, 
-then the probability of ``continue'' decreases, and the probability of ``reverse'' increases. 
+then the probability of ``continue'' decreases, and the probability of ``change'' increases. 
 Another example is that when the user keeps pressing ``Revolve Clockwise'' and find something interesting
 in the mesh from the current direction,
 the probability of ``continue'' decreases and the probability of ``change'' increases.
+In summary, in this simplified model, we assume the probability of ``continue'' and ``change''
+only depends on (previous action, corresponding coordinate).
+As a result, the number of available samples of each combination increases a lot compared with the first method
+(See Figure \ref{f:user:newsample}). 
+\begin{figure}
+    \centering
+    \epsfig{file=new_sample.eps, width=0.5\textwidth}
+    \caption{The occurrence count of combination (previous action, corresponding axis), sorted from the most popular to least popular.
+             Mesh: Thai}
+    \label{f:user:newsample}
+\end{figure}
 
-Therefore, in this simplified model, we assume the probability of ``continue'', ``reverse'', and ``change''
-only depends on (previous action, related coordinate).
-As a result, the number of available samples of each state increases a lot compared with the first method. 
+Then, we introduce step 2. In this step we need to determine $Pr(A_n |_{current state, A_n != A_p})$
+for each possible $A_n$. Due to the limited number of samples, we could not directly derive these probabilities
+from the trace. Instead, we propose a heuristic based on the assumption
+\[
+    Pr(x, y, z, ax, ay, az) = Pr(x)Pr(y)Pr(z)Pr(ax)Pr(ay)Pr(az)
+\]
+In other words, we assume the probability for a viewpoint has a specific value on an axis is independent with its 
+coordinates in other axises.
+At a specific viewpoint $vp = (x, y, z, ax, ay, az)$, if we change the value of $x$, then we stay in the 5-dimension space
+\[
+    (Y=y, Z=z, AX=ax, AY=ay, AZ=az).
+\]
+The probability for the viewpoint be in this space is 
+\begin{align*}
+    Pr(y, z, ax, ay, az)\\
+    =&Pr(y)Pr(z)Pr(ax)Pr(ay)Pr(az)\\
+    =&Pr(x)Pr(y)Pr(z)Pr(ax)Pr(ay)Pr(az)\\
+    =&\frac{Pr(x, y, z, ax, ay, az)}{Pr(x)}.
+    =&\frac{Pr(vp)}{Pr(x)}
+\end{align*}
+Similarly, we can know the probability for the viewpoint to stay in other spaces. 
 
-A further step is needed if ``change'' is selected. First, we need to select a new axis to move along. Here, we 
-assume the next action tends to increase the stability of the system. 
-We define \textit{stability} of a certain axis value as the percentage of the samples having this value, 
-then we define \textit{instability} as the reciprocal of the stability. 
-We set the probability of choosing an axis to be proportional to its instability.  
+Hence, we set the probability of changing a value of axis to be proportional to the probability to stay in the
+corresponding space. For example, the probability of changing $x$
+\begin{align*}
+    =&\frac{\frac{Pr(vp)}{Pr(x)}}
+            {\frac{Pr(vp)}{Pr(x)}
+            +\frac{Pr(vp)}{Pr(y)}
+            +\frac{Pr(vp}{Pr(z)}
+            +\frac{Pr(vp)}{Pr(ax)}
+            +\frac{Pr(vp)}{Pr(ay)}
+            +\frac{Pr(vp)}{Pr(az)}}\\
+    =& \frac{\frac{1}{Pr(x)}}
+            {\frac{1}{Pr(x)}
+            +\frac{1}{Pr(y)}
+            +\frac{1}{Pr(z)}
+            +\frac{1}{Pr(ax)}
+            +\frac{1}{Pr(ay)}
+            +\frac{1}{Pr(az)}
+            }.
+\end{align*}
+Similarly, we can know the probability of changing other coordinates. Intuitively, we can think $Pr(x)$ as 
+the popularity of current $x$ value. The above equation means we tends to change the coordinate having low
+popularity.
 
-Next, we need to choose a direction. The direction can be decided to choose the side has higher stability. 
+
+
+%We verify it with the traces we obtained and we can find that it is a reasonable simplification
+%except for the first several viewpoints. 
+%These first several viewpoints are the default viewpoint and its neighbors almost all users will pass, 
+%so their probability is significantly higher. We ignore these points in this simplified method.
+%Because we have enough samples for these viewpoints, we
+%still use the standard method to derive the transition probability for these viewpoints. 
+
+Next, for each axis we have two directions to move, and we need to know the probability of each direction.
+We assume users tend to move to a position with higher popularity, i.e. $Pr[vp]$. We set the probability 
+of a direction to be proportional to the sum of popularity of its several neighbors in that direction (we choose
+3 neighbors in our implementation). 
+For example, if the axis to change is $x$ and the 3 neighbors in one direction is
+$vp1$, $vp2$, and $vp3$ and the 3 neighbors in
+the other direction is $vp4$, $vp5$, $vp6$. 
+The probability of moving to the first direction is
+\begin{align*}
+   =&\frac{Pr(vp1)+Pr(vp2)+Pr(vp3)}
+          {Pr(vp1)+Pr(vp2)+Pr(vp3)+Pr(vp4)+Pr(vp5)+Pr(vp6)}\\
+   =&\frac{Pr(x1)+Pr(x2)+Pr(x3)}
+          {Pr(x1)+Pr(x2)+Pr(x3)+Pr(x4)+Pr(x5)+Pr(x6)}.
+\end{align*}.
+The reason is that all these viewpoints have same $y$, $z$, $ax$, $ay$, and $az$.
+Several neighbors are considered instead of one is because users tend to choose 
+the same action continuously for several times. 
+
+There is one exception where choosing direction is not needed.
+For the axis we just move along, e.g. for $x$ when the previous 
+action is ``Move Left'', we choose the opposite direction with the previous action
+since otherwise it becomes ``continue''.
+
+In brief, we generate a random trace as follows:
+\begin{enumerate}
+    \item For the default viewpoint, we derive the transition probability from the traces and decide the
+        next action based on it.
+    \item For other viewpoints, we choose ``continue'' or ``change'' based on the continue probability,
+        which is based on {previous action, corresponding coordinate}.
+        If we choose ``continue'', the previous action is taken again.
+    \item If we choose ``change'', we determine the axis to change based on $Pr(x)$, $Pr(y)$, $Pr(z)$, 
+        $Pr(ax)$, $Pr(ay)$, and $Pr(az)$. If the axis is same to the previous one, we choose the opposite 
+        action with previous action. Otherwise, we choose the direction based on the popularity of three
+        neighbors in both directions.
+\end{enumerate}
+
 \subsection{Verification}
 First, we compare this simplified model with second order Markov model. Due to the limited sample size, we 
 select the states that have more than 30 samples. 
@@ -676,19 +791,19 @@ Second, we compare the popularity at each axis.
 Third, we compare the popularity of the most frequently accessed viewpoints.
 \section{Conclusion}
 The analysis of user traces reveals that 
-user actions are predictable to certain extent. The
-prediction based on previous action is simple and effective. 
-Further, locality exists in both data and viewpoint access. By
+locality exists in both data and viewpoint access. By
 storing the most popular mesh data in caching proxies, 
 the server overhead could be significantly reduced. 
+Further, user actions are predictable to certain extent. The
+prediction based on previous action is simple and effective. 
+Moreover, we proposed a model to generate random traces based
+on real traces we collected. These random traces have similar
+properties with the real traces and can be used in simulations
+to measure system performance.
+%We plan to conduct another user study on the effect
+%of network parameters on user interaction with the progressively
+%streamed meshes. In particular, we are interested in understanding
+%the user's tolerance level to delay and bandwidth in the network,
+%the two factors that affect the time and rate at which a mesh 
+%refines its resolution.
 
-We plan to conduct another user study on the effect
-of network parameters on user interaction with the progressively
-streamed meshes. In particular, we are interested in understanding
-the user's tolerance level to delay and bandwidth in the network,
-the two factors that affect the time and rate at which a mesh 
-refines its resolution.
-
-\textbf{Acknowledgement}:
-This project is supported by National University of Singapore Academic
-Research Fund R-252-000-306-112.
