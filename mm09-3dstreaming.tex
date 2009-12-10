@@ -660,14 +660,13 @@ state ``($x,y,z,ax,ay,az,$ previous action)''. Due to the limited number of samp
 transition probability for most of the states. As a result, we need to find a new way to determine the 
 conditional distribution of $A_n$.
 
-To simplify the model, we need to understand more about the user behaviors.
-According to our observation, continuing the previous action has the highest probability in most cases. 
-We think it is mainly because users tend to press the same key multiple times. 
-Sometimes, when users moves the mesh to the edge, they tend to reverse the action to move it back. 
-Otherwise, if the user has decided to change to a new direction, 
-then the previous action may have no effect on the next action.
-
-Therefore, we categorized the action to three groups: \textit{continue}, \textit{reverse}, and \textit{change}. 
+To address the problem of lacking samples, we consider only the main factors 
+affecting the probability of $A_n$ and ignore others. 
+According to our observation, 
+continuing the previous action has the highest probability in most cases. 
+Therefore, the previous action is chosen as one of the most important factor. 
+Besed on the relation with the previous action, we categorized actions to three groups: 
+\textit{continue}, \textit{reverse}, and \textit{change}. 
 We determine the next action in two steps:
 \begin{enumerate}
     \item We determine the probability of ``continue'', ``reverse'', and ``change'',
@@ -676,19 +675,28 @@ We determine the next action in two steps:
         and $Pr(change|_{\textrm{current state}})$,
         respectively. 
     \item We decide the distribution of $A_n$ if ``change'' is decided, 
-        i.e. $Pr(A_n |_{\textrm{current state}, A_n != A_p})$ 
+        i.e. $Pr(A_n |_{\textrm{current state}, A_n != A_p, A_n != \textrm{reverse}(A_p)})$ 
         for each possible $A_n$. 
 \end{enumerate}
+
+
+%We think it is mainly because users tend to press the same key multiple times. 
+%Sometimes, when users moves the mesh to the edge, they tend to reverse the action to move it back. 
+%Otherwise, if the user has decided to change to a new direction, 
+%then the previous action may have no effect on the next action.
+
 %We assume that only step 1 depends on the previous action, and step 2
 %only depends on ($x,y,z,ax,ay,az$). 
 
-In step 1, the continue probability depends on the previous action and the 6-tuple ($x, y, z, ax, ay, az$).
-To simplify the model, we only consider the most important factor and ignore others. 
+In step 1, besides this most important factor, the previous action, we consider only one coordinate instead of six.
+%In step 1, the continue probability depends on the previous action and the 6-tuple ($x, y, z, ax, ay, az$).
+%To simplify the model, we only consider the most important factor and ignore others. 
 As we know, an action only changes one coordinate in the 6-tuple. We call this coordinate \textit{corresponding coordinate}.
 For example, the corresponding coordinate of ``Move Left'' is $x$, and the corresponding coordinate of 
 ``Revolving Clockwise'' is $ay$. 
-When users continue the previous action, only the corresponding coordinate is changed. As a result, we 
-only consider the corresponding coordinate in determining the continue probability. 
+When users are continuing or reversing the previous action, 
+only the corresponding coordinate is changed. 
+As a result, we only consider the corresponding coordinate in determining the continue probability. 
 For example, when a user keeps pressing ``Move Left'', the mesh may nearly be out of the viewable area, 
 then the probability of ``continue'' decreases, and the probability of ``reverse'' increases. 
 Another example is that when the user keeps pressing ``Revolve Clockwise'' and find something interesting
@@ -706,16 +714,28 @@ As a result, the number of available samples of each combination increases a lot
     \label{f:user:newsample}
 \end{figure}
 
-Then, we introduce step 2. In this step we need to determine $Pr(A_n |_{\textrm{current state}, A_n != A_p})$
-for each possible $A_n$. Due to the limited number of samples, we could not directly derive these probabilities
-from the trace. Instead, we propose a heuristic based on the assumption
+In step 2, we need to determine $Pr(A_n |_{\textrm{current state}, A_n != A_p, An != \textrm{reverse}(A_p)})$
+for each possible $A_n$. In this step, we ignore the effect of previous action. 
+We think the high probability of ``continue'' is mainly because users tend to press the same key multiple times. 
+It affects the probability of ``change'', but it affects little on which action to choose as ``change''.
+%When a user has decided to go along another axis, we think the previous action has little effect on the choice of
+%next action. 
+Hence, we assume $Pr(A_n |_{\textrm{current state}, A_n != A_p, An != \textrm{reverse}(A_p)})$
+only depends on $(x, y, z, ax, ay, az)$. Here, all coordinates, except the corresponding coordinate
+(it will not be changed since ``continue'' and ``reverse'' are already excluded from the choices),
+are important to decide the next action, so the sample size is not large enough to derive the probabilities
+from the trace.
+Instead, we propose a heuristic based on the assumption
 \[
     Pr(x, y, z, ax, ay, az) = Pr(x)Pr(y)Pr(z)Pr(ax)Pr(ay)Pr(az)
 \]
-In other words, we assume the probability for a viewpoint has a specific value on an axis is independent with its 
-coordinates in other axises.
-At a specific viewpoint $Vp = (x, y, z, ax, ay, az)$, 
-if we change the value of $x$, then we stay in the 5-dimension space
+In other words, we assume the probability for a viewpoint has a specific coordinate is independent with its 
+other coordinates. This is a assumption to simplify our model, and will introduce some difference between
+synthetic traces and real traces. In the validation part, however, we show that the difference is not 
+significant.
+
+At a specific viewpoint $Vp = (x, y, z, ax, ay, az)$, if we change the value of $x$, 
+then we stay in the 5-dimension space
 \[
     (Y=y, Z=z, AX=ax, AY=ay, AZ=az).
 \]
@@ -749,8 +769,6 @@ corresponding space. For example, the probability of changing $x$ when the previ
 Similarly, we can know the probability of changing other coordinates. Intuitively, we can think $Pr(x)$ as 
 the popularity of current $x$ value. The above equation means we tends to change the coordinate having low
 popularity.
-
-
 
 %We verify it with the traces we obtained and we can find that it is a reasonable simplification
 %except for the first several viewpoints. 
@@ -790,7 +808,16 @@ In brief, we generate a random trace as follows:
         neighbors in both directions.
 \end{enumerate}
 
-\subsection{Verification}
+The synthetic traces generated by our method satisfying some important requirements. 
+When replaying the traces we generated, the mesh will not stay in abnormal status for long 
+(abnormal positions include upside down, titled, out of viewable area, etc.).
+Since we decide the ``continue'' and ``reverse'' probability considering the corresponding coordinate,
+the probability for the mesh to enter abnormal status is low, and it tends to go back to normal status
+by ``reverse'' action. 
+Moreover, whenever ``change'' is chosen, 
+the mesh tends to go to a more normal status (a status having higher probability). 
+
+\subsection{Validation}
 First, we compare this simplified model with second order Markov model. Due to the limited sample size, we 
 select the states that have more than 30 samples. 
 
