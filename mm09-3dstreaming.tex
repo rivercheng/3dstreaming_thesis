@@ -1,4 +1,4 @@
-\chapter{Understanding User Behahaviors}
+\chapter{Study of User Behaviors}
 \label{c:user}
 \section{Introduction}
 High-resolution 3D meshes are typically data rich and demand high network bandwidth 
@@ -137,7 +137,7 @@ During the experiment, users' key press actions and viewpoints
 were logged for offline analysis. The representation of the viewpoints
 and actions are introduced in detail as follows.
 
-A viewpoint indicates the position and direction of the user's eye.
+A viewpoint indicates the from where and to which direction users view the mesh.
 Users can change their viewpoints during the session. Changing the position of 
 viewpoint is equivalent to changing the position of the mesh. Therefore, from another aspect,
 users are changing the position and direction of the mesh during the session.
@@ -148,8 +148,9 @@ from a certain distance.
 We use a 6-tuple, ($x, y, z, ax, ay, az$) to indicate the relative position of the mesh. 
 The ($x, y, z, ax, ay, az$) means
 translating the mesh $x$ units right, $y$ units up, and $z$ units closer to the user (i.e. out of the screen). 
-Then, we rotate the mesh $ax$ degree around $x$ axis, $ay$ degree around $y$ axis,
-and $az$ degree around $z$ axis. During the rotation, the center of the mesh is not moved.
+Then, we rotate the mesh $ax$ degrees around $x$ axis, $ay$ degrees around $y$ axis,
+and $az$ degrees around $z$ axis. 
+%During the rotation, the center of the mesh is not moved.
 The positive directions of translation and rotation are shown in the Figure \ref{f:user:viewpoint}.
 The default position is ($0, 0, 0, 0, 0, 0$).
 \begin{figure}
@@ -229,6 +230,7 @@ In this section, we present our analysis on the user behavior. We present only o
 In addition, we also discuss what implications these results have on system design.
 
 \subsection{Session Length}
+\label{ss:user:session}
 Session length refers to the time each user spends in viewing a mesh. 
 Generally, the session length is short, with the average values of 107s, 76s, 47s for \textit{Thai Statue}, 
 \textit{Dragon}, and \textit{Happy Buddha}, respectively (see Table \ref{t:TimeTable}). 
@@ -292,6 +294,7 @@ Happy Buddha&47&98&403&13\\
 %\end{table}
 
 \subsection{Think Time}
+\label{ss:user:thinktime}
 We refer to the time between two key strokes as \textit{inter-stroke time}. 
 Consecutive key strokes of the same type with inter-stroke time smaller than 20 $m$s
 are grouped together as one \textit{action}. 
@@ -339,6 +342,16 @@ classify the viewpoints into 4 regions: front-far (FF), front-near
 (FN), back-far (BF), and back-near (BN), based on \textit{front/back} and
 \textit{far/near}. We find that the think time distribution is not
 affected by the viewpoint (see Figure \ref{fig:think-time}(b)). 
+
+Next, it is reasonable to assume think time is small when user just repeat 
+the previous action and the think time tends to be big when user change to another action.
+Figure \ref{f:user:thinktime} shows this assumption is correct.
+\begin{figure}
+    \centering
+    \epsfig{file=thinktime.eps, width=0.5\textwidth}
+    \caption{Think time is smaller when user repeat the previous action.}
+    \label{f:user:thinktime}
+\end{figure}
 
 \subsection{Access Pattern}
 Proxy caching of meshes is useful in reducing the service load.  
@@ -459,7 +472,7 @@ or long delay, the requests for vertex splits of the new viewpoint
 can be sent based on the prediction before the user changes the viewpoint.
 Another example is that when the client has limited
 rendering power, the next viewpoint can be rendered
-in advance based on prediction to reduce the response time. 
+in advance based on the prediction to reduce the response time. 
 %In both cases, the accuracy of the prediction is important.
 
 The next action of a user, $A_n$, is a random variable with 14 possible values
@@ -476,7 +489,7 @@ on the traces from each of 9 meshes,
 displayed as a bubble chart. 
 The bubble size indicates the frequency of an action occurring for a mesh.
 We can see that the most frequently used actions are two revolving (rotating around y-axis). 
-As a result, without any extra information, we can always predict the next action is 
+As a result, without any extra information, we can always predict that the next action is 
 one of the two revolving.
 The accuracy of this prediction, however, is low. 
 Take the Thai mesh as an example,
@@ -514,15 +527,15 @@ of being taken next. %The other meshes exhibit the similar pattern.
 \end{figure}
 
 According to this observation, 
-we categorized the actions to two types: \textit{continue}, \textit{non-continue}. 
-Then we can predict the next action by choosing Continue unconditional.
+we categorized the actions into two types: \textit{continue}, \textit{non-continue}. 
+Then we can predict the next action by choosing ``continue'' unconditional.
 The probability of ``continue'' for three meshes can be seen in Figure \ref{f:user:cont_prob}.
 Therefore, always choosing ``continue'' as the prediction has high accuracy 
 (larger than $80\%$ for all meshes). 
 \begin{figure}[htdp!]
     \centering
     \epsfig{file=cont_prob_9.eps, width=0.5\textwidth}
-    \caption{The probability of continue the previous action for 9 meshes.}
+    \caption{The probability of continuing the previous action for 9 meshes.}
     \label{f:user:cont_prob}
 \end{figure}
 
@@ -530,7 +543,7 @@ Therefore, always choosing ``continue'' as the prediction has high accuracy
     \centering
     \epsfig{file=thai_2.eps, width=0.5\textwidth}
     \caption{The probability of continuing the previous action for each combination of previous two actions (Thai Mesh).
-    'x' means the sample size of this combination is too small (less than 10 samples) to obtain reliable probability.}
+    'x' means that the sample size of this combination is too small (less than 10 samples) to obtain reliable probability.}
     \label{f:user:prev2}
 \end{figure}
 Next, we check whether it helps to consider one more action, the second latest action. 
@@ -548,11 +561,12 @@ Therefore, we conclude that considering only the previous action is enough for t
 
 The other method is to consider the current viewpoint of the user.
 We compute the conditional distribution of next action $A_n$ on each viewpoint, 
-and always choose the action with highest conditional probability as the prediction.
+and always choose the action with the highest conditional probability as the prediction.
 
-Since we estimate the probability of a action as the frequency of its occurrence in
-the real traces, enough number of samples are required to give reliable results. 
-By analysing the traces we collected, we find that majority of the samples are 
+Since we estimate the probability of an action as the frequency 
+of its occurrence in the real traces, 
+enough number of samples are required to give reliable results. 
+By analyzing the traces we collected, we found that majority of the samples are 
 on a small proportion of viewpoints, and for the rest viewpoints, we have few
 samples (See Figure \ref{f:user:sample_size_1}).
 \begin{figure}
@@ -591,7 +605,7 @@ It is reasonable because the meshes has a defect are almost identical to the ori
 and users do not know which one has defect in advance. Therefore, their behavior are similar to
 all three versions of the same mesh.}.
 Our conclusion is that the user action is somewhat predictable and the prediction is simple.
-We can always predict the next action is same to the previous one without considering
+We can always predict the next action same as the previous one without considering
 any extra information, and the accuracy is good enough. 
 Considering both previous action and viewpoint has the highest accuracy,
 but it depends on the statistics of user behavior and differs on every mesh. Hence, it can only 
@@ -616,7 +630,7 @@ as introduced in Section \ref{s:user:study}, can be defined as the states in the
 According to the observation that the previous actions highly affects the next action
 (Section \ref{ss:user:predictability}),
 it is not a first order Markov chain because
-the previous states affect on the transition probability. 
+the previous states affect the transition probability. 
 It, however, is not practical to consider the whole history before. 
 To make the analysis possible, we consider only one step before and assume
 ``(previous state, current state)'' decides ``next state''. In other words, 
@@ -628,13 +642,13 @@ We can reduce the second order Markov chain to first order by defining the curre
 ``(previous viewpoint, current viewpoint)''. After a user action, the new state becomes 
 ``(current viewpoint, next viewpoint)'' (See Figure \ref{f:user:reduction}(A)). 
 Then, the transition probability only depends on the current state.
-Notice that ``(previous viewpoint, current viewpoint)'' is equivalent to ``(current viewpoint, last-action)'', 
-so we finally define the state to be ``($x, y, z, ax, ay, az,$ previous action).'' 
+Notice that ``(previous viewpoint, current viewpoint)'' is equivalent to ``(current viewpoint, previous action)'', 
+so we finally define the state to be ``($x, y, z, ax, ay, az, A_p$).'' 
 (See Figure \ref{f:user:reduction}(B)).
 \begin{figure}
     \centering
     \epsfig{file=reduction.eps, width=0.6\textwidth}
-    \caption{(A), State = (previous viewpoint, current viewpoint); (B), State = ($x, y, z, ax, ay, az$, previous action)}
+    \caption{(A), State = (previous viewpoint, current viewpoint); (B), State = ($x, y, z, ax, ay, az, A_p$)}
     \label{f:user:reduction}
 \end{figure}
 
@@ -648,15 +662,14 @@ many synthetic traces are generated, the number of accessed viewpoints is upper-
 Second, due to the large sample space and limited number of samples, most of the states has only one sample
 (See Figure \ref{f:user:sample_size_2}). 
 In other words, in the transition matrix, the next action for most states are determined. 
-Therefore, after several steps, the synthetic trace follows the exact path as one of the real traces. 
-Therefore, the synthetic traces are not random enough.
+As a result, after several steps, the synthetic trace follows the exact path as one of the real traces. Therefore, the synthetic traces are not random enough.
 
 To address these two limitations, we propose a method to generate more random traces in the next section.
 It is based on a simplified model, which does not directly derive and follow the transition matrix.
 
 \subsection{Simplified Model}
 To generate a random trace, we need to determine the probability of each possible $A_n$ based on current
-state ``($x,y,z,ax,ay,az,$ previous action)''. Due to the limited number of samples, we cannot obtain the reliable
+state ``($x,y,z,ax,ay,az,A_p$)''. Due to the limited number of samples, we cannot obtain the reliable
 transition probability for most of the states. As a result, we need to find a new way to determine the 
 conditional distribution of $A_n$.
 
@@ -702,7 +715,7 @@ then the probability of ``continue'' decreases, and the probability of ``reverse
 Another example is that when the user keeps pressing ``Revolve Clockwise'' and find something interesting
 in the mesh from the current direction,
 the probability of ``continue'' decreases and the probability of ``change'' increases.
-In summary, in this simplified model, we assume the probability of ``continue'', ``reverse'', and ``change''
+In summary, in this simplified model, we assume that the probability of ``continue'', ``reverse'', and ``change''
 only depends on ``(previous action, corresponding coordinate)''.
 As a result, the number of available samples of each combination increases a lot compared with the first method
 (See Figure \ref{f:user:newsample}). 
@@ -717,10 +730,10 @@ As a result, the number of available samples of each combination increases a lot
 In step 2, we need to determine $Pr(A_n |_{\textrm{current state}, A_n != A_p, An != \textrm{reverse}(A_p)})$
 for each possible $A_n$. In this step, we ignore the effect of previous action. 
 We think the high probability of ``continue'' is mainly because users tend to press the same key multiple times. 
-It affects the probability of ``change'', but it affects little on which action to choose as ``change''.
+It affects the probability of ``change'', but its effect on which action to choose as ``change'' is little.
 %When a user has decided to go along another axis, we think the previous action has little effect on the choice of
 %next action. 
-Hence, we assume $Pr(A_n |_{\textrm{current state}, A_n != A_p, An != \textrm{reverse}(A_p)})$
+Hence, we assume that $Pr(A_n |_{\textrm{current state}, A_n != A_p, An != \textrm{reverse}(A_p)})$
 only depends on $(x, y, z, ax, ay, az)$. Here, all coordinates, except the corresponding coordinate
 (it will not be changed since ``continue'' and ``reverse'' are already excluded from the choices),
 are important to decide the next action, so the sample size is not large enough to derive the probabilities
@@ -729,8 +742,8 @@ Instead, we propose a heuristic based on the assumption
 \[
     Pr(x, y, z, ax, ay, az) = Pr(x)Pr(y)Pr(z)Pr(ax)Pr(ay)Pr(az)
 \]
-In other words, we assume the probability for a viewpoint has a specific coordinate is independent with its 
-other coordinates. This is a assumption to simplify our model, and will introduce some difference between
+In other words, we assume that the probability for a viewpoint has a specific coordinate is independent with its 
+other coordinates. This is an assumption to simplify our model, and will introduce some difference between
 synthetic traces and real traces. In the validation part, however, we show that the difference is not 
 significant.
 
@@ -739,7 +752,7 @@ then we stay in the 5-dimension space
 \[
     (Y=y, Z=z, AX=ax, AY=ay, AZ=az).
 \]
-The probability for the viewpoint be in this space is 
+The probability of the viewpoint staying in this space is 
 \begin{align*}
     &Pr(y, z, ax, ay, az)\\
     =&Pr(y)Pr(z)Pr(ax)Pr(ay)Pr(az)\\
@@ -747,9 +760,9 @@ The probability for the viewpoint be in this space is
     =&\frac{Pr(x, y, z, ax, ay, az)}{Pr(x)}\\
     =&\frac{Pr(Vp)}{Pr(x)}.
 \end{align*}
-Similarly, we can know the probability for the viewpoint to stay in other spaces. 
+Similarly, we can know the probability of the viewpoint staying in other spaces. 
 
-Hence, we set the probability of changing a value of axis to be proportional to the probability to stay in the
+Hence, we set the probability of changing a value of axis to be proportional to the probability of staying in the
 corresponding space. For example, the probability of changing $x$ when the previous action on $AY$
 \begin{align*}
     =&\frac{\frac{Pr(vp)}{Pr(x)}}
@@ -767,7 +780,7 @@ corresponding space. For example, the probability of changing $x$ when the previ
             }.
 \end{align*}
 Similarly, we can know the probability of changing other coordinates. Intuitively, we can think $Pr(x)$ as 
-the popularity of current $x$ value. The above equation means we tends to change the coordinate having low
+the popularity of current $x$ value. The above equation means that we tends to change the coordinate having low
 popularity.
 
 %We verify it with the traces we obtained and we can find that it is a reasonable simplification
@@ -793,19 +806,19 @@ the same action several times.
 
 In brief, we generate a random trace as follows:
 \begin{enumerate}
+    \item Determine the session time according to the distribution of session time we derived from the real traces.
     \item For the default viewpoint, we derive the transition probability from the traces and decide the
         next action based on it.
     \item For other viewpoints, we choose ``continue'', ``reverse'', or ``change'' 
-        based on the continue probability and reverse probability,
-        which are based on {previous action, corresponding coordinate}.
-        If we choose ``continue'', the previous action is taken again.
-        If ``reverse'' is chosen, the opposite action is taken.
-        Otherwise, we go to next step.
+        based on {previous action, corresponding coordinate}.
     \item If we choose ``change'', 
         we first determine the axis to change based on $Pr(x)$, $Pr(y)$, $Pr(z)$, 
         $Pr(ax)$, $Pr(ay)$, and $Pr(az)$. 
         Next, we choose the direction based on the popularity of three
         neighbors in both directions.
+    \item We randomly select a think time from two different distributions 
+        based whether the action is ``continue'' or not (see Section \ref{ss:user:thinktime}).
+        Then go back to step 3 unless the session time is expired.
 \end{enumerate}
 
 The synthetic traces generated by our method satisfying some important requirements. 
@@ -818,27 +831,86 @@ Moreover, whenever ``change'' is chosen,
 the mesh tends to go to a more normal status (a status having higher probability). 
 
 \subsection{Validation}
-First, we compare this simplified model with second order Markov model. Due to the limited sample size, we 
-select the states that have more than 30 samples. 
+In this section, we validate our model by comparing the synthetic traces we generated with the real traces.
+We generated 10000 random traces following the simplified model we introduced in the last section.
+Thai mesh is chosen as the mesh used in this validation because of its high complexity and hence
+the high challenge.
 
-Second, we compare the popularity at each axis. 
+First, we compare the unconditional probability of each action in the traces. 
+From Figure \ref{f:user:frequency_comp}, we can see the traces we generated fit well with the real traces. 
+This result is impressing because we never consider unconditional probability in our model, but  
+still the traces generated have similar unconditional probability for each action.
+\begin{figure}[htdp!]
+    \centering
+    \epsfig{file=general_prob_comp.eps, width=0.5\textwidth}
+    \caption{Comparison of occurrence frequency of each action.}
+    \label{f:user:frequency_comp}
+\end{figure}
 
-Third, we compare the popularity of the most frequently accessed viewpoints.
+Second, we compare the probability of continuing the previous action, including unconditional continue probability
+and the continue probability under different previous action. We can see from Figure \ref{f:user:continue_prob_comp},
+the synthetic traces we generated has similar continuing probability under all conditions.
+\begin{figure}[htdp!]
+    \centering
+    \epsfig{file=continue_prob_comp.eps, width=0.5\textwidth}
+    \caption{Comparison of unconditional continue probability and continue probability under different previous actions.}
+    \label{f:user:continue_prob_comp}
+\end{figure}
+
+Third, we compare how the viewpoints distributed on each axis, 
+i.e. the value of $Pr[x]$, $Pr[y]$, $Pr[z]$, $Pr[ax]$, $Pr[ay]$, and $Pr[az]$. 
+Figure \ref{f:user:axis_distribution} shows that the synthetic traces we generated has similar distributions on all 
+axises. Among the six axises, only the $Y$ axis has a slightly higher error. The synthetic traces tends to stay in the
+center ($0$) more often. The correlation between these two set of values, however, is still close to $1$. 
+Again, this result is interesting. Although we have considered these probabilities in the selection new action when
+``change'' is selected, the majority of selection (recall that generally more than 80\% of actions are ``continue'')
+has nothing to do with these values. 
+\begin{figure}[htdp!]
+    \centering
+    \begin{tabular}{cc}
+    \epsfig{file=x.eps, width=0.45\textwidth}&
+    \epsfig{file=y.eps, width=0.45\textwidth}\\
+    \epsfig{file=z.eps, width=0.45\textwidth}&
+    \epsfig{file=ax.eps, width=0.45\textwidth}\\
+    \epsfig{file=ay.eps, width=0.45\textwidth}&
+    \epsfig{file=az.eps, width=0.45\textwidth}
+    \end{tabular}
+    \caption{Comparison of distribution of viewpoints on different axises.}
+    \label{f:user:axis_distribution}
+\end{figure}
+
+The final comparison is on the transition probability on certain state, $Pr(A_n|_{(x, y, z, ax, ay, az, A_p)}$. 
+If the Markov chain method used, the synthetic traces should have the same transition probability with the real trace.
+Due to the limited sample size, however, we have to use a simplified method. 
+This comparison shows how much difference we introduced by this simplification. 
+We only choose some states with enough number of samples to ensure the transition probabilities
+are reliable. Some of the results are shown in Figure \ref{f:user:transition_comp}.
+\begin{figure}
+    \centering
+    \begin{tabular}{cc}
+        \epsfig{file=transition6.eps, width=0.45\textwidth}&
+        \epsfig{file=transition8.eps, width=0.45\textwidth}\\
+        \epsfig{file=transition10.eps, width=0.45\textwidth}&
+        \epsfig{file=transition11.eps, width=0.45\textwidth}\\
+        \epsfig{file=transition12.eps, width=0.45\textwidth}&
+        \epsfig{file=transition16.eps, width=0.45\textwidth}\\
+        \epsfig{file=transition17.eps, width=0.45\textwidth}&
+        \epsfig{file=transition18.eps, width=0.45\textwidth}\\
+    \end{tabular}
+    \caption{Comparison of transition probabilities on certain states.}
+    \label{f:user:transition_comp}
+\end{figure}
+In most of the cases, the synthetic traces have similar transition probability. The largest error happens
+when the sample size is small (22) and the distribution of next action is relatively even (the 6th figure). 
+In this case, the transition probability derived from the real traces itself is not so reliable. In short, due to the limited number
+of real traces, the value of comparison based on states is limited. According to the results we have, however, the simplified model
+works well.
+
 \section{Conclusion}
-The analysis of user traces reveals that 
-locality exists in both data and viewpoint access. By
-storing the most popular mesh data in caching proxies, 
-the server overhead could be significantly reduced. 
-Further, user actions are predictable to certain extent. The
-prediction based on previous action is simple and effective. 
-Moreover, we proposed a model to generate random traces based
-on real traces we collected. These random traces have similar
-properties with the real traces and can be used in simulations
-to measure system performance.
-%We plan to conduct another user study on the effect
-%of network parameters on user interaction with the progressively
-%streamed meshes. In particular, we are interested in understanding
-%the user's tolerance level to delay and bandwidth in the network,
-%the two factors that affect the time and rate at which a mesh 
-%refines its resolution.
+We conclude this chapter by showing the most significant findings we have.
+First, the analysis of user traces reveals that locality exists in both data and viewpoint access. By
+storing the most popular mesh data in caching proxies, the server overhead could be significantly reduced. 
+Second, user actions are predictable to certain extent. The prediction based on previous action is simple and effective. 
+Third, we proposed a model to generate synthetic traces based on real traces we collected. These synthetic traces have similar
+properties with the real traces and can be used in simulations to measure system performance.
 
