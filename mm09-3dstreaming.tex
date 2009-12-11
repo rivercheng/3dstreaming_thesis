@@ -837,7 +837,7 @@ Thai mesh is chosen as the mesh used in this validation because of its high comp
 the high challenge.
 
 First, we compare the unconditional probability of each action in the traces. 
-From Figure \ref{f:user:frequency_comp}, we can see the traces we generated fit well with the real traces. 
+From Figure \ref{f:user:frequency_comp}, we can see that the traces we generated fit well with the real traces. 
 This result is impressing because we never consider unconditional probability in our model, but  
 still the traces generated have similar unconditional probability for each action.
 \begin{figure}[htdp!]
@@ -860,10 +860,10 @@ the synthetic traces we generated has similar continuing probability under all c
 Third, we compare how the viewpoints distributed on each axis, 
 i.e. the value of $Pr[x]$, $Pr[y]$, $Pr[z]$, $Pr[ax]$, $Pr[ay]$, and $Pr[az]$. 
 Figure \ref{f:user:axis_distribution} shows that the synthetic traces we generated has similar distributions on all 
-axises. Among the six axises, only the $Y$ axis has a slightly higher error. The synthetic traces tends to stay in the
+axises. Among the six axises, only the $Y$ axis has a slightly higher error. The synthetic traces tend to stay in the
 center ($0$) more often. The correlation between these two set of values, however, is still close to $1$. 
-Again, this result is interesting. Although we have considered these probabilities in the selection new action when
-``change'' is selected, the majority of selection (recall that generally more than 80\% of actions are ``continue'')
+Again, this result is interesting. Although we have considered these probabilities in selecting new action when
+``change'' is selected, the majority of selections (recall that more than 80\% of actions are ``continue'')
 has nothing to do with these values. 
 \begin{figure}[htdp!]
     \centering
@@ -879,7 +879,7 @@ has nothing to do with these values.
     \label{f:user:axis_distribution}
 \end{figure}
 
-The final comparison is on the transition probability on certain state, $Pr(A_n|_{(x, y, z, ax, ay, az, A_p)}$. 
+The final comparison is on the transition probability on certain state, $Pr(A_n|_{(x, y, z, ax, ay, az, A_p)})$. 
 If the Markov chain method used, the synthetic traces should have the same transition probability with the real trace.
 Due to the limited sample size, however, we have to use a simplified method. 
 This comparison shows how much difference we introduced by this simplification. 
@@ -903,14 +903,17 @@ are reliable. Some of the results are shown in Figure \ref{f:user:transition_com
 In most of the cases, the synthetic traces have similar transition probability. The largest error happens
 when the sample size is small (22) and the distribution of next action is relatively even (the 6th figure). 
 In this case, the transition probability derived from the real traces itself is not so reliable. In short, due to the limited number
-of real traces, the value of comparison based on states is limited. According to the results we have, however, the simplified model
-works well.
+of real traces, the value of comparison based on states is limited. According to the results we have, however, we still can conclude 
+the simplified model works well.
 
 \section{Conclusion}
 We conclude this chapter by showing the most significant findings we have.
-First, the analysis of user traces reveals that locality exists in both data and viewpoint access. By
-storing the most popular mesh data in caching proxies, the server overhead could be significantly reduced. 
+First, the analysis of user traces reveals that locality exists in both data and viewpoint access. 
+We can exploit this locality in designing progressive mesh streaming systems and rending systems.
+%storing the most popular mesh data in caching proxies, the server overhead could be significantly reduced. 
 Second, user actions are predictable to certain extent. The prediction based on previous action is simple and effective. 
+Therefore, pre-fetching becomes possible both in streaming and rendering.
 Third, we proposed a model to generate synthetic traces based on real traces we collected. These synthetic traces have similar
-properties with the real traces and can be used in simulations to measure system performance.
+properties with the real traces and hence can be used in simulations to measure system performance without collecting
+a large number of traces.
 
