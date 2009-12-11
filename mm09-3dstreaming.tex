@@ -16,7 +16,7 @@ high-resolution meshes, we could create a large number of synthetic traces,
 which simulate users' actions, and these traces can be used in modeling system
 performance during simulations. This method is much cheaper than collecting 
 a large number of traces from real users and can be used in developing and evaluating
-prototypes. For example, we use the random traces we generated to test our P2P mesh
+prototypes. For example, we use the synthetic traces we generated to test our P2P mesh
 streaming systems introduced in next Chapter.
 
 Most previous work on user interactions with 3D objects
@@ -25,7 +25,7 @@ techniques
 (e.g., the study by Chen et. al \cite{chen88study} and Hinckley et. al \cite{hinckley97usability}). 
 In this thesis, however, we study
 user behavior from the system design point of view, 
-such as predictability (for prefetching) and locality of access patterns (for caching),
+such as predictability (for pre-fetching) and locality of access patterns (for caching),
 similar to the spirit of the landmark studies for the Web \cite{huberman98web} and file system \cite{ousterhout85trace}.  
 No such prior study exists for progressive meshes. This chapter presents our first step towards filling 
 this gap.
@@ -80,7 +80,7 @@ We added one localized visual defect, by denting a small region, to each replica
 without changing its number of vertices or faces. The reason for adding the defects will be explained later. 
 The location and nature of the
 defects vary between the meshes. As \textit{Happy Buddha} is
-relatively simplier and has a smooth surface, its defect is
+relatively simpler and has a smooth surface, its defect is
  more obvious than \textit{Dragon}
 and \textit{Thai Statue}.  Defects for the later two meshes, due to the
 irregular surfaces, are hard to find unless the user zooms in
@@ -123,7 +123,7 @@ The order of the products are randomized to avoid order effects.
 The participants' job is to pick the best item among the three. Each item 
 can be viewed in any order and if desired, multiple times.  When 
 a participant selects an item, a new viewing window (width of 14cm and
-height of 15cm, with a resolution of 500x500 pixels) opens, and the 3D mesh corresponding to that item is
+height of 15cm, with a resolution of $500 \times 500$ pixels) opens, and the 3D mesh corresponding to that item is
 progressively streamed and rendered in the window.  
 The participants can interact freely
 with the mesh until they close the window.
@@ -134,7 +134,7 @@ complete the experiment.
 \textbf{Experiment Records}
 
 During the experiment, users' key press actions and viewpoints
-were logged for offline analysis. The representation of the viewpoints
+were logged for off-line analysis. The representation of the viewpoints
 and actions are introduced in detail as follows.
 
 A viewpoint indicates the from where and to which direction users view the mesh.
@@ -359,7 +359,7 @@ In this section, we show that the user traces exhibit access
 patterns that can lead to efficient caching.
 
 \textbf{Caching for Mesh Streaming}.
-In progressive mesh streaming, vertice splits are often grouped into chunks
+In progressive mesh streaming, vertex splits are often grouped into chunks
 for transmission. These chunks can be cached at a proxy to reduce server overhead.
 To study the usefulness of proxy caching, we look at the access pattern to chunks. 
 
@@ -654,7 +654,7 @@ so we finally define the state to be ``($x, y, z, ax, ay, az, A_p$).''
 
 Each record in the user traces can be seen as a sample of this random process.
 From these samples, we can compute the transition probability between two states, and hence
-the transition matrix, with which we can generate random traces.
+the transition matrix, with which we can generate synthetic traces.
 
 This method, however, has limitations when the number of collected traces is small. First, if a viewpoint is 
 never accessed by the real traces, it will not accessed by synthetic traces either. Therefore, no matter how
@@ -664,11 +664,11 @@ Second, due to the large sample space and limited number of samples, most of the
 In other words, in the transition matrix, the next action for most states are determined. 
 As a result, after several steps, the synthetic trace follows the exact path as one of the real traces. Therefore, the synthetic traces are not random enough.
 
-To address these two limitations, we propose a method to generate more random traces in the next section.
+To address these two limitations, we propose a method to generate more synthetic traces in the next section.
 It is based on a simplified model, which does not directly derive and follow the transition matrix.
 
 \subsection{Simplified Model}
-To generate a random trace, we need to determine the probability of each possible $A_n$ based on current
+To generate a synthetic trace, we need to determine the probability of each possible $A_n$ based on current
 state ``($x,y,z,ax,ay,az,A_p$)''. Due to the limited number of samples, we cannot obtain the reliable
 transition probability for most of the states. As a result, we need to find a new way to determine the 
 conditional distribution of $A_n$.
@@ -678,7 +678,7 @@ affecting the probability of $A_n$ and ignore others.
 According to our observation, 
 continuing the previous action has the highest probability in most cases. 
 Therefore, the previous action is chosen as one of the most important factor. 
-Besed on the relation with the previous action, we categorized actions to three groups: 
+Based on the relation with the previous action, we categorized actions to three groups: 
 \textit{continue}, \textit{reverse}, and \textit{change}. 
 We determine the next action in two steps:
 \begin{enumerate}
@@ -804,7 +804,7 @@ Notice all these viewpoints have same $y$, $z$, $ax$, $ay$, and $az$.
 We consider several neighbors instead of one because users tend to continue 
 the same action several times. 
 
-In brief, we generate a random trace as follows:
+In brief, we generate a synthetic trace as follows:
 \begin{enumerate}
     \item Determine the session time according to the distribution of session time we derived from the real traces.
     \item For the default viewpoint, we derive the transition probability from the traces and decide the
@@ -832,7 +832,7 @@ the mesh tends to go to a more normal status (a status having higher probability
 
 \subsection{Validation}
 In this section, we validate our model by comparing the synthetic traces we generated with the real traces.
-We generated 10000 random traces following the simplified model we introduced in the last section.
+We generated 10000 synthetic traces following the simplified model we introduced in the last section.
 Thai mesh is chosen as the mesh used in this validation because of its high complexity and hence
 the high challenge.
 
