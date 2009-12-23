@@ -1,46 +1,6 @@
 \chapter{Peer-Assisted View-Dependent Streaming}
 \label{c:p2p}
 \section{Introduction}
-%    \todo{Motivation Here}
-%    \todo{Why 3D streaming}
-
-    Advances in 3D scanning technology and 3D modeling
-    techniques have enabled creations of huge,
-    high-resolution, 3D meshes.  These meshes are
-    increasingly available for viewing over the Internet, in
-    applications such as virtual worlds and virtual museums.
-    Huge models may take long time to download completely
-    for display at the client.  For example, the Stanford
-    model of the David statue, with 28 million vertices and
-    56 million triangles, is still 70 MB in size with
-    state-of-the-art compression
-    \cite{alliez2001progressive} and needs around 10 minutes
-    to download at 1 Mbps.
-
-    To reduce waiting time, huge meshes are usually
-    progressively coded \cite{hoppe96progressive} and
-    transmitted via \textit{progressive streaming}, where a
-    low resolution version of the mesh (called \textit{base
-    mesh}) is transmitted and rendered first.  Refinements
-    (called \textit{vertex splits}) are then continuously
-    transmitted to incrementally improve the level of
-    details of the mesh (See Figure \ref{progressive}).
-    Each vertex split splits a vertex into two vertices.
-    This technique allows the client to view a coarse
-    version of the mesh quickly, trading off details and
-    waiting time.  The client may stop receiving the
-    refinement once sufficient details are received.
-    Further, only the visible region needs to be sent (so called
-    \textit{view-dependent} \cite{258843} streaming). 
-    
-    \begin{figure}[htbp!]
-    \centering
-    \epsfig{file=progressive.eps, width=0.45\textwidth}
-    \caption{
-    Progressive 3D mesh streaming. Original mesh 
-    courtesy of Stanford Computer Graphics Laboratory.
-    \label{progressive}}
-    \end{figure}
     In applications such as virtual art gallery, virtual
     earth, virtual museums, and virtual auction house,
     statues, artifacts, and auction items are streamed to
@@ -160,87 +120,9 @@
     \ref{s:experiment} and conclude in Section
     \ref{s:conclude}.
 
-\section{Related Work}
-\label{s:related}
-\subsection{Streaming of 3D Data}
-
-%Research in streaming of 3D data has previously considered different
-%representations for the data, 
-Previous studies in 3D data streaming have considered different
-approaches for data representation,
-including point-based, image-based, 
-and mesh-based.  In this section, we focus on mesh-based representation 
-as it is most related to our work.
-
-The main concern in streaming of 3D meshes is 
-how to improve the quality of the received mesh as fast as possible, 
-mitigate distortion to rendered mesh in the presence of packet losses,
-and scale to a large number of users.
-
-At the transport layer, Al-Regib and Altunbasak \cite{3tpregib}, Li
-et al. \cite{Li2006}, and Chen et al. \cite{chen05hybrid} have
-investigated how to intelligently select either TCP or UDP for
-transmissions to trade off reliability and end-to-end delay.  Li et
-al. have also considered SCTP with partial reliability.
-%for this purpose.  
-Harris III and Kravets \cite{harris:design} propose a new
-transport protocol that exploits loss tolerance and
-partially-ordered property of 3D objects organized into trees of
-bounding volumes.
-
-At the application layer, the major error control techniques: error
-resilient coding, error protection, retransmission, and error
-concealment, have all been applied to mesh streaming.  Park et al.
-\cite{error:Park} and Yan et al. \cite{error:Yan} focus on how to best
-segment a progressive mesh into smaller partitions such that it is
-more resilient to losses.  Al-Regib et al. \cite{1061349} consider a
-joint-source channel coding method to determine appropriate level of
-error protection to use.  Chen et al. \cite{chen05hybrid} also use
-FEC for transmission of 3D data.  Error concealment is considered by
-Park et al. \cite{Park2003}.  Cheng et al. \cite{cheng07analytical}
-argue for retransmissions as the main error control method, while
-Tian \cite{Tian2006} uses selective retransmission in their system.
-
-The issue of scaling 3D streaming to a large number of users has not
-been sufficiently addressed.  In our previous work, we focus on
-reducing the computational overhead at the server \cite{Cheng2008}, by
-shifting the burden of visibility computation from the sender to
-the receiver.  
-Hu et al. \cite{Hu2008} and Cavagna et al. \cite{Cavagna2006} have considered using peer-to-peer architecture to stream a 3D scene
-to improve scalability.  Our work is similar in
-spirit, but we focus on streaming single, large,
-progressive mesh in a view-dependent manner, rather than a 3D scene,
-    %. Streaming a single, highly detailed, progressive
-    %mesh is different from streaming of a 3D scene,
-    %The 3D scene streaming, however, is quite difference with the
-    %streaming of single highly detailed progressive mesh targeted in this
-    %paper. 
-    where visibility decision is mainly done at the object level.
-    %%could we remove the following sentences for simplicity? 
-    %The streaming
-    %of a single visible object, however, is still following a fixed
-    %pre-decided order independent of the user's view point. 
-    %The object level view-dependent system works well
-    %for scenes with many small objects but not for the
-    %scenarios we target,
-    %where %one or a few highly detailed 3D models are streamed.
-    %the data size of one object is already huge.  
-    Streaming 
-    %large 
-    progressive meshes needs 
-    a much finer granularity for view dependency. 
-    In this paper, we study view-dependent streaming at 
-    chunk level, which can be of much smaller size (can be as small as a packet) than an object.
-
-Yang et al. \cite{viewcast:yang} proposed a view-dependent 
-3D video streaming system, in which a set of gateways is used 
-to disseminate the streams depending on the views of the receivers.
-Similar to our goals, the technique aims to reduce the server 
-overhead.  The number of gateways, however, is limited and the
-gateways are assumed to be stable.  Further, 3D videos are not
-progressive in nature. 
-
-\subsection{P2P Video Streaming}
+%\section{Related Work}
+%\label{s:related}
+\section{P2P Video Streaming}
 \label{ss:related_p2p}
 %simplified by Liu Dan
 P2P techniques have been widely studied in file downloading, live
@@ -296,108 +178,6 @@ storing previous, current, and next segments, respectively. This
 approach can achieve better scalability and shorter initial delay than
 sliding window scheme, but maintaining the segment
 lists in a highly dynamic environment is difficult.
-    %P2P techniques have been widely studied in live streaming
-    %and video-on-demand streaming applications
-    %to fully utilize uploading bandwidth of all peers
-    %in the system and reduce %the burden of the server. 
-    %server overhead.
-    %Peer-to-peer systems can be basically categorized into two classes: 
-    %tree-based approaches and mesh-based\footnote{not to be confused
-    %with 3D mesh.} approaches. 
-    %Tree-based approaches construct the topology into a single tree 
-    %or multiple trees for content delivery, while mesh-based approaches
-    %construct the topology into a random mesh. 
-
-
-    %Tree-based approaches %are originated from the application-layer
-    %multicast systems, which 
-    %usually deliver the same content by
-    %pushing them down from the server along the single tree.
-    %The difference among various single-tree systems lies in the way
-    %the single tree is constructed. 
-    %For example, Overcast \cite{jannotti:overcast} 
-    %system directly constructs the tree topology,
-    %while Narada \cite{chu:narada}
-    %constructs a minimum spanning tree over the mesh
-    %constructed first.
-    
-    %%Although 
-    %Single-tree based systems 
-    %%can alleviate the burden of
-    %%the single server, there are 
-    %have three main disadvantages.
-    %First, the single-tree structure is sensitive to node failure
-    %and network dynamics, and thus is not robust. 
-    %Second, the uploading bandwidth of the leaf nodes cannot be utilized.
-    %Third, the single-tree topology can cause long end-to-end delay with
-    %the increasing depth of the tree as the number of peers increases,
-    %which is not scalable. 
-
-    %To overcome these disadvantages, multiple-tree based peer-to-peer
-    %systems have been proposed. Splitstream \cite{castro:splitstream}
-    %and CoopNet \cite{padmanabhan:coopnet} are 
-    %two representatives. In Splitstream system, the video stream 
-    %is divided into multiple descriptions using MDC
-    %(Multiple Description Coding), 
-    %with each description transmitted along a single tree to reduce
-    %the end-to-end latency and quality of stream. 
-    %To improve the robustness in face of node failures and network dynamics, 
-    %each node serves as the interior node in only one tree and the leaf node
-    %in all the other trees so that one node leave can only affect one tree.
-    %Nevertheless, multiple-tree based systems face the problem 
-    %to maintain the complex trees. 
-
-    %To further improve the robustness and scalability of P2P live streaming
-    %systems, mesh-based approaches have been widely explored and utilized
-    %in large scale P2P live streaming systems, such as PPLive and PPStream. 
-    %These large scale systems usually organize peers into a random mesh, 
-    %in which each peer can pull video content from a group of 
-    %neighbors according
-    %to certain peer selection schemes. 
-    %Pure-pull and push-pull based mechanisms
-    %are used in the content delivery. 
-    %In pure-pull mechanisms, to find the appropriate
-    %content from the neighbor peers, each peer usually notify their neighbors which
-    %chunks it has, and then each of the neighbors can selectively pull chunks 
-    %required from multiple neighbors. Compared to tree-based approaches, 
-    %such pull-based systems are more scalable and more robust to node failures
-    %and network dynamics, but incur longer end-to-end latency and management overhead.
-    %So, push-pull based approaches \cite{zhang:coolstreaming}
-    %have been studied to reduce the end-to-end latency.
-    %These approaches, however, cause unavoidable duplicated packets. 
-    %PRIME \cite{magharei:prime} incorporates content swarming scheme and MDC into live streaming 
-    %in order to improve the robustness and streaming quality. 
-    %Although using pushing in diffusion phase and pulling in swarming phase can diversify
-    %the content among different users, these two phases unavoidably increase the end-to-end
-    %latency for content delivery. 
-%
-%    Similar tree-based approaches and mesh-based approaches can also be utilized
-%    in P2P video-on-demand streaming. Zhou and Liu \cite{zhou:hybrid} proposed a hybrid method, 
-%    in which each peer participates in a random mesh overlay for normal video streaming
-%    and a tree overlay for urgent video streaming. Different from live streaming, 
-%    in video-on-demand streaming, %different 
-%    peers may require the content from different
-%    time instants rather than the same content. So in VOD P2P streaming, 
-%    it is more difficult to find the peers who have the content the peer needs. 
-%    The oStream \cite{cui:ostream} system adopts sliding window mechanism to maintain certain video 
-    %content so that a peer can obtain required content from another peer with the smaller
-    %interval between their windows.  
-    %In the P2VoD system \cite{do:p2vod}, the peers with similar
-    %cache are grouped as one generation, and thus a peer has multiple potential 
-    %sources among a generation to improve system robustness. 
-    %Besides, the pre-fetching 
-    %technique can also be applied into P2P VoD streaming systems 
-    %The dPam System \cite{sharma:dpam} 
-    %is an example. Different from the sliding window mechanism, Yiu et al \cite{yiu:distributed} 
-    %proposed an interesting storing mechanism, in which each peer randomly store some 
-    %segments. Furthermore, each peer maintains three separate 
-    %lists composed of peers having previous segment, next segment and the same segment, respectively.  
-    %Using these lists, each peer can find the next parents following the lists in the previous parents 
-    %after locating the initial parent using DHT. This method can achieve better scalability and shorter 
-    %initial delay than sliding window mechanism, but it is difficult to 
-    %maintain the lists in highly dynamic environment.
-
-    %We compare the video streaming with the view dependent 3D mesh streaming in next section and explain why the above techniques cannot be directly applied into P2P mesh streaming system.
    
 \section{P2P Mesh Streaming}
 \label{s:comp}
@@ -442,20 +222,20 @@ lists in a highly dynamic environment is difficult.
     \textit{temporal locality} in chunk access to discover
     other peers to retrieve the chunks from.
 
-    %\begin{figure}
-    %\centering
-    %\epsfig{file =diff.eps, height = 1.5in}
-    %\caption{
-    %In video streaming, peers receive chunks in the same order, so $p$
-    %may request many chunks from $q$ (e.g, in the order of C3, C4, C5).
-%	 In file sharing, peers can receive
-%    chunks in any order, so $p$ can request all chunks received by $q$
-%	(e.g., in the arbitrary order of C3, C6, C2). In
-%    P2P mesh streaming, however, a peer often needs to keep finding
-%    new providers.  If $p$ changes its view to be different from $q$,
-%	$q$ may not be able to supply $p$ with the needed chunks anymore 
-%	(e.g., C1). \label{f:diff}}
-%    \end{figure}
+    \begin{figure}
+    \centering
+    \epsfig{file =diff.eps, height = 1.5in}
+    \caption{
+    In video streaming, peers receive chunks in the same order, so $p$
+    may request many chunks from $q$ (e.g, in the order of C3, C4, C5).
+	 In file sharing, peers can receive
+    chunks in any order, so $p$ can request all chunks received by $q$
+	(e.g., in the arbitrary order of C3, C6, C2). In
+    P2P mesh streaming, however, a peer often needs to keep finding
+    new providers.  If $p$ changes its view to be different from $q$,
+	$q$ may not be able to supply $p$ with the needed chunks anymore 
+	(e.g., C1). \label{f:diff}}
+    \end{figure}
 
     Temporal locality does not apply to mesh.  In P2P mesh
     streaming, however, users might be interested in
@@ -489,6 +269,48 @@ lists in a highly dynamic environment is difficult.
     requests.  High churn rate invalidates these cache
     information quickly.
 
+TODO{transition here}
+The issue of scaling 3D streaming to a large number of users has not
+been sufficiently addressed.  In our previous work, we focus on
+reducing the computational overhead at the server \cite{Cheng2008}, by
+shifting the burden of visibility computation from the sender to
+the receiver.  
+Hu et al. \cite{Hu2008} and Cavagna et al. \cite{Cavagna2006} have considered using peer-to-peer architecture to stream a 3D scene
+to improve scalability.  Our work is similar in
+spirit, but we focus on streaming single, large,
+progressive mesh in a view-dependent manner, rather than a 3D scene,
+    %. Streaming a single, highly detailed, progressive
+    %mesh is different from streaming of a 3D scene,
+    %The 3D scene streaming, however, is quite difference with the
+    %streaming of single highly detailed progressive mesh targeted in this
+    %paper. 
+    where visibility decision is mainly done at the object level.
+    %%could we remove the following sentences for simplicity? 
+    %The streaming
+    %of a single visible object, however, is still following a fixed
+    %pre-decided order independent of the user's view point. 
+    %The object level view-dependent system works well
+    %for scenes with many small objects but not for the
+    %scenarios we target,
+    %where %one or a few highly detailed 3D models are streamed.
+    %the data size of one object is already huge.  
+    Streaming 
+    %large 
+    progressive meshes needs 
+    a much finer granularity for view dependency. 
+    In this paper, we study view-dependent streaming at 
+    chunk level, which can be of much smaller size (can be as small as a packet) than an object.
+
+Yang et al. \cite{viewcast:yang} proposed a view-dependent 
+3D video streaming system, in which a set of gateways is used 
+to disseminate the streams depending on the views of the receivers.
+Similar to our goals, the technique aims to reduce the server 
+overhead.  The number of gateways, however, is limited and the
+gateways are assumed to be stable.  Further, 3D videos are not
+progressive in nature. 
+
+
+\begin{comment}
 \section{Receiver-Driven Mesh Streaming}
 \label{s:receiver}
 
@@ -582,6 +404,7 @@ errors using this rule of thumb \cite{Cheng2008}.
     vertices generated from a split can be deduced from the
     parent's ID.  Thus, the sender need not send additional information
     to identify a vertex.
+\end{comment}
 
 \section{Hierarchical Chunk Structure}
 \label{s:chunk}
