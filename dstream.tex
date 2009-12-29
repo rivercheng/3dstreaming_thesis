@@ -1,35 +1,37 @@
-\chapter{Receiver-Driven View-Dependent Streaming}
+\chapter{Receiver-Driven View-Dependent Streaming of Progressive Meshes}
 \label{c:rdstream}
 \section{Introduction}
 \label{s:dstream:intro}
-    As we introduced in Chapter \ref{c:model}, 
-    in progressive mesh streaming, it is desirable to increase the visual quality
-    on the client side as quickly as possible.
-    One solution is to send the vertex splits
-    in the descending order of their contribution to
-    mesh quality, commonly measured by the Hausdorff distance between
-    the original and reconstructed mesh \cite{cignoni98metro}.
-    As Hausdorff distance is view independent, 
-    bandwidth may be wasted in sending invisible vertex splits
+    During streaming of a progressive mesh, it is desirable to 
+    increase the visual quality of the reconstructed mesh in the client side
+    as quickly as possible. 
+    Therefore, vertex splits having high contribution to the visual quality
+    should be sent early. 
+    What the user really can see, however, is not the mesh, but the rendered
+    image of the mesh on the screen. The quality of the rendered image
+    depends not only on the quality of the mesh, but also on the viewpoint
+    of the user. The contribution of a vertex split, as a result, 
+    also depends on the viewpoint of the user. 
+    Hence, using quality metrics independent of viewpoint,
+    such as the commonly used Hausdorff distance between the 
+    original and reconstructed mesh \cite{cignoni98metro}, to
+    decide the streaming order, may be not accurate enough. 
+    %One solution is to send the vertex splits
+    %in the descending order of their contribution to
+    %mesh quality, commonly measured by the Hausdorff distance between
+    %the original and reconstructed mesh \cite{cignoni98metro}.
+    %As Hausdorff distance is view independent, 
+    Bandwidth may be wasted in sending invisible vertex splits
     before the visible ones. Moreover, even among the visible vertex splits,
-    the view-independent metric cannot 
-    reflect the real contribution to the visual quality of
-    clients with different viewpoints. A vertex split that significantly
-    changes a mesh may change the rendered image 
+    the view-independent metric cannot reflect the real contribution to
+    the visual quality of rendered images in clients with different viewpoints. 
+    A vertex split that significantly changes a mesh may change the rendered image 
     only slightly.
 
     A better metric for visual contribution of a vertex split, 
     which considers the receiver's viewpoint, is 
     a metric based on the comparison of rendered images on the screen.
     An example is the one proposed by Lindstrom and Turk \cite{353995}.
-    %an image-based metric
-    %similar 
-    %to that proposed by Lindstrom and Turk \cite{353995}, using the %mean square error 
-    %difference between the rendered images of the original mesh and reconstructed mesh.   
-    %Lindstrom and Turk consider 
-    %many viewpoints in their simplification since it is done off-line.
-    %In the streaming case, we only need to consider the current viewer's
-    %viewpoint. % since it is already known. Hence, 
     Based on this metric, \emph{view-dependent} streaming,
     in which vertex splits are sent in the descending order of 
     their contributions to the quality of rendered image, is introduced. 
@@ -47,25 +49,27 @@
     viewing parameters to the server, and the server sends the chosen vertex splits after
     determining the visibility and the appropriate resolution of 
     different regions of the mesh (See Figure \ref{dstream:protocol}b).
+
+    This sender-driven protocol is not scalable to a large number 
+    of receivers (unless using more servers, which certainly significantly
+    increase the infrastructural cost) due to its two properties:
+    (1), the sender is state-ful because it needs to remember which
+    vertices are sent for each receiver to avoid sending duplicate data
+    when receivers changes viewpoint;
+    (2), the sender has to do expensive computation to determine the 
+    visibility and visual contributions of vertex splits for each receiver.
     
-    This sender-driven protocol, however, has two significant weaknesses.
-    Firstly, it is not scalable to many receivers. Determining visibility of vertices
-    and sorting the visible vertex splits based on their visual contributions
-    are expensive operations. 
-    %As a result, few of the existing schemes use sorting. In most implementations,
-    %the visible vertex splits are sent in the reverse of collapse order, which is
-    %often based on view-independent metrics. 
-    Moreover, the sender needs to maintain
-    the rendering state of each receiver to avoid sending duplicate data when receivers
-    changes viewpoint.
-
-    Secondly, due to the stateful design and huge computational requirements,
+    Due to the state-ful design and huge computational requirements,
     the sender-driven approach cannot be extended easily to support 
-    caching proxy and peer-to-peer architecture, two common solutions to scalability. It is not realistic
-    to require each proxy or peer to provide much CPU time and memory. 
-    Furthermore, a proxy or peer might not store the complete mesh.
+    caching proxy and peer-to-peer architecture, two common solutions to scalability. 
+    First, it is difficult for a receiver to request data from multiple proxies or peers
+    without receiving duplicate data.
+    Second, it is not realistic to require each proxy or peer to provide much CPU (or even GPU) time
+    and memory (maintaining state of other receivers) to other receivers. 
+    Third, a proxy or peer might not store the complete mesh for visibility determination.
 
-    To address the above weaknesses, we propose a receiver-driven protocol,
+    To address the above weaknesses and design a more scalable view dependent streaming system, 
+    we propose a receiver-driven protocol, 
     in which the receiver decides the sending order and explicitly requests
     the vertex splits. The sender simply sends the data requested 
     (See Figure\ref{dstream:protocol}c), so no expensive computation is needed.
@@ -74,6 +78,7 @@
     Furthermore, the server is stateless, so
     existing cache proxy and peer-to-peer techniques can be applied.
 
+    \begin{comment}
     The receiver-driven protocol also reduces the size of data sent by the sender.
     In sender-driven protocols, for each vertex split, the sender has to send identifications
     to indicate which vertex to be split ($V_s$ in Figure \ref{f:intro:split2}),
@@ -83,39 +88,31 @@
     the requesting order from the receiver. The identifications, sent
     by the receiver, consumes the down-link bandwidth 
     of the sender, which is often less likely to be the bottleneck than the up-link.
+    \end{comment}
 
-    Implementing the receiver-driven protocol is non-trivial. First, we need
-    to assign each vertex a unique identification number so that the receiver
-    can explicitly request vertex splits. Second, the receiver has to efficiently decide the
-    importance of a vertex split based on partially received mesh.
+    Implementing the receiver-driven protocol is non-trivial. It introduces some 
+    new research questions. First, we need to assign each vertex a unique identification number
+    so that the receiver can explicitly request vertex splits. 
+    Second, the receiver has to efficiently determine the visibility and visual contribution
+    of a vertex split based on partially received mesh. 
     Although it is difficult for the receiver to accurately measure
     the visual importance of a vertex split, we find that estimation suffices
     in our scheme.  
+    Third, most current coding and compression methods exploit the sending order of vertex splits
+    as we introduced in Chapter \ref{c:related}. We now, however, need a new compression scheme
+    completely independent of the sending order since the sender has no freedom in choosing sending order.
 
-    The main contributions of our work are as follows.  We
-    propose a receiver-driven protocol of view-dependent streaming, which
-    significantly reduces the CPU time of the sender
-    and makes the sender stateless.  Our protocol exploits the receiver's 
-    computing resources to approximate the optimal list of vertex splits to receive
-    to improve the rendered mesh quality.  We also introduce an 
-    algorithm to efficiently encode the receiver's requests.
-    
-    %Second, we reduce the transmission data
-    %of the server by removing a significant part of data to its incoming channel. 
-    %Third, we implement a prototype and evaluate its effectiveness with 
-    %experiments.
-
-    The rest of this chapter is organized as follows.
-    In Section \ref{s:dstream:terms}, we briefly review the current view-dependent approaches.
-    Then, we present the receiver-driven protocol 
-    in Section \ref{s:dstream:protocol}.
-    We evaluate our protocol in Section \ref{s:dstream:evaluation} 
-    and conclude in Section \ref{s:dstream:conclude}.
+    Before we introduce our solutions, we briefly review the current view-dependent approaches,
+    so we can see why receiver-driven protocol introduce new research problems and challenges. 
+    Then, we present the details of our solutions to these problems in Section \ref{s:dstream:protocol}.
+    We evaluate our protocol in Section \ref{s:dstream:evaluation} and conclude in Section \ref{s:dstream:conclude}.
 
 \section{Current View-dependent Approaches}
 \label{s:dstream:terms}
     In this section, we briefly review the current view-dependent approaches since 
-    they are the basis of our scheme.
+    they are the basis of our scheme. When we introduce some methods used in the current approaches, 
+    we will point out whether or not (and why) they can be applied to receiver-driven
+    protocol.
    
     \begin{figure}
     \centering
@@ -141,7 +138,7 @@
     %is not visible. If any of its descendants in the vertex hierarchy is visible,
     %the vertex split still needs to be applied. To avoid determining the visibility
     Due to dependencies among the vertices, visibility determination of a vertex cannot be based 
-	on the vertex alone.
+	on this vertex alone.
     An invisible vertex still needs to be split if any of its descendants is visible. 
     To avoid determining the visibility %\footnote{
     %For simplicity, in this paper determining the visibility also includes computing screen-space error.} for each
@@ -160,12 +157,13 @@
     
     These bounding object-based methods are not appropriate
     in our receiver-driven protocol. 
-    %First, it can only determine
-    %the visibility, but cannot sort the vertex splits by their visual contributions. 
-    %More importantly, 
     If these methods are applied to receiver driven protocol, the sender has to send
     these bounding parameters with the vertex splits, almost doubling 
-    the data size.  We explain our solution to this issue in Section \ref{s:dstream:protocol}.
+    the data size. To increase the streaming data size is never a good solution
+    because the network bandwidth is one of the main bottleneck of the streaming system.
+    We need a method for the receiver to estimate the visibility and contribution of 
+    splitting a vertex without any extra information.
+    We explain our solution to this issue in Section \ref{s:dstream:protocol}.
     %and the transmitted data size will be significantly increased. 
     %Since one vertex split has only five parameters, 
     %the identifications of two cut neighbors ($V_l$ and $V_r$) and the coordinations
@@ -185,9 +183,15 @@
     and the coordinates $x$, $y$, and $z$ of the right child ($V_t$ in
     Figure \ref{dstream:split}). Here, half collapse is used so $V_u$ remains at the same position
     of $V_s$. Many implementations use the sequence number of a vertex generated as its ID,
-    but this method enforces the sender to be stateful since the sender has to remember 
-    the sending order of each receiver.
-    
+    but this method enforces the sender to be state-ful since the sender has to remember 
+    the sending order of vertex splits for each receiver. 
+    \begin{figure}
+    \centering
+    \epsfig{file=split.eps, width=0.6\textwidth}
+    \caption{A vertex split split $V_s$ to $V_t$ and $V_u$, with $V_l$ and $V_r$ as two cut neighbors.}
+    \label{dstream:split}
+    \end{figure}
+
     Kim and Lee \cite{kim01truly} proposed a new method, in which every vertex has
     an ID that is independent of the sending order. The ID of a vertex is a bit string
     with two parts: tree ID and node ID.
@@ -228,6 +232,7 @@
     and the coordinates $x$, $y$, and $z$ at about 21 bpv (with 12 bit quantization).
     Although their paper focuses on random access of local meshes, we find that this 
 	method is useful in progressive streaming as well. 
+    We will introduce our implementation in detail in Section \ref{s:dstream:protocol}.
 
 \section{Receiver-Driven Protocol}
      \label{s:dstream:protocol}
@@ -240,8 +245,9 @@
      \subsection{Mesh Transmission} 
      A streaming session is initiated when the receiver requests for a specific
      mesh.
-     The sender returns the complete base mesh and other necessary information
-     (See Figure \ref{dstream:protocol}a) to the receiver.
+     The sender returns the complete base mesh and other necessary information,
+     such as the Huffman tables used in decoding vertex splits, to the receiver
+     (See Figure \ref{dstream:protocol}a).
      
      \begin{figure}
      \centering
@@ -262,57 +268,52 @@
      are sent back to the receiver (See Figure \ref{dstream:process}). 
      The sender does only two things -- decode IDs and retrieve the 
      vertex splits, and is therefore stateless. 
+
+     To avoid the receiver to request a non-exist vertex split (that is to split
+     a leaf vertex in the vertex hierarchy),
+     an extra bit is attached to every vertex to indicate whether it is leaf or not.
+     This will be introduced in more detail when we discussing about coding vertex splits
+     later.
+     
      \subsection{Determining Visual Importance}
      \label{ss:dstream:visual}
      We now introduce how the receiver decides the requesting order. 
-     We cannot directly use the mean square error between rendered images of 
-     reconstructed mesh and original mesh to determine the order, 
+     %We cannot directly use the mean square error between rendered images of 
+     %reconstructed mesh and original mesh to determine the order, 
      %image-based metric proposed by Lindstrom and 
      %Turk \cite{353995} 
-     since we need to know the importance of a vertex 
-     split before it is received. To overcome this problem, we estimate
-     the importance of the vertex splits to request for based on the received
-     mesh, using
-     %We find that
-     %estimation suffices %in the streaming case 
-     %because some error in deciding the order will not affect the rendered
-     %image.
-     %
+     We cannot know exactly the contribution of a vertex split in the receiver side
+     because it is not received yet when it is requested.
+     Adding extra information, such as the radius of bounding sphere, is not appropriate
+     because it will significantly increase the data size. 
+     Therefore, we can only estimate the contribution of vertex splits based on the 
+     partially received mesh.
+     
     \begin{figure}
     \centering
     \epsfig{file =screen_area.eps, width=0.35\textwidth}
-    \caption{%Screen area of two vertices: v1 and v2.
-    Rendered image on the receiver's screen. 
+    \caption{Rendered image on the receiver's screen. 
     The shaded are the screen area of vertex $V_1$ and vertex $V_2$.
     \label{dstream:screen_area}}
     \end{figure}
-     %We use 
-     the screen-space area of all the neighbor faces of a vertex as the 
+     We propose to use the screen-space area of all the neighbor faces of a vertex as the 
      metric of its visual importance (see Figure \ref{dstream:screen_area}).
      The rationale is that if the screen area of a vertex ($V_1$ in Figure \ref{dstream:screen_area}) 
-    is larger, it is likely the quality can
-    be improved more by splitting this vertex. 
-    %Moreover, the screen-space area can be efficiently
-    %computed with the help of the GPU, by simply counting the
-	%number of pixels inside the faces in the frame buffer.
-    %A simple method to compute the screen space of a triangle is 
-    %to count how many pixels are inside it after rendering by analyzing
-    %the frame buffer. 
+    is larger, it is likely the quality can be improved more by splitting this vertex. 
+    
     We compute the screen-space area with the help of the GPU. 
-    First we assign each face in
-    the current mesh a unique color and render them. 
+    First we assign each face in the current mesh a unique color and render them. 
     We can determine the visibility
     and the screen-space area of each vertex by counting how many pixels with its color
     are in the frame buffer, where the rendering result is stored. 
     Then we add the pixel number to the face's three vertices. Thus, the
     pixel number of a vertex (which is the sum of pixel numbers in its neighbor faces)
-    is proportional
-    to its screen-space area.
-    %In brief, we estimate the visual importance of splitting a vertex by checking
-    %at the projected area in the screen of the region occupied by this vertex and all its neighbors.
+    is proportional to its screen-space area.
+    This process introduce some delay, but the delay can be compensated by the time
+    we saved from rendering only visible part of a large mesh later. 
     
-    Once the screen-space areas are computed, the receiver sends the requests 
-	following the descending order of the 
+    After the screen-space areas are computed, 
+    the receiver sends the requests following the descending order of the 
     screen-space area. If the viewpoint changes, the visual importance will
     be re-computed and a new list of vertex splits will be requested. Since the received
     splits refine the mesh, the receiver recomputes the visual importance periodically
@@ -320,23 +321,27 @@
     in our experiments, can be decided
     by the receiver based on mesh size and network bandwidth.
 
-    The client can stop requesting once it finds that the rendering quality is sufficient.
-    The receiver has the flexibility of continuing to request for the remaining vertex splits for future use.
-    It can also pre-fetch some invisible vertices based on the prediction of future viewpoints.
+    Once the receiver satisfies with the rendering quality, it 
+    can either stop requesting or continue requesting the remaining vertex splits
+    for future use based on the prediction of the user's next action. 
+    In Chapter \ref{c:user}, we discuss about whether the user actions can be predicted.
 
     If the receiver stops requesting % for more vertex splits 
-    when the visual quality is satisfactory, 
-    it may miss some visible vertices since the visibility determination is just an estimate.
-    Some invisible vertices may have potentially 
-    visible descendants, but they will not be received if their parent has  
-    no screen-space area. 
-    Fortunately, in most cases, this kind of error is small and 
-    tolerable (See the experiment results in Section \ref{s:dstream:evaluation}).
+    when the visual quality is satisfactory, it may miss some visible vertices.
+    As we introduced in Section \ref{s:dstream:terms}, we cannot simply ignore 
+    all invisible vertices, because they may have visible descendants.
+    Unlike sender-driven approach, where the visibility of a vertex and its all descendants
+    can be determined with its bounding sphere, we estimate the visibility of 
+    a vertex and its descendants based on the visibility of its neighbor faces. 
+    This estimation may introduce some error (mostly on the silhouette), 
+    but fortunately, in most cases this kind of error is small and tolerable
+    (See the experiment results in Section \ref{s:dstream:evaluation}).
     If strict accuracy is needed, the receiver can choose to continue requesting 
     for the remaining vertex splits.  
 		%Furthermore, some methods may reduce 
     %this kind of error, for example, by generating an appropriate base mesh or giving more
     %weight to the silhouette. We will consider these techniques in the future. 
+    
     \subsection{Encoding of Vertex Splits and IDs}
     \label{ss:dstream:encoding}
 
@@ -345,12 +350,12 @@
     %%The happy Buddha mesh is from Stanford University.
     %also use Kim's algorithm \cite{multiresolution:kim}
     %to code the IDs of two cut neighbors ($Id_l$ and $Id_r$).
-
 	In this section, we explain how we encode the vertex splits 
-	and the IDs of the requested vertex splits.  Note that, in 
-	our work, we consider only manifold meshes and use half 
+    and the IDs of the requested vertex splits.  
+    Note that, in our work, we consider only manifold meshes and use half 
 	collapse in the simplification.
     
+    \textbf{Encoding Vertex Splits}
 	To encode a vertex split, we need to encode the IDs of the two
 	cut neighbors and its $x$, $y$, and $z$ coordinates.
 	%We use Kim's algorithm \cite{multiresolution:kim} to code
@@ -381,14 +386,13 @@
     \ENDWHILE
     \end{algorithmic}
     \end{algorithm}
-
     In brief, each bit in the \emph{code} excludes one or more neighbors
     from $\mathcal{N}$ until only the cut neighbor with $Id$ is left. 
-    %In ideal case, each bit excludes half of the members
-    %in $\mathcal{N}$, so the code length is $log_{2}d$, 
-    %where $d$ is the number of neighbors.
-    %In worst case, each bit of the code only excludes one neighbor,
-    %so the code length is $d-1$. 
+    In ideal case, each bit excludes half of the members
+    in $\mathcal{N}$, so the code length is $log_{2}d$, 
+    where $d$ is the number of neighbors.
+    In worst case, each bit of the code only excludes one neighbor,
+    so the code length is $d-1$. 
     After obtaining the two codes for $Id_l$ and $Id_r$, we encode them with Huffman coding algorithm.
 
     The decoding of these two codes is tricky. %not simply the reverse of the encoding.
@@ -411,8 +415,9 @@
     reconstructed with all the vertex splits are applied. It is also verified 
     by us both in theory and experiments.
     
-    To encode the coordinates, instead of encoding $x$, $y$, and $z$ directly, we encode $dx$, $dy$, and $dz$ with
-    Huffman coding algorithm. Here $dx = x - x_0$, $dy = y - y_0$,
+    To encode the coordinates, instead of encoding $x$, $y$, and $z$ directly, 
+    we encode $dx$, $dy$, and $dz$ with Huffman coding algorithm. 
+    Here $dx = x - x_0$, $dy = y - y_0$, 
     and $dz = z - z_0$, and $x_0$, $y_0$, and $z_0$ are the coordinates of
     $V_s$, the vertex to be split. 
     The rationale to code the differences is that they have less entropy, especially
@@ -433,8 +438,10 @@
     based on better prediction techniques may further increase the 
     efficiency and it will be an interesting topic of future work.
 
-    We now introduce how we encode the vertex split IDs, 
-    which need 32 bpv without compression.  
+    \textbf{Encoding IDs of vertex splits}
+    We now introduce how we encode the vertex split IDs sent from the receiver to the
+    sender. Since we use an 32bit integer to represent an ID,  32 bpv is needed for each ID
+    without compression.  
     %First we choose the number of vertex identifications to be packetized appropriately
     %such that their vertex splits after encoded will no exceed
     %the size of an Ethernet packet (often 1500 bytes). The reason is to
@@ -442,7 +449,8 @@
     %one packet loss will not affect the decoding of another packet.
     %A previous paper \cite{1291399} has discussed the importance to reduce the dependency
     %among the packets.
-    The two parts of an ID, tree ID and node ID, are encoded separately.  We use a bit string \textit{code} to store the encoded result.
+    The two parts of an ID, tree ID and node ID, are encoded separately.  
+    We use a bit string \textit{code} to store the encoded result.
     First, we sort the IDs in a packet according to the tree IDs, in increasing order. 
     Then, we store the first tree ID to \textit{code} and 
     store each of the following tree ID as the difference from the previous tree ID.
