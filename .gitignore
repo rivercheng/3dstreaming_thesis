@@ -6,6 +6,7 @@
 *.bib
 *.dvi
 *.blg
+*.png
 figs
 figures
 plot
