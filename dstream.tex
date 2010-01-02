@@ -7,15 +7,15 @@
     as quickly as possible. 
     Therefore, vertex splits having high contribution to the visual quality
     should be sent early. 
-    What the user really can see, however, is not the mesh, but the rendered
-    image of the mesh on the screen. The quality of the rendered image
-    depends not only on the quality of the mesh, but also on the viewpoint
+    What the user really can see, however, is not the mesh itself but the rendered
+    image on the screen. The quality of the rendered image
+    depends on not only the quality of the mesh but also the viewpoint
     of the user. The contribution of a vertex split, as a result, 
     also depends on the viewpoint of the user. 
     Hence, using quality metrics independent of viewpoint,
     such as the commonly used Hausdorff distance between the 
     original and reconstructed mesh \cite{cignoni98metro}, to
-    decide the streaming order, may be not accurate enough. 
+    decide the streaming order, is not accurate enough. 
     %One solution is to send the vertex splits
     %in the descending order of their contribution to
     %mesh quality, commonly measured by the Hausdorff distance between
@@ -28,13 +28,14 @@
     A vertex split that significantly changes a mesh may change the rendered image 
     only slightly.
 
-    A better metric for visual contribution of a vertex split, 
+    A better metric of the visual contribution of a vertex split, 
     which considers the receiver's viewpoint, is 
-    a metric based on the comparison of rendered images on the screen.
+    based on the quality of the rendered image on the screen.
     An example is the one proposed by Lindstrom and Turk \cite{353995}.
-    Based on this metric, \emph{view-dependent} streaming,
+    Based on this view dependent metric, \emph{view-dependent} streaming,
     in which vertex splits are sent in the descending order of 
-    their contributions to the quality of rendered image, is introduced. 
+    their contributions to the quality of rendered image, is introduced
+    to improve the user experience. 
     
     \begin{figure}
     \centering
@@ -44,15 +45,16 @@
     \end{figure}
     In previous implementations of view dependent streaming
     \cite{To1999, 363375, progressive:Yang, kim:view, zheng:interactive}, 
-    the server decides which vertex splits to send. In these implementations,  
-    the client sends its
-    viewing parameters to the server, and the server sends the chosen vertex splits after
+    the sender decides which vertex splits to send. In these implementations,  
+    the receiver sends its viewing parameters to the sender, 
+    and the sender sends the chosen vertex splits after
     determining the visibility and the appropriate resolution of 
     different regions of the mesh (See Figure \ref{dstream:protocol}b).
 
     This sender-driven protocol is not scalable to a large number 
-    of receivers (unless using more servers, which certainly significantly
-    increase the infrastructural cost) due to its two properties:
+    of receivers (unless using more servers as senders, 
+    which significantly increases the infrastructural cost) 
+    due to its two characteristics:
     (1), the sender is state-ful because it needs to remember which
     vertices are sent for each receiver to avoid sending duplicate data
     when receivers changes viewpoint;
@@ -91,36 +93,59 @@
     \end{comment}
 
     Implementing the receiver-driven protocol is non-trivial. It introduces some 
-    new research questions. First, we need to assign each vertex a unique identification number
-    so that the receiver can explicitly request vertex splits. 
-    Second, the receiver has to efficiently determine the visibility and visual contribution
+    new research questions.
+    First, the receiver has to efficiently determine the visibility and visual contribution
     of a vertex split based on partially received mesh. 
-    Although it is difficult for the receiver to accurately measure
-    the visual importance of a vertex split, we find that estimation suffices
-    in our scheme.  
+    Second, we need to assign each vertex a unique identification number
+    so that the receiver can explicitly request vertex splits. 
+    To avoid sending extra data, the identification number of each vertex 
+    should implicitly known by the receiver.
+    %Although it is difficult for the receiver to accurately measure
+    %the visual importance of a vertex split, we find that estimation suffices
+    %in our scheme.  
     Third, most current coding and compression methods exploit the sending order of vertex splits
-    as we introduced in Chapter \ref{c:related}. We now, however, need a new compression scheme
+    to increase the compression efficiency as we introduced in Chapter \ref{c:related}.
+    We now, however, need a new compression scheme
     completely independent of the sending order since the sender has no freedom in choosing sending order.
 
-    Before we introduce our solutions, we briefly review the current view-dependent approaches,
-    so we can see why receiver-driven protocol introduce new research problems and challenges. 
-    Then, we present the details of our solutions to these problems in Section \ref{s:dstream:protocol}.
-    We evaluate our protocol in Section \ref{s:dstream:evaluation} and conclude in Section \ref{s:dstream:conclude}.
+    To explain why receiver-driven approach introduce the new research questions,
+    we briefly introduce how these questions are solved in current sender-driven approaches and 
+    why these methods are not applicable in receiver-driven approach in Section \ref{s:dstream:terms}.
+    %Before we introduce our solutions, we briefly review the current view-dependent approaches,
+    %so we can see why receiver-driven protocol introduce new research problems and challenges. 
+    Then, we present our solutions of these problems in Section \ref{s:dstream:protocol}.
+    We validate our solutions by experiments in Section \ref{s:dstream:evaluation} 
+    and conclude in Section \ref{s:dstream:conclude}.
 
-\section{Current View-dependent Approaches}
+%\section{Current View-dependent Approaches}
+\section{Problem Statement}
 \label{s:dstream:terms}
-    In this section, we briefly review the current view-dependent approaches since 
-    they are the basis of our scheme. When we introduce some methods used in the current approaches, 
-    we will point out whether or not (and why) they can be applied to receiver-driven
-    protocol.
-   
+    \subsection{Determine Visibility and/or Visual Contribution of a vertex split}
+    We first define a term \emph{the visibility of a vertex split}. Under a certain
+    viewpoint, if split a vertex will help improving the quality of the rendered image,
+    we call this vertex split \emph{visible}. Otherwise, we call it a \emph{invisible}
+    vertex splits.
+    In view-dependent streaming system, it is necessary to determine the visibility
+    of each vertex split so that the sender can avoid wasting bandwidth in sending invisible 
+    vertex splits and use the saved bandwidth to send more visible vertex splits.
+
+    The visibility of a vertex split is not simply the visibility of the \emph{corresponding
+    vertex} (the vertex to be split by the vertex split), because splitting an invisible
+    vertex may generate visible vertices and improve the quality of the rendered image. 
+    To further illustrate this point, we introduce the term \emph{vertex hierarchy}.
+    %In this section, we briefly review the current view-dependent approaches since 
+    %they are the basis of our scheme. When we introduce some methods used in the current approaches, 
+    %we will point out whether or not (and why) they can be applied to receiver-driven
+    %protocol.
+    %We first introduce 
     \begin{figure}
     \centering
     \epsfig{file = hierarchy.eps, width = 0.9\textwidth}
     \caption{Vertex hierarchy and vertex front. A rectangle represents a vertex and the number inside
     is its identification number, including tree ID and node ID.\label{dstream:hierarchy}}
     \end{figure}
-    View-dependent systems often organize the vertices hierarchically.
+    %View-dependent systems often organize the vertices hierarchically.
+    Vertex splits in a progressive mesh can be organized hierarchically.
     For example, Hoppe \cite{258843} represents
     parent-child relation among the vertices in a progressive mesh
     as a forest of binary trees, named \emph{vertex hierarchy},
@@ -137,14 +162,14 @@
     %When determining the visibility of vertex splits, a vertex split cannot be ignored when it
     %is not visible. If any of its descendants in the vertex hierarchy is visible,
     %the vertex split still needs to be applied. To avoid determining the visibility
-    Due to dependencies among the vertices, visibility determination of a vertex cannot be based 
-	on this vertex alone.
-    An invisible vertex still needs to be split if any of its descendants is visible. 
+    %Due to dependencies among the vertices, visibility determination of a vertex cannot be based 
+	%on this vertex alone.
+    Therefore, an invisible vertex still needs to be split if any of its descendants is visible. 
     To avoid determining the visibility %\footnote{
     %For simplicity, in this paper determining the visibility also includes computing screen-space error.} for each
     recursively for all the descendants,
     %vertex in the vertex hierarchy is expensive. Therefore, 
-    a common method is to use a bounding sphere to represent a vertex and all its descendants.
+    a common method is to use a bounding sphere to include a vertex and all its descendants.
     Then, we can safely ignore a vertex split if its bounding sphere
     falls outside the view frustum.
     Similarly, a bounding cone of normal is used in back face culling \cite{258843}.
@@ -155,14 +180,15 @@
     ($\mu$ and $\delta$) for deciding the screen-space error
     and store them with the vertex together.
     
-    These bounding object-based methods are not appropriate
+    These bounding object-based methods, however, are not appropriate
     in our receiver-driven protocol. 
     If these methods are applied to receiver driven protocol, the sender has to send
     these bounding parameters with the vertex splits, almost doubling 
-    the data size. To increase the streaming data size is never a good solution
-    because the network bandwidth is one of the main bottleneck of the streaming system.
+    the data size. 
+    %To increase the streaming data size is never a good solution
+    %because the network bandwidth is one of the main bottleneck of the streaming system.
     We need a method for the receiver to estimate the visibility and contribution of 
-    splitting a vertex without any extra information.
+    splitting a vertex without extra information.
     We explain our solution to this issue in Section \ref{s:dstream:protocol}.
     %and the transmitted data size will be significantly increased. 
     %Since one vertex split has only five parameters, 
@@ -174,6 +200,7 @@
     %It is not acceptable since the network bandwidth
     %is considered as the main bottleneck.  
 
+    \subsection{Identify Vertices}
     After deciding the visibility, the sender sends the chosen vertex splits to the receiver.
     Six parameters are needed in a vertex split of a manifold mesh: the identification number
     (we call ID from now on) of the vertex to be split
@@ -182,9 +209,14 @@
     ($V_l$ and $V_r$ in Figure \ref{dstream:split}), $Id_l$ and $Id_r$,
     and the coordinates $x$, $y$, and $z$ of the right child ($V_t$ in
     Figure \ref{dstream:split}). Here, half collapse is used so $V_u$ remains at the same position
-    of $V_s$. Many implementations use the sequence number of a vertex generated as its ID,
-    but this method enforces the sender to be state-ful since the sender has to remember 
+    of $V_s$. 
+    
+    Many sender-driven implementations use the sequence number of a vertex generated as its ID,
+    then the IDs of two newly generated vertices can be implicitly known by the receiver without
+    extra information. This method, however, 
+    enforces the sender to be state-ful since the sender has to remember 
     the sending order of vertex splits for each receiver. 
+    Therefore, it is not applicable in our receiver-driven protocol.
     \begin{figure}
     \centering
     \epsfig{file=split.eps, width=0.6\textwidth}
@@ -202,7 +234,7 @@
     of the left child and right child of the root vertex respectively. 
     A vertex hierarchy with the assigned IDs is shown in 
     Figure \ref{dstream:hierarchy}.
-    
+
     Besides being independent of the sending order, another benefit of this scheme
     is that the IDs embed the hierarchy. Thus,  
     we can deduce the IDs of the ancestors and the descendants of each vertex. 
@@ -211,11 +243,51 @@
     `10011' is the ID of its right child. 
     This property frees the sender from sending the IDs of the two newly generated vertices
     ($V_u$ and $V_t$ in Figure \ref{dstream:split}), as they can be deduced by the receiver.
+
+    As a result, with Kim and Lee's method \cite{kim01truly}, we can identify the vertices
+    implicitly and the identification numbers are independent of the sending order of the 
+    vertex splits, which is essential to ensure the sender is stateless.
+
+    \subsection{Compress Vertex Splits Efficiently}
+    As we introduced above, in a sender-driven protocol, 
+    a vertex split usually includes five numbers {$IDs$, $ID_l$, $ID_r$,
+    $x$, $y$, $z$}. 
+    In the receiver-driven protocol, on one hand, the sender needs not send
+    $IDs$ since the vertex splits can be sent according to
+    the requesting order from the receiver. On the other hand, the other 
+    five numbers are more difficult to be compressed efficiently.
     
-    The above property is also essential in splitting
-    a progressive mesh in random order, in which the set of neighbors of a vertex
-    during the decoding $\mathcal{N}'$ may not be $\mathcal{N}$, the set 
-    during the encoding. If a cut neighbor with an ID of $Id$ %in $\mathcal{N}$
+    \textbf{Encoding $ID_l$ and $ID_r$}
+
+    In sender-driven protocol, instead of sending the two cut neighbors, $ID_l$ and $ID_r$, directly,
+    only the information indicating their position among all the \emph{one ring neighbors}
+    of vertex $IDs$ (the vertices directly connected to vertex $IDs$) is coded.  
+    Since the number of one ring neighbors is much smaller than the total number of vertices,
+    much less bits are needed than coding $ID_l$ and $ID_r$ directly. Moreover, entropy coding
+    can be used to further improve coding efficiency because the vertex $ID_l$ and vertex $ID_r$
+    are not equally possible in any position.
+
+    In the receiver-driven approach, however, the method introduced above is not applicable.
+    Because the receiver may split the progressive mesh in many ways, the set of neighbors of 
+    a vertex during the decoding, $\mathcal{N}'$, 
+    may not be the set of neighbors during the encoding $\mathcal{N}$.
+    Moreover, a stateless sender does not remember the sending
+    order, so it has no idea what the set is. 
+    As a result, even coding on the fly is not possible. 
+    In the receiver-driven approach, $ID_l$ and $ID_r$ need to be encoded independent to the decoding order. 
+
+    
+    Kim et al. \cite{multiresolution:kim} proposed an efficient algorithm to encode the IDs
+    of two cut neighbors. With their method, the proper cut neighbors can be selected from
+    the one ring neighbors $\mathcal{N}'$, no matter what $\mathcal{N}'$ is that time. 
+    Moreover, even the vertex $ID_l$ or vertex $ID_r$ itself is not in $\mathcal{N'}$ that
+    time, the vertex split still could be applied properly.
+    Their method is based on the following observation.
+    %The above property is also essential in splitting
+    %Ta progressive mesh in random order, in which the set of neighbors of a vertex
+    %during the decoding $\mathcal{N}'$ may not be $\mathcal{N}$, the set 
+    %during the encoding. 
+    If a cut neighbor vertex with an ID of $Id$ %in $\mathcal{N}$
     is not in $\mathcal{N}'$, then either one of its 
     ancestors or at least one of its descendants must belong to $\mathcal{N}'$ \cite{multiresolution:kim}.
     In the former case, the ancestor is found and used as 
@@ -229,10 +301,25 @@
 
     Kim et al. \cite{multiresolution:kim} also propose an algorithm
     to encode the IDs of two cut neighbors at about 12 bpv (bit per vertex) 
-    and the coordinates $x$, $y$, and $z$ at about 21 bpv (with 12 bit quantization).
+    %and the coordinates $x$, $y$, and $z$ at about 21 bpv 
+    (with 12 bit quantization).
     Although their paper focuses on random access of local meshes, we find that this 
 	method is useful in progressive streaming as well. 
-    We will introduce our implementation in detail in Section \ref{s:dstream:protocol}.
+    
+    \textbf{Encoding ($x$, $y$, $z$)}
+    As we introduced in Chapter \ref{c:related}, the coordinates of the newly generated
+    vertex, ($x$, $y$, $z$) can be encoded based on the prediction. Usually, the prediction
+    is based on position of some other vertices close to the vertex $IDs$. This method is 
+    not applicable in the receiver-driven approach. Now, because of the random splitting order, 
+    it is possible that those vertices do not exist yet when vertex $IDs$ is split. 
+    
+    We proposed a simple method to encode the $x$, $y$, $z$ based on the position
+    of its parent, the vertex $IDs$ itself. First, the child is usually close to its
+    parent. Second, the parent, vertex $IDs$ here, definitely exist. Otherwise, the vertex
+    split cannot be applied anyway. 
+
+    We will introduce our implementation of encoding ($ID_l$, $ID_r$, $x$, $y$, $z$) 
+    in detail in Section \ref{s:dstream:protocol}.
 
 \section{Receiver-Driven Protocol}
      \label{s:dstream:protocol}
