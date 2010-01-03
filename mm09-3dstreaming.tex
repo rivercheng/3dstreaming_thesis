@@ -1,40 +1,67 @@
-\chapter{Characterizing and Modeling User Interaction with Progressively Transmitted 3D Meshes}
+\chapter{Characterizing User Interaction with Progressively Transmitted Meshes}
 \label{c:user}
 \section{Introduction}
-High-resolution 3D meshes are typically data rich and demand high network bandwidth 
-and computational power. 
-When these meshes are viewed on portable devices with
-low bandwidth and slow CPUs, delays in both transmitting and
-rendering become unavoidable. To minimize negative user experience, the
-streaming system needs to prioritize data chunks according to user needs and
-efficiently cache the most frequently viewed data.  Designing such
-systems requires a thorough understanding of user behaviors in viewing 3D
-meshes.
+In a view-dependent progressive mesh streaming system, which set of the data is streamed
+and in what order it is streamed both depend on how the user interacts with the mesh. 
+%For example, if the user quickly rotates the mesh, only the vertex splits at the top levels
+%of the vertex hierarchy are required by the receiver. On the contrary, if the user
+%zoom in and examine certain part of the mesh carefully, the receiver requires the 
+%vertex splits deep down to the bottom of the vertex hierarchy. 
+%Different user interactions have different demand to the streaming system,
+%so 
+A thorough understanding of how users interact with the progressively streamed mesh will
+help us in designing a view-dependent mesh streaming system to %minimize negative 
+improve user experience. 
+%and improving user experience.
+For example, if the next viewpoint of the user can be predicted, the vertex splits 
+that will be useful in the next viewpoint could be pre-fetched 
+to reduce the response time of the system. 
+Moreover, the vertex splits of a mesh are not all equal in popularity. 
+Hence, if we know which part of data are requested more often, we could
+store them in caching proxy close to the end users to increase the capacity
+and reduce the response time of the system. 
 
-Moreover, if we could derive certain pattern in users' interaction with
-high-resolution meshes, we could create a large number of synthetic traces,
-which simulate users' actions, and these traces can be used in modeling system
-performance during simulations. This method is much cheaper than collecting 
-a large number of traces from real users and can be used in developing and evaluating
-prototypes. For example, we use the synthetic traces we generated to test our P2P mesh
-streaming systems introduced in next Chapter.
 
-Most previous work on user interactions with 3D objects
-focused on design of specific interaction
-techniques
-(e.g., the study by Chen et. al \cite{chen88study} and Hinckley et. al \cite{hinckley97usability}). 
-In this thesis, however, we study
-user behavior from the system design point of view, 
-such as predictability (for pre-fetching) and locality of access patterns (for caching),
-similar to the spirit of the landmark studies for the Web \cite{huberman98web} and file system \cite{ousterhout85trace}.  
-No such prior study exists for progressive meshes. This chapter presents our first step towards filling 
-this gap.
+%First, with the view-dependent streaming strategy and the efficient coding 
+%system introduced in Chapter \ref{c:dstream}, the quality of the rendered image
+%in the receiver side could become satisfying in only seconds. The user may stay
+%in a certain viewpoint longer than 
 
-We conducted a user experiment\footnote{Thanks for Ransi De Silva for conducting this experiment.}
+Understanding user interaction is not only useful in designing the system, but
+also in testing the system. The ideal way to test a streaming system is to 
+test it with a large number of real users. This method, however, is expensive 
+and not always feasible. If we could characterize users' interaction with
+progressively streamed meshes from a small number of real user traces
+(the records of the interaction of users), 
+we could create a large number of synthetic traces,
+which simulate users' actions, to be used in measuring system performance. 
+This method is much cheaper than collecting a large number of traces from real users
+and can be used in developing and evaluating
+prototypes. 
+For example, we use the synthetic traces we generated to test our P2P mesh
+streaming systems introduced in Chapter \ref{c:p2p}.
+
+
+
+%Most previous work on user interactions with 3D objects
+%focused on design of specific interaction techniques
+%(e.g., the study by Chen et. al \cite{chen88study} and Hinckley et. al \cite{hinckley97usability}). 
+%In this thesis, however, we study
+%user behavior from the system design point of view, 
+%such as predictability (for pre-fetching) and locality of access patterns (for caching),
+%similar to the spirit of the landmark studies for the Web \cite{huberman98web} and file system \cite{ousterhout85trace}.  
+%Moreover, we need to understand the user interaction more so that we can generate synthetic 
+%traces to simulate user actions.
+%No such prior study exists for progressive meshes. This chapter presents our first step towards filling 
+%this gap.
+For the objectives introduced above,
+We conducted a user experiment
+%\footnote{Thanks for Ransi De Silva for conducting this experiment.}
 with 37 users interacting with 9 meshes.
 We log the user's actions while they interact and view the meshes in a mock online shop.  
-We present the analysis of these traces in this paper\footnote{Dan Liu helps in part of the analysis (session time,
-think time, and predictability).}, 
+We present the analysis of these traces in this paper
+%\footnote{Dan Liu helps in part of the analysis (session time,
+%think time, and predictability).}, 
 and highlight findings that are significant to the design of efficient 
 and scalable progressive mesh streaming systems.  
 In particular, we found that 
@@ -55,6 +82,10 @@ Dragon
 Thai Statue (5 million vertices), Dragon (3.6 million vertices), and Happy Buddha (0.5 million vertices).}
 \label{fig:3dmodels}
 \end{figure}
+
+In this chapter, we first introduce how we did the user study and recorded the data. Then 
+we show how these data be used in predicting user actions, guiding in caching, and generating
+synthetic traces.
 
 \section{User Study}
 \label{s:user:study}
@@ -237,161 +268,240 @@ In this sense, a session is a random walk in the 6-dimension space.
 \end{figure}
 
 
-\section{Results and Implications}
-In this section, we present our analysis on the user behavior. We present only on the analysis of the original (non-defect) statues, unless otherwise specified.
-In addition, we also discuss what implications these results have on system design.
+%\section{Results and Implications}
+%In this section, we present our analysis on the user behavior. We present only on the analysis of the original (non-defect) statues, unless otherwise specified.
+%In addition, we also discuss what implications these results have on system design.
 
-\subsection{Session Length}
-\label{ss:user:session}
-Session length refers to the time each user spends in viewing a mesh. 
-Generally, the session length is short, with the average values of 107s, 76s, 47s for \textit{Thai Statue}, 
-\textit{Dragon}, and \textit{Happy Buddha}, respectively (see Table \ref{t:TimeTable}). 
-Figure \ref{fig:session-length}(a) shows the distribution. 
-The session length decreases with complexity of the meshes, as expected. 
-The session length fits the \textit{log-normal} distribution.
+\section{Predicting User Actions}
+\label{ss:user:predictability}
+it is interesting to see if user actions are predictable. 
+If so, pre-fetching can be used to reduce response time when
+users change their viewpoints. For example, when the connection between the 
+receiver and the sender has limited bandwidth
+or long delay, the requests for vertex splits of the new viewpoint 
+can be sent based on the prediction before the user changes the viewpoint.
+Another example is that when the client has limited
+rendering power, the next viewpoint can be rendered
+in advance based on the prediction to reduce the response time. 
 
-%The three models show different distributions. Such results are expected, for the session length is related to the users' interest in the models and the levels of details in different models.  Among these three models, Thai Statue is the biggest one, which provide the most coarse model to users when users start to view it, while ``Happy Buddha`` is the smallest one with less interesting details in it. 
-%In generaly, the results of the session length distribution gives us two implications. First, the session length is short with maximum value of $376 sec$, which increase the difficulty in data sharing in P2P 3D mesh streaming systems. Second, the session length is dependent on the content of the models, and thus we need to consider the different features of the content of the model when generating synthetic traces for them.
-
-\begin{figure}[htp]
-\begin{center}
-\begin{tabular}{cc}
-\epsfig{file=figs/unconditionalThinkTimeResults/sessionLengthdistribution.eps, width=0.45\textwidth,angle=270}&
-\epsfig{file=figs/unconditionalThinkTimeResults/Inter-operationTimeDistribution.eps, width=0.45\textwidth, angle = 270}\\
-\end{tabular}
-\caption{\label{fig:session-length} (a) Session Length and (b) Inter-stroke Time}
-\end{center}
+The next action of a user, $A_n$, is a random variable with 14 possible values
+(see Table \ref{t:user:action}). 
+A naive way to predict the value of $A_n$ is based on the unconditional distribution 
+of $A_n$, which can be estimated as the frequency of each value in the traces
+we collected.  
+Then the $A_n$ can be predicted as the action with highest probability.
+We note this action as $a_{max}$ and its probability as $p_{max}$
+Figure \ref{f:user:frequency}
+shows the frequency of occurrences of 12 different actions in the traces we collected,
+displayed as a bubble chart. 
+The bubble size indicates the frequency of an action occurring for a mesh.
+We can see that the most frequently used actions are two revolving (rotating around y-axis). 
+Table \ref{t:user:highest_probability} shows the $a_{max}$ and $p_{max}$ for all 9 meshes.
+As a result, without any extra information, we can always predict that the next action is 
+$a_{max}$, and the accuracy is $p_{max}$.
+\begin{table}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        Mesh              &     $a_{max}$         &    $p_{max}$ \\
+        \hline
+        Dragon            &     REAN              &    0.2517    \\
+        Dragon1           &     REC               &    0.2237    \\
+        Dragon2           &     REAN              &    0.2180    \\
+        Thai              &     REAN              &    0.3292    \\
+        Thai1             &     REAN              &    0.3323    \\
+        Thai2             &     REC               &    0.3375    \\
+        Buddha            &     REAN              &    0.3584    \\
+        Buddha1           &     REAN              &    0.2707    \\
+        Buddha2           &     REC               &    0.3438    \\
+        \hline
+    \end{tabular}
+    \caption{The action with highest unconditional probability and its probability.}
+    \label{t:user:highest_probability}
+\end{table}
+The accuracy of this prediction, however, is low. 
+The best prediction we can make is for Buddha, which has the accuracy as 35.84\%. % if we guess one action and $64.34\%$ if we guess two actions
+%(if the real action is one of the predictions, we consider our prediction is accurate).
+The prediction could be more accurate with more information,
+such as the previous action of the user and the current viewpoint of the user.
+\begin{figure}[htdp!]
+    \centering
+    \epsfig{file=UnActionEventFrequency.eps, width=0.45\textwidth}
+    \caption{The frequency of 12 actions in the traces we collected.}
+    \label{f:user:frequency}
 \end{figure}
 
-%\begin{figure}[htp]
-%\begin{center}
-%\epsfig{file=figs/RegionType0/sessionLengthdistribution.eps, width=0.28\textwidth, angle = 270}
-%\caption{The Session Length Distribution}
-%\label{fig:session-length}
-%\end{center}
-%\end{figure}
-
-\begin{table}[hbp!]
-\begin{center}
-\begin{tabular}{|c|c|c|c|c|c|}
-\hline 
-Mesh&\multicolumn{2}{c|}{Session Length}&\multicolumn{2}{c|}{Think Time}\\
-\cline{2-5}
-&Mean($s$)&Max($s$)&Mean($ms$)&Max($s$)\\
-\hline
-Thai Statue&107&376&593&25\\
-\hline
-Dragon&76&272&574&20\\
-\hline
-Happy Buddha&47&98&403&13\\
-\hline
-\end{tabular}
-\caption{Session Length and Think Time\label{t:TimeTable}}
-\end{center}
-\end{table}%\begin{table}[hbp!]
-%	\centering
-%	  \caption{Session Length Stastistics}
-%		\begin{tabular}{|c|c|c|c|}
-%		\hline
-%		Model&Sample Size&Mean(s)&Max(s)\\
-%		\hline
-%		Thai Statue&60&107&376\\
-%		\hline
-%		Dragon&63&76&272\\
-%		\hline
-%		Happy Buddha&39&47&98\\
-%		\hline
-%		\end{tabular}
-%		\label{SessionTable}
-%\end{table}
-
-\subsection{Think Time}
-\label{ss:user:thinktime}
-We refer to the time between two key strokes as \textit{inter-stroke time}. 
-Consecutive key strokes of the same type with inter-stroke time smaller than 20 $m$s
-are grouped together as one \textit{action}. 
-The time between two actions is \textit{think time}. 
-We choose the threshold of 20 $m$s because there is an obvious gap between 5 $m$s and 35 $m$s
-in the CDF of inter-stroke times for all meshes (see Figure \ref{fig:session-length}(b)).
-%shows part of the inter-stroke time distributions. A gap exists between 5 $m$s and 35 $m$s approximately. 
-%For larger values, the inter-stroke times follow similar distribution among different meshes. 
-%Therefore, we select 20 $m$s as the threshold. 
-
-%\begin{figure}[htp]
-%\begin{center}
-%\epsfig{file=figs/Inter-operationTimeDistribution.eps, width=0.28\textwidth, angle = 270}
-%\caption{Inter-operation Time Distribution}
-%\label{fig:interOpsTime}
-%\end{center}
-%\end{figure}
- 
-%The think time thus reflects the time interval between users' changing viewpoint. We study the think time distribution not only considering different models but also considering the different viewpoint regions of the model. 
-
-%First, we give the results without considering the different viewpoint regions. 
-
-We find that think time follows similar distributions for all of the three meshes (Figure \ref{fig:think-time}(a)). 
-About 90\% of the think time is smaller than a second. There is a jump in the curve of think time distribution for all the three meshes -- 
-about 5\% of the think time clusters around 0.5 seconds. 
-We hypothesize that this is related to the 0.4-second round trip time in our experiments. 
-After a user performs an action, it takes 0.4 seconds before the user can see progressive refinement of the mesh
-(although the system responses to the change in viewpoint \textit{immediately}). 
-Some users might wait for the refinement to come before the next action.
-
-The mean and maximum think time are shown in Table \ref{t:TimeTable}. We note that the maximum is up to 50 times larger than the mean.
-
-\begin{figure}[htp]
-\begin{center}
-\begin{tabular}{cc}
-\epsfig{file=figs/unconditionalThinkTimeResults/ThinkTimeDistribution3.eps, width=0.45\textwidth, angle = 270}&
-\epsfig{file=figs/conditionalThinkTimeResults1/ConditionalThinkTimeDistribution1hugenormal.eps, width=0.45\textwidth, angle = 270}\\
-\end{tabular}
-\caption{\label{fig:think-time} Think Time (x-axis in log scale).}
-\end{center}
+\textbf{Considering Previous Action}
+From the traces we found that the value of $A_n$ highly correlates
+with the value of $A_p$, the previous action taken by the user.
+Figure \ref{f:user:prev_next_relation} shows the conditional 
+probability of taking the next action given the previous action
+%for \textit{Thai Statue}.
+for the three meshes.
+The shaded diagonal shows that the same action has the 
+significantly larger probability (e.g., more than 0.93 for revolving) 
+of being taken next. %The other meshes exhibit the similar pattern. 
+\begin{figure}[htp!]
+    \centering
+    \begin{tabular}{c}
+        \epsfig{file=figs/traceHistogram0/Inter-operationprobability-hugenormal.eps, width=0.45\textwidth}\\
+        \epsfig{file=figs/traceHistogram0/Inter-operationprobability-dragonnormal.eps, width=0.45\textwidth}\\
+        \epsfig{file=figs/traceHistogram0/Inter-operationprobability-happynormal.eps, width=0.45\textwidth}
+    \end{tabular}
+\caption{The conditional probability of next action if the previous action is given.}
+\label{f:user:prev_next_relation}
 \end{figure}
 
-To investigate the relation between think time and viewpoints, we
-classify the viewpoints into 4 regions: front-far (FF), front-near
-(FN), back-far (BF), and back-near (BN), based on \textit{front/back} and
-\textit{far/near}. We find that the think time distribution is not
-affected by the viewpoint (see Figure \ref{fig:think-time}(b)). 
+According to this observation, 
+we categorized the actions into two types: \textit{repeat}, \textit{non-repeat} and use 
+$P_{repeat}$ to represent the probability to repeat the previous action.
+Then we can predict the next action by choosing ``repeat'' unconditionally.
+The probability of ``repeat'' for three meshes can be seen in Figure \ref{f:user:cont_prob}.
+Therefore, always choosing ``repeat'' as the prediction has high accuracy 
+(larger than $80\%$ for all meshes). 
+\begin{figure}[htdp!]
+    \centering
+    \epsfig{file=cont_prob_9.eps, width=0.6\textwidth}
+    \caption{The probability of repeating the previous action for 9 meshes.}
+    \label{f:user:cont_prob}
+\end{figure}
 
-Next, it is reasonable to assume think time is small when user just repeat 
-the previous action and the think time tends to be big when user change to another action.
-Figure \ref{f:user:thinktime} shows this assumption is correct.
 \begin{figure}
     \centering
-    \epsfig{file=thinktime.eps, width=0.5\textwidth}
-    \caption{Think time is smaller when user repeat the previous action.}
-    \label{f:user:thinktime}
+    \epsfig{file=happy_2.eps, width=0.55\textwidth}\\
+    Buddha\\
+    \epsfig{file=dragon_2.eps, width=0.55\textwidth}\\
+    Dragon\\
+    \epsfig{file=thai_2.eps, width=0.55\textwidth}\\
+    Thai Statue
+    \caption{The probability of repeating the previous action for each combination of previous two actions (Thai Mesh).
+    'x' means that the sample size of this combination is too small (less than 10 samples) to obtain reliable probability.}
+    \label{f:user:prev2}
+\end{figure}
+Next, we check whether it helps to consider one more action, the second latest action. 
+The $P_{repeat}$ under different combination of
+previous two actions for Thai Mesh is shown in Figure \ref{f:user:prev2}.
+In this figure, we can see that the second latest action does affect the 
+$P_{repeat}$y, but the effect is much less significant than the previous action. 
+Moreover, we found that in around 99.9\% of the combinations, 
+repeating the previous action still has the largest probability,
+so the prediction based on previous action and the one based on previous two actions are the same in
+most of the cases. 
+Therefore, we conclude that considering only the previous action is enough for the prediction.
+
+\textbf{Considering Viewpoint} 
+The other method to improve the prediction accuracy is to consider the current viewpoint of the user.
+We compute the conditional distribution of next action $A_n$ on each viewpoint, 
+and always choose the action with the highest conditional probability as the prediction.
+
+Since we estimate the probability of an action as the frequency 
+of its occurrence in the real traces, 
+enough number of samples are required to give reliable results. 
+By analyzing the traces we collected, we found that majority of the samples are 
+on a small proportion of viewpoints, and for the rest viewpoints, we have few
+samples (See Figure \ref{f:user:sample_size_1}).
+\begin{figure}
+    \centering
+    \epsfig{file=happy_sample_size_1.eps, width=0.55\textwidth}\\
+    Buddha\\
+    \epsfig{file=dragon_sample_size_1.eps, width=0.55\textwidth}\\
+    Dragon\\
+    \epsfig{file=thai_sample_size_1.eps, width=0.55\textwidth}\\
+    Thai Statue
+    \caption{The number of samples on all viewpoints, and the viewpoints are sorted from the most popular to the least popular.}
+    \label{f:user:sample_size_1}
+\end{figure}
+Including the viewpoints having few samples may exaggerate the accuracy.
+For example, the predictions on all the viewpoints having one sample are 
+always 100\%, which is not realistic.
+Therefore, we ignore all those viewpoints with less than 10 samples.
+The accuracy of this method can be seen in Figure \ref{f:user:accuracy_comp} (labelled ``Vp'').
+We can see that this method has lower accuracy than the one based on previous action.
+
+\textbf{Considering Viewpoint and Previous Action}
+To improve the accuracy, we could consider both viewpoint and previous action.
+%Now we consider both current viewpoint and  previous action.
+Similarly, we compute the conditional distribution of next action $A_n$ for each combination. 
+Then we always choose the action with highest conditional probability as the prediction.
+
+The same problem of lacking samples exists for most combinations (See Figure \ref{f:user:sample_size_2}).
+\begin{figure}
+    \centering
+    \epsfig{file=happy_sample_size_2.eps, width=0.55\textwidth}\\
+    Buddha\\
+    \epsfig{file=dragon_sample_size_2.eps, width=0.55\textwidth}\\
+    Dragon\\
+    \epsfig{file=thai_sample_size_2.eps, width=0.55\textwidth}\\
+    Thai Statue
+    \caption{The number of samples on all combinations of viewpoint and previous action, and the combinations are sorted from the most popular to the least popular.}
+    \label{f:user:sample_size_2}
+\end{figure}
+We ignore those combinations with  less than 10 samples.
+The accuracy of this method can be seen in Figure \ref{f:user:accuracy_comp}.
+This method has the highest accuracy among the four methods.
+
+We compare the four methods in Figure \ref{f:user:accuracy_comp} for three meshes\footnote{
+To increase the sample size, we aggregate the data of the three version of the same mesh together.
+It is reasonable because the meshes has a defect are almost identical to the original one, 
+and users do not know which one has defect in advance. Therefore, their behavior are similar to
+all three versions of the same mesh.}.
+Our conclusion is that the user action is somewhat predictable and the prediction is simple.
+We can always predict the next action same as the previous one without considering
+any extra information, and the accuracy is good enough. 
+Considering both previous action and viewpoint has the highest accuracy,
+but it depends on the statistics of user behavior and differs on every mesh. Hence, it can only 
+be done when enough user traces are already collected for a specific mesh. 
+The slightly better accuracy may not justify the much higher complexity.
+\begin{figure}
+    \centering
+    \epsfig{file=accuracy_comp.eps, width=0.65\textwidth}
+    \caption{The accuracy of four prediction methods.}
+    \label{f:user:accuracy_comp}
 \end{figure}
 
-\subsection{Access Pattern}
-Proxy caching of meshes is useful in reducing the service load.  
-In this section, we show that the user traces exhibit access
-patterns that can lead to efficient caching.
+\section{Guiding Caching with User Traces}
+%According to our observations, parts of a mesh have different popularity. 
+%popular parts of the mesh. 
+Caching techniques are used to spend limited resources (such as 
+servers, memories, and network bandwidth) on the most popular requested 
+data to improve the system performance. 
+Hence, how effective a caching system can be depends on the access pattern
+of users. For example, if most user requests concentrate on a small 
+part of the data, then a small cache can significantly improve the 
+system performance. On the contrary, if all data are equally important,
+then caching is much less effective. Therefore, to study user traces
+is crucial in designing a caching system.
+In this section, based on the analysis of the traces we collected, 
+we show that how caching is useful in three different scenarios:
+(1) progressive mesh streaming, (2) remote rendering, and (3) 
+mesh rendering.
+%In this section, we show that the user traces exhibit access
+%patterns that can lead to efficient caching in three different scenarios.
 
 \textbf{Caching for Mesh Streaming}.
-In progressive mesh streaming, vertex splits are often grouped into chunks
-for transmission. These chunks can be cached at a proxy to reduce server overhead.
-To study the usefulness of proxy caching, we look at the access pattern to chunks. 
+%In progressive mesh streaming, vertex splits are often grouped into chunks
+%for transmission. These chunks can be cached at a proxy to reduce server overhead.
+%To study the usefulness of proxy caching, we look at the access pattern to chunks. 
+In progressive mesh streaming, vertex splits can be cached at a proxy to reduce server overhead.
+Usually, caching proxy has limited memory (or it can only provide limited memory for a certain mesh),
+so only a small part of the vertex splits can be stored. To study the usefulness of proxy caching,
+we look at the access pattern to vertex splits.
 
 We first replay the log of actions from the users, and generate
-a list of chunks accessed  by users during the experiment.  
-From these chunk traces, we count
-the number of times each chunk 
-is accessed.  We then sort the chunks 
+a list of vertex splits accessed  by users during the experiment.  
+From these vertex split requesting traces, we count
+the number of times each vertex split is accessed.  We then sort the vertex splits
 in decreasing order of the access count, and plot the cumulative
-access count versus rank in Figure \ref{fig:CDF}(a).  We
-normalize both axes to between 0 and 1 so that we can plot
-all three meshes on the same graph.  
-Figure \ref{fig:CDF}(a) shows how many requests we can satisfy (i.e., hit rate) 
+access count versus rank in Figure \ref{fig:CDF}(a).  We normalize both axes to between 0 and 1
+so that we can plot all three meshes on the same graph.  
+Figure \ref{fig:CDF}(a) shows how many requests (in percentage) we can satisfy (i.e., hit rate) 
 by storing the most frequently requested chunks in a proxy. 
-The x-axis denotes the number of chunks stored in the proxy, 
-as a fraction of total number of chunks requested
-(note: not the total number of all chunks).
+The x-axis denotes the number of vertex splits stored in the proxy, 
+as a fraction of total number of vertex splits requested
+(note: not the total number of all vertex splits).
 It can be observed that by building a static
 cache that stores 20\% of the most frequently accessed
-chunks, the proxy can achieve more than 70\% hit rate for
+vertex splits, the proxy can achieve more than 70\% hit rate for
 \textit{Thai Statue} and \textit{Dragon}, and 55\% for 
 \textit{Happy Buddha}.
 
@@ -464,7 +574,6 @@ leading to more evenly distributed viewpoints around the mesh.
 %    \end{tabular}
 %        \caption{(a)The normalized number of views for each face. (b) The hit rate when we save part of the faces in the graphic card.\label{fig:heat_map}}
 %    \end{figure}
-    
 \begin{figure}[htp!]
     \centering
 \begin{tabular}{c}
@@ -481,177 +590,6 @@ leading to more evenly distributed viewpoints around the mesh.
 \caption{The hit rate when we save part of the faces in the graphic card.\label{fig:face_hit_rate}}
 \end{figure}
 
-\subsection{Predictability}
-\label{ss:user:predictability}
-Besides the session length, think time, and the access pattern,
-it is also interesting to see if user actions are predictable. 
-If so, pre-fetching can be used to reduce response time when
-users change their viewpoints. For example, when the connection between the 
-receiver and the sender has limited bandwidth
-or long delay, the requests for vertex splits of the new viewpoint 
-can be sent based on the prediction before the user changes the viewpoint.
-Another example is that when the client has limited
-rendering power, the next viewpoint can be rendered
-in advance based on the prediction to reduce the response time. 
-%In both cases, the accuracy of the prediction is important.
-
-The next action of a user, $A_n$, is a random variable with 14 possible values
-(see Table \ref{t:user:action}). 
-A naive way to predict the value of $A_n$ is based on the unconditional distribution 
-of $A_n$, which can be estimated as the frequency of each value in the traces
-we collected.  
-Then the $A_n$ can be predicted as the action with highest probability.
-Figure \ref{f:user:frequency}
-shows the frequency of occurrences of 12 different actions.
-%\footnote{We ignore RESET and QUIT 
-%in this figure because they have the lowest probability.}
-on the traces from each of 9 meshes,
-displayed as a bubble chart. 
-The bubble size indicates the frequency of an action occurring for a mesh.
-We can see that the most frequently used actions are two revolving (rotating around y-axis). 
-As a result, without any extra information, we can always predict that the next action is 
-one of the two revolving.
-The accuracy of this prediction, however, is low. 
-Take the Thai mesh as an example,
-the accuracy is $33.07\%$. % if we guess one action and $64.34\%$ if we guess two actions
-%(if the real action is one of the predictions, we consider our prediction is accurate).
-The prediction could be more accurate with more information,
-such as the previous action of the user and the current viewpoint of the user.
-\begin{figure}[htdp!]
-    \centering
-    \epsfig{file=UnActionEventFrequency.eps, width=0.45\textwidth}
-    \caption{The frequency of 12 actions in the traces we collected.}
-    \label{f:user:frequency}
-\end{figure}
-
-\textbf{Considering Previous Action}
-
-From the traces we found that the value of $A_n$ highly correlates
-with the value of $A_p$, the previous action taken by the user.
-Figure \ref{f:user:prev_next_relation} shows the conditional 
-probability of taking the next action given the previous action
-%for \textit{Thai Statue}.
-for the three meshes.
-The shaded diagonal shows that the same action has the 
-significantly larger probability (e.g., more than 0.93 for revolving) 
-of being taken next. %The other meshes exhibit the similar pattern. 
-\begin{figure}[htp!]
-    \centering
-    \begin{tabular}{c}
-        \epsfig{file=figs/traceHistogram0/Inter-operationprobability-hugenormal.eps, width=0.45\textwidth}\\
-        \epsfig{file=figs/traceHistogram0/Inter-operationprobability-dragonnormal.eps, width=0.45\textwidth}\\
-        \epsfig{file=figs/traceHistogram0/Inter-operationprobability-happynormal.eps, width=0.45\textwidth}
-    \end{tabular}
-\caption{The conditional probability of next action if the previous action is given.}
-\label{f:user:prev_next_relation}
-\end{figure}
-
-According to this observation, 
-we categorized the actions into two types: \textit{repeat}, \textit{non-repeat}. 
-Then we can predict the next action by choosing ``repeat'' unconditionally.
-The probability of ``repeat'' for three meshes can be seen in Figure \ref{f:user:cont_prob}.
-Therefore, always choosing ``repeat'' as the prediction has high accuracy 
-(larger than $80\%$ for all meshes). 
-\begin{figure}[htdp!]
-    \centering
-    \epsfig{file=cont_prob_9.eps, width=0.6\textwidth}
-    \caption{The probability of repeating the previous action for 9 meshes.}
-    \label{f:user:cont_prob}
-\end{figure}
-
-\begin{figure}
-    \centering
-    \epsfig{file=happy_2.eps, width=0.55\textwidth}\\
-    Buddha\\
-    \epsfig{file=dragon_2.eps, width=0.55\textwidth}\\
-    Dragon\\
-    \epsfig{file=thai_2.eps, width=0.55\textwidth}\\
-    Thai Statue
-    \caption{The probability of repeating the previous action for each combination of previous two actions (Thai Mesh).
-    'x' means that the sample size of this combination is too small (less than 10 samples) to obtain reliable probability.}
-    \label{f:user:prev2}
-\end{figure}
-Next, we check whether it helps to consider one more action, the second latest action. 
-The probability of repeating the previous action under different combination of
-previous two actions for Thai Mesh is shown in Figure \ref{f:user:prev2}.
-In this figure, we can see that the second latest action does affect the 
-repeat probability, but the effect is much less significant than the previous action. 
-Moreover, we found that in around 99.9\% of the combinations, 
-repeating the previous action still has the largest probability,
-so the prediction based on previous action and the one based on previous two actions are the same in
-most of the cases. 
-Therefore, we conclude that considering only the previous action is enough for the prediction.
-
-\textbf{Considering Viewpoint}
-
-The other method to improve the prediction accuracy is to consider the current viewpoint of the user.
-We compute the conditional distribution of next action $A_n$ on each viewpoint, 
-and always choose the action with the highest conditional probability as the prediction.
-
-Since we estimate the probability of an action as the frequency 
-of its occurrence in the real traces, 
-enough number of samples are required to give reliable results. 
-By analyzing the traces we collected, we found that majority of the samples are 
-on a small proportion of viewpoints, and for the rest viewpoints, we have few
-samples (See Figure \ref{f:user:sample_size_1}).
-\begin{figure}
-    \centering
-    \epsfig{file=happy_sample_size_1.eps, width=0.55\textwidth}\\
-    Buddha\\
-    \epsfig{file=dragon_sample_size_1.eps, width=0.55\textwidth}\\
-    Dragon\\
-    \epsfig{file=thai_sample_size_1.eps, width=0.55\textwidth}\\
-    Thai Statue
-    \caption{The number of samples on all viewpoints, and the viewpoints are sorted from the most popular to the least popular.}
-    \label{f:user:sample_size_1}
-\end{figure}
-Including the viewpoints having few samples may exaggerate the accuracy.
-For example, the predictions on all the viewpoints having one sample are 
-always 100\%, which is not realistic.
-Therefore, we ignore all those viewpoints with less than 10 samples.
-The accuracy of this method can be seen in Figure \ref{f:user:accuracy_comp} (labelled ``Vp'').
-We can see that this method has lower accuracy than the one based on previous action.
-
-\textbf{Considering Viewpoint and Previous Action}
-To improve the accuracy, we could consider both viewpoint and previous action.
-%Now we consider both current viewpoint and  previous action.
-Similarly, we compute the conditional distribution of next action $A_n$ for each combination. 
-Then we always choose the action with highest conditional probability as the prediction.
-
-The same problem of lacking samples exists for most combinations (See Figure \ref{f:user:sample_size_2}).
-\begin{figure}
-    \centering
-    \epsfig{file=happy_sample_size_2.eps, width=0.55\textwidth}\\
-    Buddha\\
-    \epsfig{file=dragon_sample_size_2.eps, width=0.55\textwidth}\\
-    Dragon\\
-    \epsfig{file=thai_sample_size_2.eps, width=0.55\textwidth}\\
-    Thai Statue
-    \caption{The number of samples on all combinations of viewpoint and previous action, and the combinations are sorted from the most popular to the least popular.}
-    \label{f:user:sample_size_2}
-\end{figure}
-We ignore those combinations with  less than 10 samples.
-The accuracy of this method can be seen in Figure \ref{f:user:accuracy_comp}.
-This method has the highest accuracy among the four methods.
-
-We compare the four methods in Figure \ref{f:user:accuracy_comp} for three meshes\footnote{
-To increase the sample size, we aggregate the data of the three version of the same mesh together.
-It is reasonable because the meshes has a defect are almost identical to the original one, 
-and users do not know which one has defect in advance. Therefore, their behavior are similar to
-all three versions of the same mesh.}.
-Our conclusion is that the user action is somewhat predictable and the prediction is simple.
-We can always predict the next action same as the previous one without considering
-any extra information, and the accuracy is good enough. 
-Considering both previous action and viewpoint has the highest accuracy,
-but it depends on the statistics of user behavior and differs on every mesh. Hence, it can only 
-be done when enough user traces are already collected for a specific mesh. 
-The slightly better accuracy may not justify the much higher complexity.
-\begin{figure}
-    \centering
-    \epsfig{file=accuracy_comp.eps, width=0.65\textwidth}
-    \caption{The accuracy of four prediction methods.}
-    \label{f:user:accuracy_comp}
-\end{figure}
 
 \section{Generating Synthetic Traces}
 To evaluate the effectiveness and performance of a system, we often need many user traces. 
@@ -660,11 +598,130 @@ A cheaper way is to consider a user trace as a Markov chain
 and derive the transition matrix from the collected traces.
 Then following the transition matrix, we can generate as many traces as we want.
 
-The viewpoint, represented as a 6-tuple: {$x, y, z, \theta_x, ay, \theta_z$}
+As we introduced in Section \ref{s:user:study}, a user session is a random process 
+with viewpoints as the states. Each action transits
+the system from one state to next state, until the session is terminated
+(see Figure \ref{f:user:transition} as an example). 
+To generate a synthetic trace, we first need to determine the session length, i.e. how long
+the user spent in viewing on this mesh. Then we begin from the default viewpoint and keep
+determining the next action until the session time is expired. For each action, we need 
+to determine two things: when and what is the next action. In this section we first introduce
+how we determine the session length and the interval between two actions, named \emph{think time},
+and then we introduce how we choose the next action based on current state in detail.
+
+
+\subsection{Session Length}
+\label{ss:user:session}
+Session length refers to the time each user spends in viewing a mesh. 
+Generally, the session length is short, with the average values of 107s, 76s, 47s for \textit{Thai Statue}, 
+\textit{Dragon}, and \textit{Happy Buddha}, respectively (see Table \ref{t:TimeTable}). 
+Figure \ref{fig:session-length}(a) shows the distribution. 
+The session length decreases with complexity of the meshes, as expected. 
+The session length fits the \textit{log-normal} distribution.
+When we generate a synthetic trace, we determine the session length by generating a random number following 
+the log-normal distribution with parameter derived from the real traces.
+
+\begin{figure}[htp]
+\begin{center}
+\begin{tabular}{c}
+\epsfig{file=figs/unconditionalThinkTimeResults/sessionLengthdistribution.eps, width=0.55\textwidth,angle=270}
+\end{tabular}
+\caption{\label{fig:session-length} Distribution of Session Length}
+\end{center}
+\end{figure}
+
+\begin{table}[hbp!]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline 
+Mesh&\multicolumn{2}{c|}{Session Length}&\multicolumn{2}{c|}{Think Time}\\
+\cline{2-5}
+&Mean($s$)&Max($s$)&Mean($ms$)&Max($s$)\\
+\hline
+Thai Statue&107&376&593&25\\
+\hline
+Dragon&76&272&574&20\\
+\hline
+Happy Buddha&47&98&403&13\\
+\hline
+\end{tabular}
+\caption{Session Length and Think Time\label{t:TimeTable}}
+\end{center}
+\end{table}
+
+%\begin{table}[hbp!]
+%	\centering
+%	  \caption{Session Length Stastistics}
+%		\begin{tabular}{|c|c|c|c|}
+%		\hline
+%		Model&Sample Size&Mean(s)&Max(s)\\
+%		\hline
+%		Thai Statue&60&107&376\\
+%		\hline
+%		Dragon&63&76&272\\
+%		\hline
+%		Happy Buddha&39&47&98\\
+%		\hline
+%		\end{tabular}
+%		\label{SessionTable}
+%\end{table}
+
+\subsection{Think Time}
+\label{ss:user:thinktime}
+We refer to the time between two actions as \textit{think time}. 
+We find that think time follows similar distributions for all of the three meshes (Figure \ref{fig:think-time}(a)). 
+%There is a jump in the curve of think time distribution for all the three meshes -- 
+%about 5\% of the think time clusters around 0.5 seconds. 
+%We hypothesize that this is related to the 0.4-second round trip time in our experiments. 
+%After a user performs an action, it takes 0.4 seconds before the user can see progressive refinement of the mesh
+%(although the system responses to the change in viewpoint \textit{immediately}). 
+%Some users might wait for the refinement to come before the next action.
+The mean and maximum think time are shown in Table \ref{t:TimeTable}. 
+We note that the maximum is up to 50 times larger than the mean, but about 90\% of the think time is smaller than a second. 
+\begin{figure}[htp]
+\begin{center}
+\begin{tabular}{cc}
+\epsfig{file=figs/unconditionalThinkTimeResults/ThinkTimeDistribution3.eps, width=0.45\textwidth, angle = 270}&
+\epsfig{file=figs/conditionalThinkTimeResults1/ConditionalThinkTimeDistribution1hugenormal.eps, width=0.45\textwidth, angle = 270}\\
+\end{tabular}
+\caption{\label{fig:think-time} Think Time (x-axis in log scale).}
+\end{center}
+\end{figure}
+
+A simple method to determine the think time is following the distribution
+we derived from the traces, without considering the current state.
+This may be not accurate since the current viewpoint may affect the 
+distribution of the think time. Furthermore, people tends to repeat the same
+action quickly, and when usually takes longer time if they change to another action.
+Therefore, whether next action is repeating last action is also an factor to be considered.
+
+To investigate the relation between think time and viewpoints, we
+classify the viewpoints into 4 regions: front-far (FF), front-near
+(FN), back-far (BF), and back-near (BN), based on \textit{front/back} and
+\textit{far/near}. We find that the effect of region on think time distribution is not
+apparent \ref{fig:think-time}(b)).  Hence, for simplicity we ignore the effect
+of viewpoint during determining think time.
+
+Next, we examine the effect of repeating or non-repeating the previous action. 
+%it is reasonable to assume think time is small when user just repeat 
+%the previous action and the think time tends to be big when user change to another action.
+Figure \ref{f:user:thinktime} shows %this assumption is correct.
+think time tends to be much shorter when users repeat the previous action.
+Hence, during the synthetic trace generating, we use the respective distribution after
+we decide the next action. Next, we introduce how we determine the next action.
+\begin{figure}
+    \centering
+    \epsfig{file=thinktime.eps, width=0.5\textwidth}
+    \caption{Think time is smaller when user repeat the previous action.}
+    \label{f:user:thinktime}
+\end{figure}
+
+\subsection{Next Action}
+We decide the next action based the Markov chain method.
+The viewpoint, represented as a 6-tuple: {$x, y, z, \theta_x, \theta_y, \theta_z$}
 as introduced in Section \ref{s:user:study}, can be defined as the states in the Markov chain.
 According to the observation that the previous actions highly affects the next action
-(Section \ref{ss:user:predictability}),
-it is not a first order Markov chain because
+(Section \ref{ss:user:predictability}), it is not a first order Markov chain because
 the previous states affect the transition probability. 
 It, however, is not practical to consider the whole history before. 
 To make the analysis possible, we consider only one step before and assume
@@ -715,13 +772,20 @@ repeating the previous action has the highest probability in most cases.
 Therefore, the previous action is chosen as one of the most important factor. 
 Based on the relation with the previous action, we categorized actions to three groups: 
 \textit{repeat}, \textit{reverse}, and \textit{change}. 
+``Repeat'' means the next action is same to the previous action; ``reverse'' means
+the next action is the opposite of the previous action. For example, if the previous action
+is ``Move Up'', then ``reverse'' means the next action is ``Move Down''. All other actions are 
+categorized as ``change'' action.
+
 We determine the next action in two steps:
 \begin{enumerate}
     \item We determine the probability of ``repeat'', ``reverse'', and ``change'',
-        i.e. $Pr(repeat|_{\textrm{current state}})$, 
-        $Pr(reverse|_{\textrm{current state}}$, 
-        and $Pr(change|_{\textrm{current state}})$,
-        respectively. 
+        i.e.
+        \begin{align*}
+        P_{repeat}  &= Pr(A_n = A_p |_{\textrm{current state}}) \\
+        P_{reverse} &= Pr(A_n = \textrm{reverse}(A_p)|_{\textrm{current state}})\\
+        P_{change}  &= Pr(A_n != A_p, A_n != \textrm{reverse}(A_p)|_{\textrm{current state}}),
+    \end{align*}
     \item We decide the distribution of $A_n$ if ``change'' is decided, 
         i.e. $Pr(A_n |_{\textrm{current state}, A_n != A_p, A_n != \textrm{reverse}(A_p)})$ 
         for each possible $A_n$. 
@@ -744,13 +808,13 @@ For example, the corresponding coordinate of ``Move Left'' is $x$, and the corre
 ``Revolving Clockwise'' is $\theta_y$. 
 When users are repeating or reversing the previous action, 
 only the corresponding coordinate is changed. 
-As a result, we only consider the corresponding coordinate in determining the repeat probability. 
+As a result, we only consider the corresponding coordinate in determining the $P_{repeat}$. 
 For example, when a user keeps pressing ``Move Left'', the mesh may nearly be out of the viewable area, 
-then the probability of ``repeat'' decreases, and the probability of ``reverse'' increases. 
+then the $P_{repeat}$ decreases, and the $P_{reverse}$ increases. 
 Another example is that when the user keeps pressing ``Revolve Clockwise'' and find something interesting
 in the mesh from the current direction,
-the probability of ``repeat'' decreases and the probability of ``change'' increases.
-In summary, in this simplified model, we assume that the probability of ``repeat'', ``reverse'', and ``change''
+the $P_{repeat}$ decreases and the $P_{change}$ increases (the user may ``Zoom In'' to see more details or ``Move'' to the interesting part).
+In summary, in this simplified model, we assume that $P_{repeat}$, $P_{reverse}$, and $P_{change}$
 only depends on ``(previous action, corresponding coordinate)''.
 As a result, the number of available samples of each combination increases a lot compared with the first method
 (See Figure \ref{f:user:newsample}). 
@@ -764,8 +828,8 @@ As a result, the number of available samples of each combination increases a lot
 
 In step 2, we need to determine $Pr(A_n |_{\textrm{current state}, A_n != A_p, An != \textrm{reverse}(A_p)})$
 for each possible $A_n$. In this step, we ignore the effect of previous action. 
-We think the high probability of ``repeat'' is mainly because users tend to press the same key multiple times. 
-It affects the probability of ``change'', but its effect on which action to choose as ``change'' is little.
+We think that $P_{continue}$ is high mainly because users tend to press the same key multiple times. 
+It affects the $P_{change}$, but its effect on which action to be chosen as ``change'' is little.
 %When a user has decided to go along another axis, we think the previous action has little effect on the choice of
 %next action. 
 Hence, we assume that $Pr(A_n |_{\textrm{current state}, A_n != A_p, An != \textrm{reverse}(A_p)})$
@@ -825,19 +889,22 @@ popularity.
 %Because we have enough samples for these viewpoints, we
 %still use the standard method to derive the transition probability for these viewpoints. 
 
-Next, for each axis we have two directions to move, and we need to know the probability of each direction.
-We assume users tend to move to a position with higher popularity, i.e. $Pr[vp]$. We set the probability 
-of a direction to be proportional to the sum of popularity of its several neighbors in that direction (we choose
-3 neighbors in our implementation). 
+Next, for each axis we have two directions to move, and we need choose one.
+We assume users tend to move to a direction with higher popularity, i.e. $Pr[vp]$. 
+We define the popularity of a direction to be the sum of popularity of several consecutive positions in that direction
+(we choose 3 positions in our implementation). 
+Then, we assume the probability to go one direction is proportional to the popularity of that direction.
 For example, if the axis to change is $X$ and its current value is $x$, 
-the probability of moving to $x+1$  
+the probability of moving right (considering three consecutive positions in that direction: $x+1$, $x+2$, $x+3$)
 \begin{align*}
+    =&\frac{\textrm{Popularity(right)}}
+    {\textrm{Popularity(right)} + \textrm{Popularity(left)}} \\
    =&\frac{Pr(x+1)+Pr(x+2)+Pr(x+3)}
           {Pr(x+1)+Pr(x+2)+Pr(x+3)+Pr(x-1)+Pr(x-2)+Pr(x-3)}.
 \end{align*}
-Notice all these viewpoints have same $y$, $z$, $\theta_x$, $\theta_y$, and $\theta_z$.
-We consider several neighbors instead of one because users tend to repeat 
-the same action several times. 
+Notice all these viewpoints have same $y$, $z$, $\theta_x$, $\theta_y$, and $\theta_z$, so they are not in
+the equation. We consider several positions instead of one because users tend to repeat the same action several times,
+so once a direction is chosen, the following several positions instead of one could be visited. 
 
 In brief, we generate a synthetic trace as follows:
 \begin{enumerate}
@@ -859,7 +926,7 @@ In brief, we generate a synthetic trace as follows:
 The synthetic traces generated by our method satisfying some important requirements. 
 When replaying the traces we generated, the mesh will not stay in abnormal state for long 
 (abnormal positions include upside down, titled, out of viewable area, etc.).
-Since we decide the ``repeat'' and ``reverse'' probability considering the corresponding coordinate,
+Since we determine $P_{repeat}$ and $P_{reverse}$ considering the corresponding coordinate,
 the probability for the mesh to enter abnormal state is low, and it tends to go back to normal state
 by ``reverse'' action. 
 Moreover, whenever ``change'' is chosen, 
@@ -868,8 +935,8 @@ the mesh tends to go to a more normal state (a state having higher probability).
 \subsection{Validation}
 In this section, we validate our model by comparing the synthetic traces we generated with the real traces.
 We generated 10000 synthetic traces following the simplified model we introduced in the last section.
-Thai mesh is chosen as the mesh used in this validation because of its high complexity and hence
-the high challenge.
+Thai mesh is chosen as the mesh used in this validation because of its high complexity. Thai statue 
+is the largest mesh and has many details, so more variety exist in users interactions. 
 
 First, we compare the unconditional probability of each action in the traces. 
 From Figure \ref{f:user:frequency_comp}, we can see that the traces we generated fit well with the real traces. 
@@ -882,9 +949,9 @@ still the traces generated have similar unconditional probability for each actio
     \label{f:user:frequency_comp}
 \end{figure}
 
-Second, we compare the probability of repeating the previous action, including unconditional repeat probability
-and the repeat probability under different previous action. We can see from Figure \ref{f:user:repeat_prob_comp},
-the synthetic traces we generated has similar repeating probability under all conditions.
+Second, we compare the $P_{repeart}$, including unconditional $P_{repeat}$
+and conditional $P_{repeat}$ under different previous action. We can see from Figure \ref{f:user:repeat_prob_comp},
+the synthetic traces we generated has similar $P_{repeat}$ under all conditions.
 \begin{figure}[htdp!]
     \centering
     \epsfig{file=repeat_prob_comp.eps, width=0.5\textwidth}
@@ -951,4 +1018,6 @@ Therefore, pre-fetching becomes possible both in streaming and rendering.
 Third, we proposed a simple model to generate synthetic traces based on real traces we collected. These synthetic traces have similar
 properties with the real traces and hence can be used in simulations to measure system performance without collecting
 a large number of traces.
+
+
 
