@@ -55,8 +55,8 @@
     which significantly increases the infrastructural cost) 
     due to its two characteristics:
     (1), the sender is state-ful because it needs to remember which
-    vertices are sent for each receiver to avoid sending duplicate data
-    when receivers changes viewpoint;
+    vertices are sent for each receiver to avoid sending duplicate data;
+    %when receivers changes viewpoint;
     (2), the sender has to do expensive computation to determine the 
     visibility and visual contributions of vertex splits for each receiver.
     
@@ -66,8 +66,9 @@
     First, it is difficult for a receiver to request data from multiple proxies or peers
     without receiving duplicate data, because it requires the sending history in multiple senders to  
     be synchronized. 
-    Second, it is not realistic to require each proxy or peer to provide much CPU (or even GPU) time
-    and memory (maintaining state of other receivers) to other receivers. 
+    Second, it is not realistic to require each proxy or peer to provide much CPU
+    %(or even GPU) 
+    time and memory (maintaining state of other receivers) to other receivers. 
     Third, a proxy or peer might not store the complete mesh for visibility determination.
 
     To address the above weaknesses and design a more scalable view dependent streaming system, 
@@ -99,7 +100,7 @@
     Second, we need to assign each vertex a unique identification number
     so that the receiver can explicitly request vertex splits. 
     To avoid sending extra data, the identification number of each vertex 
-    should implicitly known by the receiver.
+    should be implicitly known by the receiver.
     %Although it is difficult for the receiver to accurately measure
     %the visual importance of a vertex split, we find that estimation suffices
     %in our scheme.  
@@ -363,10 +364,11 @@
 
      To avoid the receiver to request a non-exist vertex split (trying to split
      a leaf vertex in the vertex hierarchy),
-     an extra bit is attached to every vertex to indicate whether it is a leaf or not.
+     In the base mesh, an extra bit is attached to every vertex to indicate whether it is a leaf or not.
+     Every vertex splits has two extra bits to indicate whether the two newly generated vertices are 
+     leave or not.
      %This will be introduced in more detail when we discussing about coding vertex splits
      %later.
-     
      \subsection{Determining Visual Importance}
      \label{ss:dstream:visual}
      We now introduce how the receiver decides the requesting order. 
@@ -393,78 +395,129 @@
      metric of its visual importance (see Figure \ref{dstream:screen_area}).
      The rationale is that if the screen area of a vertex ($V_1$ in Figure \ref{dstream:screen_area}) 
     is larger, it is likely the quality can be improved more by splitting this vertex. 
-    In other words, we use the neighbor faces to estimate the projected area of the 
-    bounding sphere on the screen.
+    In other words, we use the neighbor faces as an approximation of the projection of bounding sphere used
+    in sender-driven protocol.
     
     We compute the screen-space area with the help of the GPU. 
     First we assign each face in the current mesh a unique color and render them. 
     We can determine the visibility
-    and the screen-space area of each vertex by counting how many pixels with its color
+    and the screen-space area of each face by counting how many pixels with its color
     are in the frame buffer, where the rendering result is stored. 
     Then we add the pixel number to the face's three vertices. Thus, the
     pixel number of a vertex (which is the sum of pixel numbers in its neighbor faces)
     is proportional to its screen-space area.
-    This process introduce some delay, but the delay can be compensated by the time
+    This process introduce some overhead, but the overhead can be compensated by the time
     we saved from rendering only visible part of a large mesh later. 
-
     After the screen-space areas are computed, 
     the receiver sends the requests following the descending order of the 
-    screen-space area. The effectiveness of this method is evaluated in Section \ref{s:dstream:evaluation},
-    compared with other two methods. One is based on the level of a vertex in the 
-    vertex hierarchy and one is randomly pick a visible vertex to split.
+    screen-space area. 
+    
+    A vertex split will generate two new vertices and their screen-area need re-computation.
+    Moreover, it also changes the area of some neighbor vertices. Ideally, we should 
+    do the screen-area computation after each vertex split and then select the next 
+    vertex split. This \emph{vertex by vertex} method is not feasible for two reasons.
+    First, the screen-area computation for each vertex split is too expensive. Second,
+    due to the RTT between the receiver and the sender, vertex by vertex method means
+    to send a request and wait for the vertex splits to come before sending next vertex
+    split. As a result, the majority of network bandwidth will be wasted. 
+    
+    %Between a request is 
+    %sent and the corresponding vertex is received, a considerable delay, roughly equal
+    %to the RTT between the receiver and the sender, exists. 
+    To use all the bandwidth available, the receiver should keep selecting vertices to be split
+    and send out the requests. If we only select from the existed vertices, i.e. 
+    the vertices in the vertex front, we will face two problems.
+    %TOne solution could be select vertex to be split all from the If only vertex splits of 
+    %With the method introduced above, we can estimate the visual importance of each existed vertex,
+    %i.e. the vertices in the vertex front. For several reasons, we need to estimate 
+    %the visual importance of some children of these vertices too. 
+    %the existed vertices are sent, 
+    In the beginning, when the mesh is still coarse, the receiver may have no enough requests
+    %to fill the pipeline.
+    %In other words, the receiver may have no vertex splits 
+    to request before the vertex splits already requested arrive after one RTT. 
+    Then we cannot full utilize the network bandwidth when we need them most.
+    Moreover, even when there are enough vertices splits to request during one RTT, only sending
+    the splits of existed vertices may delay splits of some important children vertices.
+    For example, if vertex $v$ has the highest importance, and if it is split, its two 
+    children $v_1$ and $v_2$ are the next most important vertices. However, because these
+    two vertices do not exist, they will not be selected until the vertex splits of $v$ 
+    is received and applied after one RTT.
 
+    To address this problem, we also estimate the visual importance of the children vertices
+    when their parent vertex is selected. Whenever a vertex is selected to be split, its two children
+    are added into the candidates. Their virtual importance are both estimated as the half
+    of the selected vertex. For example, if vertex $v$ having importance $a_v$ is selected,
+    its two children $v_1$ and $v_2$ are added to the candidates with importance $\frac{a_v}{2}$.
+    Then they will also be considered for the next selection.
+    This estimation introduces some error, and the error could propagate to
+    lower levels. To reduce the error propagation, 
+    we periodically do the visibility test again to update the visual importance of 
+    each vertex\footnote{ 
     If the viewpoint changes due to the user's interaction, the visual importance will
-    be re-computed and a new list of vertex splits will be requested. Since the received
-    splits refine the mesh, the receiver recomputes the visual importance periodically
-    to update the order even without viewpoint change. The refresh period, one second
-    in our experiments, can be decided by the receiver based on mesh size and network bandwidth.
+    be re-computed and a new list of vertex splits will be requested. 
+    }.
+    In Section \ref{s:dstream:evaluation}, we show that
+    that with periodical updating, this method works well. Compared with the ideal case,
+    using vertex by vertex approach and the RTT is $0$, this method has comparable performance
+    with a regular RTT.
+
+    The effectiveness of screen-based method is evaluated in Section \ref{s:dstream:evaluation},
+    compared with other two methods. One is based on the level of a vertex in the 
+    vertex hierarchy and the other is randomly pick a visible vertex to split.
+
+    %With the screen-area based method, only the visual importance of currently existed
+    %vertices can be estimated. For several reasons, we need to estimate the visual importance
+    %of their children too. First, the visual importance of some children vertices may
+    %be higher than some current existed vertices. Second, if only the vertex splits of 
+    %current existed vertices are requested, the requests may not fill the pipeline when RTT
+    %between the receiver and the sender is high. Therefore,
+    %the receiver may be idle before requested vertex splits are received. (This paragraph to be elaborated)
     
-    With the screen-area based method, only the visual importance of currently existed
-    vertices can be estimated. For several reasons, we need to estimate the visual importance
-    of their children too. First, the visual importance of some children vertices may
-    be higher than some current existed vertices. Second, if only the vertex splits of 
-    current existed vertices are requested, the requests may not fill the pipeline when RTT
-    between the receiver and the sender is high. Therefore,
-    the receiver may be idle before requested vertex splits are received. (This paragraph to be elaborated)
+    %We use a simple method to estimate the visual contribution of the children vertices.
+    %If the importance of the vertex $v$ is $A_v$, then we assign $\frac{A_v}{2}$ to its 
+    %two children vertices.  Since we periodically recomputes the visual importance, the error
+    %introduced by this simple method can be reduced. 
+    %In Section \ref{s:dstream:evaluation}, we show that this simple method works well.
     
-    We use a simple method to estimate the visual contribution of the children vertices.
-    If the importance of the vertex $v$ is $A_v$, then we assign $\frac{A_v}{2}$ to its 
-    two children vertices.  Since we periodically recomputes the visual importance, the error
-    introduced by this simple method can be reduced. 
-    In Section \ref{s:dstream:evaluation}, we show that this simple method works well.
-    
-    Once the receiver satisfies with the rendering quality, it 
+    During the streaming, when the receiver satisfies with the rendering quality, it 
     can either stop requesting or continue requesting the remaining vertex splits
-    for future use based on the prediction of the user's next action. 
-    In Chapter \ref{c:user}, we discuss about whether the user actions can be predicted.
+    for future use based on the prediction of the user's next action 
+    (In Chapter \ref{c:user}, we discuss about whether the user actions can be predicted).
 
     If the receiver stops requesting % for more vertex splits 
     when the visual quality is satisfactory, it may miss some visible vertices.
-    As we introduced in Section \ref{s:dstream:terms}, we cannot simply ignore 
-    all invisible vertices, because they may have visible descendants.
+    %As we introduced in Section \ref{s:dstream:terms}, we cannot simply ignore 
+    %all invisible vertices, because they may have visible descendants.
     Unlike sender-driven approach, where the visibility of a vertex and its all descendants
     can be determined with its bounding sphere, we estimate the visibility of 
-    a vertex and its descendants based on the visibility of its neighbor faces. 
+    a vertex and its descendants based on the visibility the neighbor faces of this vertex. 
     This estimation may introduce some error (mostly on the silhouette), 
     but fortunately, in most cases this kind of error is small and tolerable
     (See the experiment results in Section \ref{s:dstream:evaluation}).
-    If strict accuracy is needed, the receiver can choose to continue requesting 
-    for the remaining vertex splits.  
+    %If strict accuracy is needed, the receiver can choose to continue requesting 
+    %for the remaining vertex splits.  
 
-	Furthermore, %some methods may reduce 
-    we can reduce the error by split the vertices close to the silhouette even 
+	%Furthermore, %some methods may reduce 
+    We can reduce the error by split the vertices close to the silhouette even 
     when they are invisible. During the process of determining visibility, we can also
-    detect the silhouette. Since we assign a unique color to each faces, we know
-    which color does not belong to the mesh. Then, whenever we find a pixel is a 
-    neighbor of an ``alien'' color, we know that the corresponding 
-    face of this pixel is in silhouette.
-    We can then split the neighbors of this pixel disregard of the visibility.
+    detect the silhouette. Recall that we assign a unique color to each faces.
+    Lets define the set of colors used for a mesh is $\mathcal{C}$.  
+    %As a result, if a pixel has an ``alien'' color (the color not belongs to the 
+    %mesh), we know that it is not a part of the mesh.
+    Then, whenever we find a pixel with color in $\mathcal{C}$ 
+    is a neighbor (any of the four directions: up, bottom, left, and right)
+    of a pixel with color not in $\mathcal{C}$, 
+    we know that the corresponding face of this pixel is in the silhouette.
+    We can then split the neighbors of this pixel disregard of their visibility.
     In Section \ref{s:dstream:evaluation}, we can see that this method helps
-    reduce the error significantly.
+    reduce the error significantly. Moreover, we show that we could assign
+    higher priority to the silhouette so that the reconstruted image has 
+    a more correct shape early. This is useful in some applicaions that the
+    shape of the mesh is important.
     
     \subsection{Encoding of Vertex Splits and IDs}
     \label{ss:dstream:encoding}
-
     %Our progressive meshes are generated using OpenMesh\footnote{http://www.openmesh.org}. 
     %Here, we consider only manifold meshes and use half collapse in the simplification. We 
     %%The happy Buddha mesh is from Stanford University.
@@ -560,9 +613,14 @@
 
     \textbf{Encoding IDs of vertex splits}
     We now introduce how we encode the vertex split IDs sent from the receiver to the
-    sender. Since we use an 32bit integer to represent an ID,  32 bpv is needed for each ID
-    without compression. It is already larger than the vertex split corresponding to the ID,
-    so compression is necessary.
+    sender. Since we use an 32bit integer to represent an ID, 32 bpv is needed for each ID
+    without compression. It is already larger than the vertex split (31 bpv in average)
+    corresponding to the ID, so compression is desired.
+    
+    We separate vertex split IDs into blocks, and one block will be compressed as a unit and
+    be sent as a packet. Inside a block, we first filter out all the vertex splits ID
+    whose parent ID are also in this packet. They can be encoded with a special way introduced
+    later. We then focused on those remaining vertex split IDs.
     
     %First we choose the number of vertex identifications to be packetized appropriately
     %such that their vertex splits after encoded will no exceed
@@ -571,7 +629,6 @@
     %one packet loss will not affect the decoding of another packet.
     %A previous paper \cite{1291399} has discussed the importance to reduce the dependency
     %among the packets.
-    First, we filter out all the children vertices in the requests.
     The two parts of an ID, tree ID and node ID, are encoded separately.  
     We use a bit string \textit{code} to store the encoded result.
     First, we sort the IDs in a packet according to the tree IDs, in increasing order. 
@@ -642,23 +699,23 @@
     %Due to the limited space, we omit the decoding algorithm
     %here. It can be deduced from the encoding algorithm.
 
-    For each non-children vertices, we indicate how many descendants are also requested.
-    Only a number to indicate how many levels to go down is enough for this purpose.
-    %We can further reduce the data size for some receivers whose up-link (receiver to
-    %sender link) bandwidth is much less than the down-link (sender to receiver link) 
-    %bandwidth. These receivers can request the sender to send not only the vertex split
-    %for the requested vertex but also the vertex splits for its descendant.
-    %For example, if the receiver sends an ID 
-    %`10010', the sender can send vertex splits for `10010', `100100', `100101'.
-    %The receiver can explicitly indicate in the packet how many descendants to send. This method 
-	%also allows the server to better utilize its outgoing bandwidth by filling the pipeline when RTT between the server and the client is high.
-
+    At last, for each vertex, we indicate how many levels of descendants are also requested.
+    We use `0' to indicate no descendants, `10' to indicate one level of descendants,
+    `110` to indicate two levels of descendants. 
+    In the worst case, when there are no descendants, we add only one bit for each vertex split
+    ID. But once there are some descendants to be split, this method encodes their IDs 
+    efficiently (1 bpv for one level, and 0.5 bpv for two levels). 
+    We force the descendants at the same level be requested together, and 
+    this rule is reasonable. Recall that the importance of the descendants at one level are all the same, 
+    one half of the parent's importance.
 \section{Evaluation}
+\begin{comment}
 In this section, we introduce the experiments results to evaluate our protocol.
 We choose two computers on a LAN as the sender and the receiver. 
 %We use several meshes from Stanford University in our experiments, but we only
 %present the result of Happy Buddha in this paper due to the space limit.
 \label{s:dstream:evaluation}
+\end{comment}
 \begin{comment}
     \subsection{CPU Usage of the Sender}
     \begin{table}[b]
@@ -700,6 +757,7 @@ We choose two computers on a LAN as the sender and the receiver.
     We can see that the receiver-driven protocol reduces the CPU usage
     of the sender by 24\% since we remove the processes for determining the visibility and updating the vertex front on the sender. 
 \end{comment}
+\begin{comment}
 \subsection{Transmitted Data Size}
 During transmissions of the Happy Buddha model (542652 vertex splits) using 
 the receiver-driven protocol, 1.83 MBytes are sent from the receiver
@@ -833,7 +891,9 @@ how many pixels are different and the other is to compute the PSNR value.
 Table \ref{t:dstream:error} shows that the error is negligible.
 % -- less than 0.12\% of the pixels are different and the PSNR values of the rendered images are at least 37.8.
 %add figures and explanation here.
+\end{comment}
 \section{Conclusion}
+\begin{comment}
 \label{s:dstream:conclude}
 In traditional view-dependent systems,
 senders decide which refinements to send, so they are
@@ -876,3 +936,4 @@ transmission data on the down-link of the sender is significantly reduced.
 %object. 
 %\section*{Acknowledgment}
 %This work is supported by National University of Singapore Academic Research Fund R-252-000-306-112.
+    \end{comment}
