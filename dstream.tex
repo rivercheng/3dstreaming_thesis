@@ -708,55 +708,179 @@
     We force the descendants at the same level be requested together, and 
     this rule is reasonable. Recall that the importance of the descendants at one level are all the same, 
     one half of the parent's importance.
-\section{Evaluation}
-\begin{comment}
-In this section, we introduce the experiments results to evaluate our protocol.
-We choose two computers on a LAN as the sender and the receiver. 
-%We use several meshes from Stanford University in our experiments, but we only
-%present the result of Happy Buddha in this paper due to the space limit.
+\section{Validation}
+In this section, we introduce the experimental results to 
+validate our solutions. First, we verify 
+how effective the screen-area based method is under 
+various scenarios.
+Then, we show the compression efficiency of 
+our encoding algorithm on three meshes.
 \label{s:dstream:evaluation}
-\end{comment}
-\begin{comment}
-    \subsection{CPU Usage of the Sender}
-    \begin{table}[b]
+
+\subsection{Testing Screen-Area Based Method}
+We test the effectiveness of screen-area based method by checking
+how fast the quality of rendered image is improved. PSNR value 
+is used as the main metric to measure the quality of a rendered
+image, compared with the rendered image of the original mesh. 
+When more vertices are split, the PSNR value tends to increase
+and plotting the PSNR value versus number of vertices are split
+will give us the quality curve. 
+We evaluate the requesting order mainly by examining the quality
+curve, and sometimes, when PSNR value is not enough to 
+represent the quality of an image, we will show the images directly.
+
+We test our method on various of meshes, viewpoints, and 
+initial status so that our result is more convincing.
+
+\textbf{Mesh}
+Three meshes, Happy Buddha (543,652 vertices)
+%, Asian Dragon (3,609,455 vertices), 
+and Thai Statue (5,000,000 vertices), both freely available
+from Stanford Graphic Lab, are used in our experiments to show how our 
+method works on meshes with various resolutions.
+Figure \ref{f:dstream:meshes} shows the rendered images of the original meshes
+compared with the rendered images of their base meshes.
+\begin{figure}[htdp!]
     \centering
-    \begin{tabular}{|c|c|c|}
-    \hline
-    &Sender-driven &Receiver-driven\\
-    \hline
-    send    base mesh           & 1.40s & 1.13s  \\
-    %receive encoded IDs         & -     & 0.06s  \\
-    decode  IDs                 & -     & 1.55s  \\
-    search vertex split         & 1.85s  & 1.85s \\
-    %receive the view parameters &       & -      \\
-    %traverse vertex hierarchy   &   & - \\
-    determine visibility        & 0.41s & - \\
-    update vertex front         & 1.41s & - \\
-    encode IDs                  & 0.94s & - \\
-    %send data                   &       & 0.10s  \\
-    others                      &0.16s  & 0.16s\\
-    \hline
+    \begin{tabular}{cc}
+        \epsfig{file=buddha_final.eps, width=0.45\textwidth} & \epsfig{file=buddha_initial.eps, width=0.45\textwidth} \\
+                 Happy Buddha viewpoint 1(Original)                      &          Happy Buddha viewpoint 1(Base) \\
+        %\epsfig{file=dragon_final.eps, width=0.45\textwidth} & \epsfig{file=dragon_initial.eps, width=0.45\textwidth} \\
+        \epsfig{file=thai_final.eps, width=0.45\textwidth} & \epsfig{file=thai_initial.eps, width=0.45\textwidth}\\
+                 Thai Statue(Original)                    &             Thai Statue (Base) \\
     \end{tabular}
-    \caption{Comparison of CPU usage of the sender.
-    \label{t:dstream:cpu}}
-    \end{table}
-    We compare the CPU usage of the sender in sender-driven
-    protocol and receiver-driven protocol after all vertex splits
-    are received (see Table \ref{t:dstream:cpu}). 
-    The implementation of the sender-driven protocol is modified from
-    our receiver-driven protocol using the visibility determination
-    algorithm from Kim et al. \cite{kim:view}. % by adding encoding scheme.
-    In both experiments, the client changes its viewpoints exactly the
-    same way.
-    A computer with an Intel Core 2 Duo 2.4 GHz CPU and 4 GB memory is
-    used as the sender.  We profile the code five times 
-    with Google CPU profiler and take the average value.
-    %We transmit
-    %the Stanford Happy Buddha mesh with both protocols and compare
-    %the CPU time used by the servers. 
-    We can see that the receiver-driven protocol reduces the CPU usage
-    of the sender by 24\% since we remove the processes for determining the visibility and updating the vertex front on the sender. 
+    \caption{Meshes we used in the experiments.}
+    \label{f:dstream:meshes}
+\end{figure}
+
+\textbf{Viewpoint}
+We also include two other viewpoints of Buddha mesh in our experiments (see Figure \ref{f:dstream:vps}). 
+In the first one, the user has zoomed in to see the upper half of the mesh. 
+The second one is a close-up view of the head of the Buddha. The previous viewpoint
+and these two represents viewpoints with various distance, from far to near.
+\begin{figure}[htdp!]
+    \centering
+    \begin{tabular}{cc}
+        \epsfig{file=vp2_buddha_final.eps, width=0.45\textwidth} & \epsfig{file=vp2_buddha_initial.eps, width=0.45\textwidth} \\
+                Happy Buddha viewpoint 2(Original)              &      Happy Buddha viewpoint 2(Base)      \\    
+        \epsfig{file=vp3_buddha_final.eps, width=0.45\textwidth} & \epsfig{file=vp3_buddha_initial.eps, width=0.45\textwidth} \\
+                Happy Buddha viewpoint 3(Original)              &      Happy Buddha viewpoint 3(Base)      \\
+    \end{tabular}
+    \caption{Two more viewpoints of Buddha mesh we used.}
+    \label{f:dstream:vps}
+\end{figure}
+
+\textbf{Initial Status}
+When users change the viewpoint, they may see a mesh with uneven quality.
+The part they have already seen has fine quality, but the newly seen part
+is still coarse. To address these scenarios, we include the Buddha mesh
+with different initial status (see Figure \ref{f:dstream:histories}). The first one is generated when the user just 
+zoomed out from the central part of the Buddha mesh, so we can see that 
+the middle part of the mesh is already refined but the upper part
+and the lower part is still coarse. The second one
+is generated when the user revolved the mesh from left to right, so we
+can see a fine right part and a coarse left part.
+\begin{figure}[htdp!]
+    \centering
+    \begin{tabular}{cc}
+        \epsfig{file=his1_buddha_final.eps, width=0.45\textwidth} & \epsfig{file=his1_buddha_initial.eps, width=0.45\textwidth} \\
+                Happy Buddha                                      &                Happy Buddha with initial status 1 \\
+        \epsfig{file=his2_buddha_final.eps, width=0.45\textwidth} & \epsfig{file=his2_buddha_initial.eps, width=0.45\textwidth} \\
+                Happy Buddha                                      &                Happy Buddha with initial status 2  \\
+    \end{tabular}
+    \caption{Two more initial status of Buddha mesh we used.}
+    \label{f:dstream:histories}
+\end{figure}
+
+\begin{comment}
+During the transmission, we set the RTT between the sender and the receiver
+as 400 ms. The receiver sends 125 packets per second and each packet has 
+200 requests inside. With this setting the sender will
+send a 125 packet, each has a size around 1K bytes, to the receiver. In other
+words, we assume the bandwidth is 1Mbps and each vertex splits has around
+50 bits. It also means the receiver has to send 10000 vertex split requests
+to fill the pipeline due to the RTT existed between the sender and the receiver. 
 \end{comment}
+
+In Section \ref{ss:dstream:visual} we explained why we estimate the visual importance
+of the two children vertices when their parent vertex is selected to be split.
+Here, we show how considering children vertices helps to improve the quality.
+\begin{figure}[htdp!]
+    \centering
+    \begin{tabular}{cc}
+        \epsfig{file=vp1_push_nopush.eps, angle=270, width=0.45\textwidth} & \\ 
+        \epsfig{file=vp2_push_nopush.eps, angle=270, width=0.45\textwidth} &  \epsfig{file=vp3_push_nopush.eps, angle=270, width=0.45\textwidth} \\ 
+        \epsfig{file=his1_push_nopush.eps, angle=270, width=0.45\textwidth}&  \epsfig{file=his2_push_nopush.eps,angle=270, width=0.45\textwidth} \\
+    \end{tabular}
+    \caption{Comparison of quality curves.}
+    \label{f:dstream:push_nopush}
+\end{figure}
+During this evaluation, 
+%we assume we need to
+%send 10000 vertex splits to fill the pipeline between receiver and the sender.
+We assume the RTT is 400ms, the bandwidth is 1Mbps, and the size of vertex split 
+is 40 bits.  
+Therefore, the receiver needs to send
+10000 vertex splits to fill the pipeline between receiver and the sender.
+From Figure \ref{f:dstream:push_nopush}, we see that
+without considering children vertex splits, during the first several rounds,
+the receiver cannot find 10000 vertices to fill the pipeline, and a considerable
+part of the bandwidth is wasted. 
+%Moreover, the vertex splits selected contribute
+%less to the quality since the curve has a smaller slope even before the quality 
+%stops increasing. 
+
+Next, we show the effect of updating period. 
+In Figure \ref{f:dstream:update_period} we list out the quality curves for
+4 different updating periods: 1, 200, 15000, 30000. Updating period being 1 means
+we do visibility check after every vertex split, and meanwhile we ignore the RTT
+and assume vertex splits is available immediately after the request. This is the 
+ideal case and used as the base for comparison. 
+%Updating period as 200, 15000, 30000
+%mean checking visibility every packet, 1 second, and 2 seconds, respectively,
+%if we assume the bandwidth is 1 Mbps and the size of vertex split is 40 bits. 
+From the figure, we can see when we increase the update period,
+the performance is slightly decreased but the difference is not apparent. 
+The performance is still close to the ideal case when the update period is 30000, which
+means 2 seconds if the bandwidth is 1 Mbps.
+
+Next, we compare the screen-area based method with other two methods. One is level-based
+method, which means we split the visible vertices in the vertex hierarchy in a breadth-first
+order. In other words, the vertex splits of a vertex with lowest level will be sent first. 
+The other one is random method, which just randomly pick visible vertices to split. 
+\begin{figure}[htdp!]
+    \centering
+    \begin{tabular}{cc}
+        \epsfig{file=vp1_weight_level.eps, angle=270, width=0.45\textwidth} & \\ 
+        \epsfig{file=vp2_weight_level.eps, angle=270, width=0.45\textwidth} &  \epsfig{file=vp3_weight_level.eps, angle=270, width=0.45\textwidth} \\ 
+        \epsfig{file=his1_weight_level.eps, angle=270, width=0.45\textwidth}&  \epsfig{file=his2_weight_level.eps,angle=270, width=0.45\textwidth} \\
+    \end{tabular}
+    \caption{Comparison of quality curves.}
+    \label{f:dstream:comp}
+\end{figure}
+From Figure \ref{}, we see 
+that both screen-area based method and level-based method works much better than random method.
+When we compare the level-based method and the screen-area based method by examining the images
+they generated. We can see that the level-based method tends to leave some large block of error 
+in the middle part of the mesh but has a better silhouette. Therefore, we modify the screen-area
+based method by multiplying the faces in the silhouette with a weight larger than 1 so that they
+have higher priority. We can see that with this method, now we have a good silhouette and avoids
+the big block error in the middle, and it results in a better PSNR curve.
+
+Finally, we check the accuracy of visibility test. 
+As we explained in Section \ref{ss:dstream:visual}, 
+if the receiver stop requesting vertex splits after all the visible splits received,
+some potentially visible vertices may not be generated.
+We use two metrics to compare the rendered images between the original mesh and the reconstructed mesh when all visible vertices
+are split. One is to find
+how many pixels are different and the other is to compute the PSNR value. 
+Table \ref{t:dstream:error} shows that the error is negligible.
+Moreover, if we force to split all the neighbors of vertices in the silhouette,
+we can further reduce the error and have a more accurate silhouette.
+
+\subsection{The Compression Efficiency}
+In Table \ref{}, we show how our compression algorithm works. 
+
 \begin{comment}
 \subsection{Transmitted Data Size}
 During transmissions of the Happy Buddha model (542652 vertex splits) using 
