@@ -50,7 +50,7 @@
     %in the nature of mesh streaming 
     lead us to new challenges and different design decisions in 
     designing P2P mesh streaming systems, in contrast to P2P
-    video streaming and P2P file downloading.  This paper
+    video streaming and P2P file downloading.  This chapter
     reports on our design of a P2P mesh streaming system and
     its evaluations.
 
@@ -58,7 +58,7 @@
     mesh) are typically divided into \textit{chunks}.  A
     peer that has downloaded a chunk can potentially serve
     this chunk to other peers.  We call such a peer a
-    \textit{provider} of the chunk.  This paper addresses
+    \textit{provider} of the chunk.  This chapter addresses
     two important design questions of P2P mesh streaming.
 
     The first question is how to define a chunk.  While one 
@@ -90,7 +90,7 @@
     Each group has a leader that takes over most of the responsibilities of the server to
     reduce server overhead.
     
-    Our contributions in this paper are as follows.
+    Our contributions in this chapter are as follows.
     First, we compare and contrast P2P mesh streaming to P2P
     video streaming and P2P file downloading and point out
     the main difficulties of P2P mesh streaming.  Second, 
@@ -107,18 +107,20 @@
     reduced by 90\%. Meanwhile,  average response time and
     control overhead are low.
 
-    We structure the rest of the paper as follows.  We
-    introduce previous work on progressive mesh streaming
-    and P2P techniques in Section \ref{s:related}.  We
+    We structure the rest of this chapter as follows.  
+    %We introduce previous work on progressive mesh streaming
+    %and P2P techniques in Section \ref{s:related}.  
+    We
     compare P2P mesh streaming with P2P video streaming and
     P2P file downloading in Section \ref{s:comp}.  
-    Sections \ref{s:receiver} and \ref{s:chunk} introduces the
-    receiver-driven protocol and the hierarchical chunk structure,
-    two essential components of our system, respectively.  We propose two content discovery schemes
-    in Section \ref{s:content}.
-    We present experimental results in Section
-    \ref{s:experiment} and conclude in Section
-    \ref{s:conclude}.
+    %Sections \ref{s:receiver} and \ref{s:chunk} introduces the
+    %receiver-driven protocol and the hierarchical chunk structure,
+    Section \ref{s:chunk} introduces the hierarchical chunk structure.
+    %two essential components of our system, respectively.  
+    We propose two content discovery schemes
+    in Section \ref{s:content}, and the experimental results in Section
+    \ref{s:experiment}.
+    Finally, we conclude in Section \ref{s:conclude}.
 
 %\section{Related Work}
 %\label{s:related}
@@ -224,7 +226,7 @@ lists in a highly dynamic environment is difficult.
 
     \begin{figure}
     \centering
-    \epsfig{file =diff.eps, height = 1.5in}
+    \epsfig{file =diff.eps, height = 2.5in}
     \caption{
     In video streaming, peers receive chunks in the same order, so $p$
     may request many chunks from $q$ (e.g, in the order of C3, C4, C5).
@@ -269,16 +271,20 @@ lists in a highly dynamic environment is difficult.
     requests.  High churn rate invalidates these cache
     information quickly.
 
-TODO{transition here}
-The issue of scaling 3D streaming to a large number of users has not
-been sufficiently addressed.  In our previous work, we focus on
-reducing the computational overhead at the server \cite{Cheng2008}, by
-shifting the burden of visibility computation from the sender to
-the receiver.  
-Hu et al. \cite{Hu2008} and Cavagna et al. \cite{Cavagna2006} have considered using peer-to-peer architecture to stream a 3D scene
-to improve scalability.  Our work is similar in
-spirit, but we focus on streaming single, large,
-progressive mesh in a view-dependent manner, rather than a 3D scene,
+    %TODO{transition here}
+    %The issue of scaling 3D streaming to a large number of users has not
+    P2P view-dependent mesh streaming remains a new topic because
+    of the difference we stated above. 
+    Some related studies exist, but they are not sufficient.
+    %been sufficiently addressed.  
+    %In our previous work, we focus on
+    %reducing the computational overhead at the server \cite{Cheng2008}, by
+    %shifting the burden of visibility computation from the sender to
+    %the receiver.  
+    Hu et al. \cite{Hu2008} and Cavagna et al. \cite{Cavagna2006} have considered using peer-to-peer architecture to stream a 3D scene
+    to improve scalability.  Our work is similar in
+    spirit, but we focus on streaming single, large,
+    progressive mesh in a view-dependent manner, rather than a 3D scene,
     %. Streaming a single, highly detailed, progressive
     %mesh is different from streaming of a 3D scene,
     %The 3D scene streaming, however, is quite difference with the
@@ -286,19 +292,18 @@ progressive mesh in a view-dependent manner, rather than a 3D scene,
     %paper. 
     where visibility decision is mainly done at the object level.
     %%could we remove the following sentences for simplicity? 
-    %The streaming
-    %of a single visible object, however, is still following a fixed
-    %pre-decided order independent of the user's view point. 
-    %The object level view-dependent system works well
-    %for scenes with many small objects but not for the
-    %scenarios we target,
-    %where %one or a few highly detailed 3D models are streamed.
-    %the data size of one object is already huge.  
-    Streaming 
-    %large 
+    The streaming
+    of a single visible object, however, is still following a fixed
+    pre-decided order independent of the user's view point. 
+    The object level view-dependent system works well
+    for scenes with many small objects but not for the
+    scenarios we target,
+    where %one or a few highly detailed 3D models are streamed.
+    the data size of one object is already huge.  
+    Streaming %large 
     progressive meshes needs 
     a much finer granularity for view dependency. 
-    In this paper, we study view-dependent streaming at 
+    In this chapter, we study view-dependent streaming at 
     chunk level, which can be of much smaller size (can be as small as a packet) than an object.
 
 Yang et al. \cite{viewcast:yang} proposed a view-dependent 
@@ -370,7 +375,7 @@ errors using this rule of thumb \cite{Cheng2008}.
 
     \begin{figure}
     \centering
-    \epsfig{file = hierarchy.eps, height = 1.1in, width = 3.3in}
+    \epsfig{file = hierarchy.eps, height = 2.2in}
     \caption{Vertex hierarchy. A rectangle represents a vertex and the number inside
     is its identification number, including tree ID and node ID.\label{hierarchy}}
     \end{figure}
@@ -530,7 +535,7 @@ progressiveness among the chunks.
 
    \begin{figure}[t]
     \centering
-    \epsfig{file = packetize.eps, height = 1.5in, width = 3.3in}
+    \epsfig{file = packetize.eps, height = 2.2in}
     \caption{An example of hierarchical chunk structure. Here $w$ = 1 , $d$ = 2
     and $i$ = 1. 
     \label{f:packetize}}
@@ -786,7 +791,7 @@ progressiveness among the chunks.
 
    \begin{figure}[t]
     \centering
-    \epsfig{file = centralized.eps, height = 1.5in}
+    \epsfig{file = centralized.eps, height = 2.4in}
     \caption{Centralized Lookup. 
     \label{f:cp2p}}
     \end{figure}
@@ -932,7 +937,7 @@ progressiveness among the chunks.
 
     \begin{figure}[t]
     \centering
-    \epsfig{file = leader_assign.eps, height = 1.5in}
+    \epsfig{file = leader_assign.eps, height = 2.4in}
     \caption{(a) Peer B is assigned a leader. (b) An old leader is
     replaced by peer B. 
     \label{f:leader_assign}}
@@ -1016,7 +1021,7 @@ progressiveness among the chunks.
 
     \begin{figure}[t]
     \centering
-    \epsfig{file = register.eps, height = 1.5in}
+    \epsfig{file = register.eps, height = 2.5in}
     \caption{This peer will register in Group $00000$ for leader
     updates from group $0$
     and $000$, and it will register in Group $0000300$ for leader
@@ -1129,7 +1134,7 @@ progressiveness among the chunks.
 
     \begin{figure}
     \centering
-    \epsfig{file =thai.eps, height = 2.1in}
+    \epsfig{file =thai.eps, height = 3.5in}
     \caption{%Screen area of two vertices: v1 and v2.
     The Thai Statue. The top left is the whole mesh, and the 
     rest is the closeup of some parts of it.
@@ -1156,12 +1161,12 @@ progressiveness among the chunks.
     and use the latter in the simulation.
 \begin{figure*}[htb!]
 \centering
-\def\picheight{2.0in}
-\begin{tabular}{ccc}
+\def\picheight{3.0in}
+\begin{tabular}{c}
 \epsfig{file = plot/sessionLengthCDF.eps, height=\picheight, angle=270}
-&
+\\
 \epsfig{file = plot/delayCDF.eps, height=\picheight, angle=270}
-&
+\\
 \epsfig{file = plot/bandwidthCDF.eps, height=\picheight, angle=270}
 \\
 \end{tabular}
@@ -1236,7 +1241,7 @@ bandwidth (download mean = 4292.8Kbps, upload mean = 1023.0Kbps) used in our sim
 \subsection{Server Overhead}
 \begin{figure*}[p!]
 \centering
-\def\picheight{2.3in}
+\def\picheight{3.0in}
 \begin{tabular}{cc}
 \epsfig{file = plot/serverdatarate.eps, height=\picheight, angle=270}
 &
@@ -1250,6 +1255,21 @@ bandwidth (download mean = 4292.8Kbps, upload mean = 1023.0Kbps) used in our sim
 &
 \epsfig{file = plot/serverVisit_stable.eps, height=\picheight, angle=270}
 \\
+\end{tabular}
+\caption{Comparison between centralized lookup approach and hierarchical
+P2P lookup approach. The left column indicates how the results change with time, and
+the right column how the results change with the arriving rate of
+peers. The value in stable stage is averaged from $t = 300s$ to $t =
+320s$.
+%In the measurement, we choose the average value from 300 second
+%to 320 second as the stable value.
+\label{f:result}}
+\end{figure*}
+
+\begin{figure*}[p!]
+\centering
+\def\picheight{3.0in}
+\begin{tabular}{cc}
 \epsfig{file = plot/messageOverhead.eps, height=\picheight, angle=270}
 &
 \epsfig{file = plot/messageOverhead_stable.eps, height=\picheight, angle=270}
@@ -1266,9 +1286,8 @@ peers. The value in stable stage is averaged from $t = 300s$ to $t =
 320s$.
 %In the measurement, we choose the average value from 300 second
 %to 320 second as the stable value.
-\label{f:result}}
+\label{f:result2}}
 \end{figure*}
-
     In this section, we measure the server overhead in three forms. 
     First, we measure the outgoing data rate of the server.
     %, which is
@@ -1359,7 +1378,7 @@ peers. The value in stable stage is averaged from $t = 300s$ to $t =
     messages to the size of chunks received by all peers during one
     second.
     Figures
-    \ref{f:result} (g) and (h) show that hierarchical P2P lookup has 
+    \ref{f:result2} (g) and (h) show that hierarchical P2P lookup has 
     higher control overhead than centralized lookup.
     The higher overhead is caused by maintaining the
     leader hierarchy and propagating leader updates. 
@@ -1386,7 +1405,7 @@ peers. The value in stable stage is averaged from $t = 300s$ to $t =
     the average value of all the response times of chunk requests in a
     second.
 
-    Figures \ref{f:result}(i) and (j) show that the hierarchical P2P system
+    Figures \ref{f:result2}(i) and (j) show that the hierarchical P2P system
     has higher average response time.
     The higher response time is caused mainly by two reasons.
     First, unlike providers, only one leader exists for one chunk.
@@ -1432,9 +1451,9 @@ peers. The value in stable stage is averaged from $t = 300s$ to $t =
     increases, the control overhead and response time remain
     relatively stable.
 
-\section{Conclusion and Future Work}
+\section{Conclusion}
 \label{s:conclude}
-This paper investigates into the problem of P2P view-dependent,
+This chapter investigates into the problem of P2P view-dependent,
 progressive mesh streaming, and studied two important components of
 the problem - chunking and content discovery. We find that in P2P mesh
 streaming, peers need to keep finding new chunk providers, increasing
@@ -1451,7 +1470,4 @@ mesh by peers. Second, the user pattern in viewing the mesh could be
 exploited for pre-fetching. We plan to pursue these research issues
 next.
 
-\textbf{Acknowledgement}:
-This project is supported by National University of Singapore Academic
-Research Fund R-252-000-306-112.
 
