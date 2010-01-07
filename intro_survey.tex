@@ -11,7 +11,7 @@
     Similar projects include 
 \begin{figure}[htbp!]
 \centering
-\epsfig{file=scanner.eps, height=0.3\textwidth}
+\epsfig{file=scanner.eps, width=0.6\textwidth}
 \caption{Stanford's Digital Michelangelo Project. The head of David Statue is being 
 scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:intro:scanner}
 \end{figure}
@@ -22,9 +22,9 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
 \begin{figure}[htbp!]
 \centering
 \begin{tabular}{cc}
-\epsfig{file=zbrush1.eps, height=0.3\textwidth}
+\epsfig{file=zbrush1.eps, height=0.33\textwidth}
 &
-\epsfig{file=zbrush2.eps, height=0.3\textwidth}
+\epsfig{file=zbrush2.eps, height=0.33\textwidth}
 \end{tabular}
 \caption{Complex digital sculptures created with ZBrush
 (image source: http://www.evermotion.org/vbulletin/showthread.php?t=64128).}\label{f:intro:zbrush}
@@ -329,8 +329,11 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     considering both the mesh property and network condition. 
             
     To achieve this objective, an analytical model is proposed
-    to estimate the decoding time of each vertex split by considering both
+    to estimate the quality curve based on both
     the mesh property and network condition. 
+    Quality of rendered mesh improves when vertices are split,
+    so we can draw the quality curve when the decoding time
+    of each vertex split is known.
     From this model, we can efficiently know both the expected 
     value and the distribution of the decoding time of each
     vertex split before transmission. Consequently, 
@@ -379,10 +382,15 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     for the receiver to accurately measure
     the visual importance of a vertex split before receiving it, 
     estimation suffices in our scheme. 
-    We proposed two estimation methods using screen space area (the area of the neighbor faces
-    of a vertex after projected to the screen) and level of vertex (how many times this vertex
-    has been split), respectively. Moreover, we compared these two methods with random selection
-    with experiments.
+    We propose a method to estimate the visual importance of a vertex
+    using its screen space area (the area of the neighbor faces
+    of a vertex after projected to the screen).
+    %and level of vertex (how many times this vertex
+    %has been split), respectively. 
+    To validate this method, we compared these two methods with two other
+    methods. One is randomly selecting from the visible vertices and 
+    the other is based the level of vertex (how many times this vertex
+    has been split). 
     
     To uniquely identify each vertex, we borrow the idea from Kim and Lee \cite{kim01truly}.
     In this system, IDs can be deduced by the receiver without any extra information. 
@@ -400,26 +408,26 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     
     \subsection{Analyze User Behaviors in Interacting with Meshes}
     Our third objective is to study user behavior from the system design point of view, 
-    such as predictability and access pattern.
+    such as predictability and access pattern, and to develop a model, with which we
+    could generate arbitrary number of synthetic traces to be used in measuring the performance
+    of progressive mesh streaming system.
     We have conducted a user experiment with 37 users interacting with 9 meshes.
     We log the user's actions while they interact and view the meshes in a mock online shop.
-    Then we analyze these traces to derive the patterns of user behaviors.
+    Then we analyze these traces to derive the patterns of user behaviors. Then we proposed
+    a simple model to generate synthetic traces.
 
-    The contributions of our user study are:
-    First, the analysis of user traces reveals that 
-        user actions are predictable to certain extent. 
-        Hence, pre-fetching based on our analysis becomes possible.
-        Second, 
-        locality exists in both data and viewpoint access. By
-        storing the most popular mesh data in caching proxies, 
-        the server overhead could be significantly reduced. 
-        Moreover, caching rendered images can be useful in remote rendering,
-        and caching faces and textures is useful in improving rendering speed.
-        Finally,
-        We develop a method to generate random user behaviors similar to real ones
-        and use them in simulations, 
-        which are useful in testing protocols and measuring system performance.
-
+    The analysis of user traces reveals that user actions are predictable to certain extent. 
+    Hence, pre-fetching based on our analysis becomes possible. Moreover, we found that 
+    locality exists in both data and viewpoint access. As a result, 
+    by storing the most popular mesh data in caching proxies, 
+    the server overhead could be significantly reduced. 
+    Moreover, caching rendered images can be useful in remote rendering,
+    and caching faces and textures in the memory of graphic card is useful in improving rendering speed.
+    Finally, We develop a method to generate random user actions
+    and use them in simulations, which are useful in testing protocols and measuring system performance.
+    We compared the synthetic user traces and the real traces in various aspects and found
+    that they have similar properties.
+    
     \subsection{Peer Assisted View-Dependent Progressive Mesh Streaming}
     The final objective in this thesis is to implement a prototype of 
     P2P view-dependent mesh streaming system
@@ -445,12 +453,18 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     mesh is considered in the second design to further
     reduce server overhead, so it is more suitable for large scale networks. 
     
-    Finally, we run simulations based on real
-    traces collected from users to evaluate the P2P
-    mesh streaming system we proposed.  Analysis and
+    Finally, we run simulations 
+    %based on 
+    %the real
+    %traces collected from users 
+    to evaluate the P2P
+    mesh streaming system we proposed.  
+    Analysis and
     simulation results show that server overhead can be
     reduced by 90\%. Meanwhile,  average response time and
     control overhead are low.
+    The synthetic traces we generated with the simple model we proposed 
+    was used in the simulation to simulate the actions from a large number peers.
 
     Our results indicate that with the help of P2P technique,
     sharing high-resolution

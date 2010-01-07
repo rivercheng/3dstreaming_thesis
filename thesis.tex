@@ -13,6 +13,8 @@
 \usepackage{subfigure}
 \usepackage[usenames]{color}
 \usepackage{verbatim}
+\usepackage{multirow}
+\usepackage{amssymb}
 
 \newcommand\todo[1]{\textcolor{Red}{\textbf{#1}}}
 \newcommand\pOlost{\textrm{$P_0$ is lost}}
@@ -35,10 +37,10 @@ National University of Singapore\\
 Supervisor\\
 Wei Tsang Ooi}
 \begin{document}
-%\maketitle
+\maketitle
 \doublespacing
-%\begin{abstract}
-    \begin{comment}
+\begin{abstract}
+    %\begin{comment}
     High-resolution 3D meshes are increasingly available in networked
     applications, such as digital museum, online game, and virtual reality.
     The amount of data constituting a high-resolution 3D mesh can be
@@ -59,10 +61,11 @@ Wei Tsang Ooi}
     Therefore, progressive streaming can be implemented by sending the vertex
     splits as refinements after sending the base mesh.
 
-    Although streaming of videos is extensively studied, 
-    streaming of high-resolution progressive meshes is considerably different.
+    %Although streaming of videos is extensively studied, 
+    Streaming of high-resolution progressive meshes is considerably different
+    to video streaming, which is extensively studied.
     Frames of a video are usually sent following the time order,
-    vertex splits of a progressive mesh, however, can be sent in various of orders.
+    vertex splits of a progressive mesh, however, can be sent in various orders.
     Some new research problems arise due to the flexibility in sending order of 
     vertex splits. In this thesis, four related topics are discussed. 
     %After decoding, each frame contributes the same to a video, but vertex splits
@@ -86,7 +89,7 @@ Wei Tsang Ooi}
     %is non-trivial as the packet loss happens randomly.
     In this thesis, an analytical model is proposed to 
     %quantify the effect of dependency on the quality curve.
-    quantitatively analyzes the effects of dependency
+    quantitatively analyze the effects of dependency
     by modeling the distribution of decoding time of each vertex split
     as a function of mesh properties and network parameters.
     %The quality curve is determined by the decoding time of the vertex
@@ -100,7 +103,7 @@ Wei Tsang Ooi}
     %From this expression, %both the expected value and 
     %the distribution of the decoding time of each
     %vertex split can be efficiently computed before transmission. 
-    Consequently, Different sending orders can be  
+    Consequently, different sending orders can be  
     efficiently evaluated without simulations, 
     and this model can help in developing a sending
     strategy to improve the quality curve 
@@ -111,7 +114,7 @@ Wei Tsang Ooi}
     progressive meshes and
     %providing insights to the importance of dependencies on the
     %decoded mesh quality. 
-    The main insight found is that if each lost packet
+    the main insight we found is that if each lost packet
     is immediately retransmitted upon the packet loss is detected, 
     the effect of dependencies on decoded mesh quality diminishes with time.
     %the dependencies only matters in the first several round trip times. 
@@ -123,7 +126,7 @@ Wei Tsang Ooi}
     and varying sending rate. The values predicted from our model match the measured
     value reasonably well in all cases except when losses are too bursty.
     
-    To further improve the quality curve, the viewpoint of the 
+    Second, to further improve the quality curve, the viewpoint of the 
     user can be considered in deciding the sending order.
     %Usually, users can only see a part of a mesh, so sending non-visible data
     %before visible data wastes bandwidth. Moreover, 
@@ -159,31 +162,72 @@ Wei Tsang Ooi}
     the sender in our receiver-driven protocol is stateless and free of complex computation.
     Furthermore, caching proxy and P2P streaming systems can be applied to improve
     the scalability without adding more servers.  
+
+    Third, 
+    when a progressive mesh is streamed in a view-dependent way, which set of the data is streamed
+    and in what order it is streamed both relate to how the user interacts with the mesh. 
+%For example, if the user quickly rotates the mesh, only the vertex splits at the top levels
+%of the vertex hierarchy are required by the receiver. On the contrary, if the user
+%zoom in and examine certain part of the mesh carefully, the receiver requires the 
+%vertex splits deep down to the bottom of the vertex hierarchy. 
+%Different user interactions have different demand to the streaming system,
+%so 
+    Understanding of how users interact with the progressively streamed mesh will
+    help us in designing a view-dependent mesh streaming system to %minimize negative 
+    improve user experience. 
+%and improving user experience.
+    For example, if the system can predict the next viewpoint of the user, it can pre-fectch
+    the vertex splits useful in the next viewpoint to reduce the response time of the system. 
+    Moreover, if we know some part of data are requested most frequently due to the common
+    pattern of users, 
+    we could store them in caching proxy close to the end users to increase the system capacity
+    and reduce the response time. 
+
+
+    Understanding user interaction is 
+    also useful in testing the system. To test a streaming system  
+    with a large number of real users is expensive 
+    and not always feasible. If we could characterize users' interaction with
+    progressively streamed meshes from a small number of real user records,
+    we could generate arbitrary number of synthetic traces,
+    which simulate users' actions, to be used in measuring system performance. 
+    This method is much cheaper than collecting a large number of traces from real users
+    and can be used in developing and evaluating prototypes. 
     
-    The receiver-driven protocol significantly reduces the computing cost at the sender,
-    but the bandwidth can remain the bottleneck if each receiver receives data
-    from the same sender. 
-    Based on the receiver-driven protocol, P2P techniques are applied to mesh
-    streaming in this thesis. In the implementation of P2P mesh streaming system,
+    We conducted a user experiment with 37 users, whose actions are logged
+    while they interact and view the meshes in a mock online shop.  
+    We present the analysis of these traces in this thesis
+    and highlight findings that are significant to the design of efficient 
+    and scalable progressive mesh streaming systems.  
+    In particular, we found that 
+    (i) user actions are predictable to some extent, making pre-fetching useful in certain cases; 
+    (ii) users' viewpoint concentrates on part of the meshes, making caching technique useful. 
+    We also developed a simple model, which can be used to generate synthetic traces
+    for evaluating progressive mesh streaming systems.
+    
+    Fourth, based on the receiver-driven protocol we proposed, 
+    P2P techniques are applied to view-dependent progressive mesh streaming in this thesis. 
+    In the implementation of P2P mesh streaming system,
     two issues are considered: how to partition a progressive mesh into chunks and 
-    how to lookup the provider of a chunk. For the latter issus, we investigated 
-    into two solutions, which trade off server overhead and response time. The first
+    how to lookup the provider of a chunk. For the latter issue, we investigated 
+    two solutions, which trade off server overhead and response time. The first
     uses a simple centralized lookup service, while the second organizes peers into
     groups according to the hierarchical structure of the progressive mesh to 
-    take advantage of access pattern. Simulation results show that our 
-    proposed systems are robust under high churn rate, reduce the server overhead
-    by more than $90\%$, keep control overhead below $10\%s$, and achieve
+    take advantage of access pattern. We implement a prototype and test its performance
+    with the synthetic traces we generated. The synthetic traces are generated with the simple model we proposed based on the user study we have done. 
+    Simulation results show that our proposed systems are robust under high churn rate. It reduces the server overhead
+    by more than $90\%$, keeps control overhead below $10\%s$, and achieves
     low average response time.
-\end{comment}
-%\end{abstract}
+%\end{comment}
+\end{abstract}
    
 %\include{intro_survey}
-%\include{mesh}
-\include{dstream}
+\include{mesh}
+%\include{dstream}
 %\include{mm09-3dstreaming}
 %\include{p2p}
 
-\begin{comment}
+%\begin{comment}
 \chapter{Conclusion}
 \label{c:conclusion}
 This research concentrated on streaming of progressive meshes over network. 
@@ -203,7 +247,7 @@ with the analytical model in this thesis.
 For example, this model was successfully applied in streaming of 3D plants.
 
 The analytical model in this thesis assumes that the packet losses 
-are independent with each other, 
+are independent from each other, 
 so a network trace with many burst packet losses may cause considerable error in the prediction. 
 Gilbert model of packet loss may be used to obtain results that are more accurate, 
 but using Gilbert model may significantly increase the complexity of the analytical model. 
@@ -226,48 +270,79 @@ Consequently, the relative value of the effect,
 represented as the ratio of the contribution of vertex
 splits to the quality of the reconstructed mesh, decreases.
 As a result, considering the dependency among the vertex splits 
-is only needed for applications requiring high interactivity
+is only needed in applications requiring high interactivity
 because these applications require low initial latency. 
 For these applications, the greedy method proposed in this thesis
 could generate a adaptive sending strategy to reduce the initial latency. 
 
-View-dependent streaming is needed in streaming of large meshes
+View-dependent streaming is needed in streaming of high-resolution meshes
 to improve the quality quickly, but current implementations cannot be easily scaled
-to large number of receivers because the sender is not stateless. 
+to large number of receivers as the sender is not stateless. 
 To address this weakness, a receiver-driven view-dependent streaming system,
 in which the sender is stateless, was proposed in this thesis. 
-According to the experimental results, the receiver-driven approach
-can reduce both the CPU usage and outgoing bandwidth of the sender significantly. 
+%According to the experimental results, the receiver-driven approach
+%can reduce both the CPU usage and outgoing bandwidth of the sender significantly. 
 Moving the visibility decision to the receiver reduces the overhead of the server. 
-Moreover, it also reduces the outgoing bandwidth of the sender because the server
-does not need to send the identifications of the vertex splits any more. 
-Above all, a significant advantage of receiver-driven approach is that
+%Moreover, it also reduces the outgoing bandwidth of the sender because the server
+%does not need to send the identifications of the vertex splits any more. 
+Moreover, a significant advantage of receiver-driven approach is that
 now both the caching proxy and P2P techniques can be applied to increase the scalability of the system
-because of the sender is stateless. 
+since the sender is stateless. 
+
+One main challenge of receiver-driven protocol is enable the receiver
+to determine the visibility and visual contribution of the vertices.
+We proposed to use the screen-area as the estimation of visual contribution and 
+experimental results show that this method works well. We also proposed a method
+to detect the silhouette and high priority could be assigned to silhouette when the
+shape of the mesh is important. 
 
 The visibility decision made by the receiver may not be accurate 
-because the receiver can only estimate the visibility based on
+since the receiver can only estimate the visibility based on
 the partially received mesh. 
 Visible vertices may be not displayed if their ancestor vertices are not visible. 
 According to the current results, however, this kind of error is negligible in most cases. 
+Moreover, we found that force splitting the neighbors of vertices in silhouette can significantly reduce this error.
 For applications that tolerate no error, 
 further research could be done to remove this kind of error. 
-A possible solution could be to split those vertices near the silhouette even when they are invisible.
+%A possible solution could be to split those vertices near the silhouette even when they are invisible.
+
+In a view-dependent progressive mesh streaming system, the interaction of users directly
+affect which data is streamed and in which order they are streamed.
+We have conducted a user study to have a better understanding of the user interactions when the users are 
+viewing a progressively streamed mesh.
+With the analysis of user records, we found that user actions are 
+somewhat predictable since the user tends to repeat the previous 
+action. 
+Therefore, pre-fetching becomes possible and it can be used both in streaming and rendering to
+reduce response time.
+Furthermore, the analysis of user traces reveals that locality exists in both data and viewpoint access. 
+We can exploit this locality and use caching technique in progressive mesh streaming systems and rending systems.
+%storing the most popular mesh data in caching proxies, the server overhead could be significantly reduced. 
+After studying the user records, we proposed a simple model 
+to generate synthetic traces based on real traces we collected. 
+These synthetic traces have similar properties with the real traces and 
+can be used in simulations to measure system performance.
+Due to the limited number of user traces collected, we have to 
+sacrifice the accuracy in this simple model. In the future, if we could develop a real 
+online shop or online museum, we could collect a large number of real traces.
+With more real traces, we could develop a more accurate model.
+%withoutt collecting
+%a large number of traces.
 
 To increase the scalability of the view-dependent mesh-streaming systems, 
 a P2P mesh streaming system was proposed in this thesis based on the receiver-driven approach. 
 According to the experimental results, the server overhead can be reduced by 90\%
-and the response time is still close to the low bound. 
+and the response time is acceptable. %still close to the low bound. 
 The control overhead introduced in this system is about 10\%, a reasonable value. 
-The response time is low because most requests in this system are successful in the first try, 
-and the message overhead is reasonable because the hierarchical group system proposed in this thesis effectively 
-reduces the message overhead. 
+%The response time is low because most requests in this system are successful in the first try, 
+%and the message overhead is reasonable because the hierarchical group system proposed in this thesis effectively 
+%reduces the message overhead. 
 The prototype developed in this thesis shows that P2P mesh streaming system is feasible
 and it can significantly reduce the server cost when there are many clients.
 
 The control overhead at 10\% is acceptable in this system since the majority of
 control messages are transmitted among the peers and the server overhead keeps low. 
-Nonetheless, the message overhead could be further reduced. 
+Nonetheless, the control overhead could be further reduced in the future. 
 
 During the study, it is found that in some cases the bottleneck can be the rendering of the meshes, 
 especially when the graphic card is used in deciding the visibility of vertices. 
@@ -275,7 +350,7 @@ Improving the rendering efficiency of the progressive mesh during the streaming
 could be an interesting research problem.  
 During the streaming, a progressive mesh with only partial modification is frequently re-rendered, 
 so it is possible to exploit the similarity between two consecutive meshes to improve the rendering speed.
-\end{comment}
+%\end{comment}
 \bibliographystyle{abbrv}
 \bibliography{thesis}
 \end{document}

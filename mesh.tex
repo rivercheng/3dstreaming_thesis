@@ -28,14 +28,14 @@
     have been well studied in the literature \cite{boyce98}.   Multi-resolution 3D
     objects also have dependencies between different level of details.
         For progressive meshes, the mesh is refined by successive
-    \textit{vertex splits} (see Figure~\ref{split2}).  Thus,
-    dependencies exist between the original vertex and its one
+    vertex splits. % (see Figure~\ref{split2}).  
+    Thus, dependencies exist between the original vertex and its one
     ring (the direct neighbors of the vertex)
     and the vertices and triangles created by the vertex split.
     The effects of these dependencies on decoded mesh quality, however,
     are not well understood.  Due to the fundamentally different
     nature of progressive mesh and video data, what we learn from
-    video streaming research does not apply.  This paper aims to study
+    video streaming research does not apply.  This chapter aims to study
     the effect of dependencies in progressive mesh streaming by
     proposing an analytical model, relating the decoded mesh quality
     of progressive mesh to packet loss rate, given the dependencies
@@ -85,7 +85,7 @@
     Our analytical model is general and can be applied to any 
     partially-ordered data without playback deadline.  We
     choose to concentrate on progressive 3D meshes (which are indeed 
-    partially ordered chunks) in this paper. 
+    partially ordered chunks) in this chapter. 
     While meshes are not necessarily the best 3D representations, they 
     are popular and support finer granularity of progressivity 
     than other multi-resolution representations. 
@@ -136,7 +136,13 @@
     between these operations. We assign each node a weight,
     which corresponds to the importance of the vertex split.
     We will use the terms node and vertex split interchangeably
-    in this paper.
+    in this chapter.
+\begin{figure}
+\centering
+\epsfig{file = figures/dag1.eps, width=0.4\textwidth}
+\caption{Dependency between vertex splits represented as a DAG.\label{model:dag2}}
+\end{figure}
+
 
     On the sender, vertex splits are grouped into packets,
     each containing equal number of vertex splits.  We say packet $P$ is a \textit{parent packet}
@@ -146,11 +152,6 @@
     can be decoded only after the packet containing it and all its
     parent packets are received.
 
-\begin{figure}
-\centering
-\epsfig{file = figures/dag1.eps, height = 1.2in}
-\caption{Dependency between vertex splits represented as a DAG.\label{model:dag2}}
-\end{figure}
 
     Let $B$ be the average
     sending rate\footnote{decided either by the available bandwidth or by TCP friendly requirement} and $p$ be the packet loss rate.
@@ -188,7 +189,7 @@
     equations related to the received time and decoded time. 
     We denote the $i$-th packet sent (and not retransmitted) as $P_i$, where $i = 0, 1, ...$.
     Table~\ref{t:model:notation} summarizes these notations as well as
-    other major notations used in this paper.
+    other major notations used in this chapter.
 
 % NOTATION
 
@@ -219,7 +220,7 @@
     of a vertex split.
 \if\showproof0
     Due to space constraints, we will only sketch the proofs in this
-    paper.
+    chapter.
 \fi
 
 \subsection{Sending Time and Receiving Time}
@@ -299,6 +300,7 @@ $S_i = i$.
     %%\begin{displaymath}
     %%    E[S_i]          = (i - T_d + 1)\frac{1}{1-p} + T_d - 1.
     %%\end{displaymath}
+    \QED
     \end{proof}
 \else
     % Proof sketch
@@ -315,6 +317,7 @@ $S_i = i$.
     transmissions are successful and $k$ transmissions fail.
     The variable $k$ has a negative binomial distribution,
     and the expression for $Pr(S_i = i+k)$ follows.
+    \QED
     \end{proof}
 
     The total number of transmissions until a packet is successfully sent is
@@ -322,7 +325,7 @@ $S_i = i$.
     $1/(1-p)$. Therefore, the expected value of total transmission number
     until $i - T_d + 1$ packets are successfully sent is $(i-T_d+1)/(1-p)$.
     Including the subsequent $T_d - 1$ unknown transmissions, we have the expression
-    for $E[S_i]$.  \QED
+    for $E[S_i]$. 
 \fi
 
     
@@ -346,7 +349,7 @@ is given as follows.
     \begin{proof}
     The lemma follows from the fact that a packet can only be
     received at a time that is a multiple of $T_d$ after the
-    first time it was sent. %\QED
+    first time it was sent. \QED
     \end{proof}
 
     Note that here $S_i$ is a random variable but we approximate
@@ -375,7 +378,7 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
     %Given $t$, the probability that a packet is received strictly after
     %time $t$ is the same as the probability that the packet has been
     %lost $n_{i,t} + 1$ times, or $p^{n_{i,t}+1}$.  
-    Lemma~\ref{l:model:prlet} follows. %\QED
+    Lemma~\ref{l:model:prlet} follows. \QED
     \end{proof}
 
 \subsection{Decoding Time of a Vertex Split}
@@ -408,7 +411,7 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
     Since the probability $Pr(D_v = t)$ decreases exponentially
     as $t$ increases, in practice we can numerically estimate the
     expected decoding time by considering only the first few
-    terms of the sum.  In this paper, we consider $j$ from $S_i$ to $S_i + 3T_d$,
+    terms of the sum.  In this chapter, we consider $j$ from $S_i$ to $S_i + 3T_d$,
     which we found to be accurate enough for practical purposes.
     That is,
     a packet is considered to be lost at most three times in a row.
@@ -492,7 +495,7 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
     %the number of successful Bernoulli trials out of $t+1$
     %transmission\footnote{recall that the first transmission is at time 0}.
     %Theorem~\ref{t:ideal} follows.
-    %\QED
+    \QED
     \end{proof}
 
 \subsection{Worst Case}
@@ -536,7 +539,7 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
     Now consider what happens if $P_0$ is lost in its first transmission. 
 \begin{figure}[htbp]
 \centering
-\epsfig{file = figures/comparison.eps, height = 1.5in}
+\epsfig{file = figures/comparison.eps, width=0.6\textwidth}
 \caption{If packet $0$ is lost, compared with the transmissions begin from time slot 1, only the sending order of first $T_d$ packets is different.}\label{f:model:comp}
 \end{figure}
     $P_0$ will be retransmitted at time $T_d$. If we view time $t=1$ as
@@ -591,6 +594,7 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
     received before time $nT_d + b$ is $1 - p^{n+1}$. The others have only
     $n$ chances to be transmitted, and hence the probability to be
     received before time $nT_d + b$ is $1-p^n$. 
+    \QED
     \end{proof}
 
     Then we can prove the following lemma:
@@ -627,6 +631,7 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
     =&\dfrac{p-1}{p}(1- (1-p^{n+1})^b) \\
     \end{align*}
     Hence, the lemma still holds in this case.
+    \QED
     \end{proof}
     
     Combining the results in this section, we have the following:
@@ -655,6 +660,7 @@ where $t=nT_d+b$ and $n,b\in\mathbb{Z^+}; 0 \le b<T_d$.
              &=(1-p)(1-p^{n+1})^b.
     \end{align*}
     when $t=0$, the above formula still holds because $\Delta_0 = 1-p$.
+    \QED
     \end{proof}
     \fi
 
@@ -683,7 +689,7 @@ where $t=nT_d+b$ and $n,b\in\mathbb{Z^+}; 0 \le b<T_d$.
         \sum_{i=0}^nq^i = \dfrac{1-q^{n+1}}{1-q}, 
     \end{displaymath}
     we can prove this theorem.
-
+    \QED
     \end{proof}
 
 \subsection{Insights}
@@ -751,7 +757,7 @@ where $t=nT_d+b$ and $n,b\in\mathbb{Z^+}; 0 \le b<T_d$.
 
 \begin{figure}[htbp]
 \centering
-\epsfig{file = figures/extreme40_1.eps, height = 2.5in, angle = 270}
+\epsfig{file = figures/extreme40_1.eps, height=0.6\textwidth, angle = 270}
 \caption{The number of decodable packets for ideal case and worst case. $T_d= 40$, Loss rate $p =0.1$. In the figure, we assume the first packet arrives at time 1.}\label{model:extreme}
 \end{figure}
 
@@ -970,10 +976,13 @@ help us select which node to pack.
 
     \begin{figure*}
     \centering
-    \begin{tabular}{cc}
-    \epsfig{file = figures/point_period.eps, height = 1.0in}
-    &
-    \epsfig{file = figures/point_period2.eps,height = 1.0in}
+    \begin{tabular}{c}
+    \epsfig{file = figures/point_period.eps, height = 2.0in}\\
+    (a)\\
+    \epsfig{file = figures/point_period2.eps,height = 2.0in}\\
+    \end{tabular}\\
+    \begin{tabular}{cccccccccc}
+    (b)            &&&&&&&&            (c)
     \end{tabular}
     \caption{Intermediate quality of decoded mesh.  From left to right: (a) Strategy 2 is better than Strategy 1 since the area under the curve is larger. (b) Area sum of vertical slices.  (c) Area sum of horizontal slices.}\label{model:two_views}
     \end{figure*}
@@ -1134,7 +1143,7 @@ Trace    & Length  & Loss Rate& Sending Rate & RTT & $T_d$\\
 \end{table*}
 
 \begin{figure*}[htb!]
-\def\picwidth{1.7in}
+\def\picwidth{2.2in}
 \centering
 \begin{tabular}{ccc}
 \epsfig{file = figures/plots/traces/lossrate.eps, width=\picwidth, angle=270}
@@ -1188,7 +1197,7 @@ The measured values are then compared to the expected value predicted by our mod
     along with the predicted values from our model (using the mesh \textit{Happy Buddha}) in Figure~\ref{f:model:r_dtime_comp}.  
 
 \begin{figure*}[htb!]
-\def\picwidth{1.7in}
+\def\picwidth{2.2in}
 \centering
 \begin{tabular}{ccc}
 \epsfig{file = figures/plots/\tracea/\mesha/f/10/rec_comp_s_z.eps, width=\picwidth, angle=270}
@@ -1254,7 +1263,7 @@ The measured values are then compared to the expected value predicted by our mod
     Results for other traces are similar and are therefore omitted. 
 
    \begin{figure*}[htb!]
-\def\picwidth{1.7in}
+\def\picwidth{2.1in}
 \centering
 \subfigure[]{
 %\begin{tabular}{ccc}
@@ -1350,7 +1359,7 @@ using various meshes and number of runs.}
     
     \paragraph*{Different Traces}
 \begin{figure*}[htb!]
-\def\picwidth{1.7in}
+\def\picwidth{2.2in}
 \centering
 \begin{tabular}{ccc}
 \epsfig{file = figures/plots/\tracea/\mesha/10/quality_curve_a_s.eps, width=\picwidth, angle=270}
@@ -1385,7 +1394,7 @@ using various meshes and number of runs.}
 
     \paragraph*{Different Meshes}
 \begin{figure*}[htb!]
-\def\picwidth{1.7in}
+\def\picwidth{2.5in}
 \centering
 \begin{tabular}{cc}
 \epsfig{file = figures/plots/\tracea/\meshb/10/quality_curve_a_s.eps, width=\picwidth, angle=270}
@@ -1443,7 +1452,7 @@ using various meshes and number of runs.}
 %\label{f:hausdorff}
 %\end{figure*}
 \begin{figure*}[htb!]
-\def\picwidth{1.7in}
+\def\picwidth{2.1in}
 \centering
 \subfigure[]{
 \epsfig{file = figures/plots/\tracea/\mesh_h/10/quality_curve_a_s.eps, width = \picwidth, angle=270}
@@ -1501,7 +1510,7 @@ suitable here since it depends on the decoding order of the vertex splits.
 Changing the sending order changes the importance of vertex splits,
 so our greedy method is not applicable.
 \begin{figure*}[htb!]
-\def\picwidth{1.7in}
+\def\picwidth{2.5in}
 \centering
 \begin{tabular}{cc}
 \epsfig{file = figures/plots/\tracea/\mesha/1000/quality_curve_f_g_relative.eps, width = \picwidth, angle=270}
@@ -1513,7 +1522,7 @@ so our greedy method is not applicable.
 \label{f:model:f_g}
 \end{figure*}
 \begin{figure*}[htb!]
-\def\picwidth{1.7in}
+\def\picwidth{2.5in}
 \centering
 \epsfig{file= figures/f_g_comp_low.eps, height=\picwidth}
 \caption{The rendered \textit{Happy Buddha} at the time $T_d$, using \textsf{UDP-High} . Left: FIFO with quality 5.96, Right: greedy with quality 9.29.}

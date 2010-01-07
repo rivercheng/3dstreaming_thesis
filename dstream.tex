@@ -710,44 +710,45 @@
     one half of the parent's importance.
 \section{Validation}
 In this section, we introduce the experimental results to 
-validate our solutions. First, we verify 
-how effective the screen-area based method is under 
-various scenarios.
-Then, we show the compression efficiency of 
-our encoding algorithm on three meshes.
+validate the screen-area based method.
+%our solutions. First, we verify 
+%how effective the screen-area based method is under 
+%various scenarios.
+%Then, we show the compression efficiency of 
+%our encoding algorithm on three meshes.
 \label{s:dstream:evaluation}
 
-\subsection{Testing Screen-Area Based Method}
+%\subsection{Testing Screen-Area Based Method}
 We test the effectiveness of screen-area based method by checking
 how fast the quality of rendered image is improved. PSNR value 
-is used as the main metric to measure the quality of a rendered
-image, compared with the rendered image of the original mesh. 
+is used to measure the quality of a rendered
+image, with the rendered image of the original mesh as the reference. 
 When more vertices are split, the PSNR value tends to increase
 and plotting the PSNR value versus number of vertices are split
 will give us the quality curve. 
-We evaluate the requesting order mainly by examining the quality
+We evaluate the requesting order by examining the quality
 curve, and sometimes, when PSNR value is not enough to 
 represent the quality of an image, we will show the images directly.
 
-We test our method on various of meshes, viewpoints, and 
+We test our method on various meshes, viewpoints, and 
 initial status so that our result is more convincing.
 
 \textbf{Mesh}
-Three meshes, Happy Buddha (543,652 vertices)
+Two meshes, Happy Buddha (543,652 vertices)
 %, Asian Dragon (3,609,455 vertices), 
 and Thai Statue (5,000,000 vertices), both freely available
 from Stanford Graphic Lab, are used in our experiments to show how our 
 method works on meshes with various resolutions.
 Figure \ref{f:dstream:meshes} shows the rendered images of the original meshes
-compared with the rendered images of their base meshes.
+as the reference image and the initial image rendered from the base meshes.
 \begin{figure}[htdp!]
     \centering
     \begin{tabular}{cc}
-        \epsfig{file=buddha_final.eps, width=0.45\textwidth} & \epsfig{file=buddha_initial.eps, width=0.45\textwidth} \\
-                 Happy Buddha viewpoint 1(Original)                      &          Happy Buddha viewpoint 1(Base) \\
+        \epsfig{file=buddha_final.eps, width=0.48\textwidth} & \epsfig{file=buddha_initial.eps, width=0.48\textwidth} \\
+                 Happy Buddha viewpoint 1(reference)         &          Happy Buddha viewpoint 1(initial) \\
         %\epsfig{file=dragon_final.eps, width=0.45\textwidth} & \epsfig{file=dragon_initial.eps, width=0.45\textwidth} \\
-        \epsfig{file=thai_final.eps, width=0.45\textwidth} & \epsfig{file=thai_initial.eps, width=0.45\textwidth}\\
-                 Thai Statue(Original)                    &             Thai Statue (Base) \\
+        \epsfig{file=thai_final.eps, width=0.48\textwidth} & \epsfig{file=thai_initial.eps, width=0.48\textwidth}\\
+                 Thai Statue(reference)                    &             Thai Statue (initial) \\
     \end{tabular}
     \caption{Meshes we used in the experiments.}
     \label{f:dstream:meshes}
@@ -757,14 +758,14 @@ compared with the rendered images of their base meshes.
 We also include two other viewpoints of Buddha mesh in our experiments (see Figure \ref{f:dstream:vps}). 
 In the first one, the user has zoomed in to see the upper half of the mesh. 
 The second one is a close-up view of the head of the Buddha. The previous viewpoint
-and these two represents viewpoints with various distance, from far to near.
+and these two represent viewpoints with various distance, from far to near.
 \begin{figure}[htdp!]
     \centering
     \begin{tabular}{cc}
-        \epsfig{file=vp2_buddha_final.eps, width=0.45\textwidth} & \epsfig{file=vp2_buddha_initial.eps, width=0.45\textwidth} \\
-                Happy Buddha viewpoint 2(Original)              &      Happy Buddha viewpoint 2(Base)      \\    
-        \epsfig{file=vp3_buddha_final.eps, width=0.45\textwidth} & \epsfig{file=vp3_buddha_initial.eps, width=0.45\textwidth} \\
-                Happy Buddha viewpoint 3(Original)              &      Happy Buddha viewpoint 3(Base)      \\
+        \epsfig{file=vp2_buddha_final.eps, width=0.48\textwidth} & \epsfig{file=vp2_buddha_initial.eps, width=0.48\textwidth} \\
+                Happy Buddha viewpoint 2(reference)              &      Happy Buddha viewpoint 2(initial)      \\    
+        \epsfig{file=vp3_buddha_final.eps, width=0.48\textwidth} & \epsfig{file=vp3_buddha_initial.eps, width=0.48\textwidth} \\
+                Happy Buddha viewpoint 3(reference)              &      Happy Buddha viewpoint 3(initial)      \\
     \end{tabular}
     \caption{Two more viewpoints of Buddha mesh we used.}
     \label{f:dstream:vps}
@@ -774,19 +775,20 @@ and these two represents viewpoints with various distance, from far to near.
 When users change the viewpoint, they may see a mesh with uneven quality.
 The part they have already seen has fine quality, but the newly seen part
 is still coarse. To address these scenarios, we include the Buddha mesh
-with different initial status (see Figure \ref{f:dstream:histories}). The first one is generated when the user just 
+with different initial status (see Figure \ref{f:dstream:histories}). 
+The first one is generated when the user just 
 zoomed out from the central part of the Buddha mesh, so we can see that 
-the middle part of the mesh is already refined but the upper part
+the central part of the mesh is already refined but the upper part
 and the lower part is still coarse. The second one
 is generated when the user revolved the mesh from left to right, so we
 can see a fine right part and a coarse left part.
 \begin{figure}[htdp!]
     \centering
     \begin{tabular}{cc}
-        \epsfig{file=his1_buddha_final.eps, width=0.45\textwidth} & \epsfig{file=his1_buddha_initial.eps, width=0.45\textwidth} \\
-                Happy Buddha                                      &                Happy Buddha with initial status 1 \\
-        \epsfig{file=his2_buddha_final.eps, width=0.45\textwidth} & \epsfig{file=his2_buddha_initial.eps, width=0.45\textwidth} \\
-                Happy Buddha                                      &                Happy Buddha with initial status 2  \\
+        \epsfig{file=his1_buddha_final.eps, width=0.48\textwidth} & \epsfig{file=his1_buddha_initial.eps, width=0.48\textwidth} \\
+                Happy Buddha (reference)                                     &          Happy Buddha with initial status 1 \\
+        \epsfig{file=his2_buddha_final.eps, width=0.48\textwidth} & \epsfig{file=his2_buddha_initial.eps, width=0.48\textwidth} \\
+                Happy Buddha (reference)                                     &          Happy Buddha with initial status 2  \\
     \end{tabular}
     \caption{Two more initial status of Buddha mesh we used.}
     \label{f:dstream:histories}
@@ -804,82 +806,121 @@ to fill the pipeline due to the RTT existed between the sender and the receiver.
 
 In Section \ref{ss:dstream:visual} we explained why we estimate the visual importance
 of the two children vertices when their parent vertex is selected to be split.
-Here, we show how considering children vertices helps to improve the quality.
-\begin{figure}[htdp!]
-    \centering
-    \begin{tabular}{cc}
-        \epsfig{file=vp1_push_nopush.eps, angle=270, width=0.45\textwidth} & \\ 
-        \epsfig{file=vp2_push_nopush.eps, angle=270, width=0.45\textwidth} &  \epsfig{file=vp3_push_nopush.eps, angle=270, width=0.45\textwidth} \\ 
-        \epsfig{file=his1_push_nopush.eps, angle=270, width=0.45\textwidth}&  \epsfig{file=his2_push_nopush.eps,angle=270, width=0.45\textwidth} \\
-    \end{tabular}
-    \caption{Comparison of quality curves.}
-    \label{f:dstream:push_nopush}
-\end{figure}
+Here, we show how much it improves the quality.
 During this evaluation, 
 %we assume we need to
 %send 10000 vertex splits to fill the pipeline between receiver and the sender.
 We assume the RTT is 400ms, the bandwidth is 1Mbps, and the size of vertex split 
-is 40 bits.  
-Therefore, the receiver needs to send
+is 40 bits.  As a result, the receiver needs to send
 10000 vertex splits to fill the pipeline between receiver and the sender.
 From Figure \ref{f:dstream:push_nopush}, we see that
 without considering children vertex splits, during the first several rounds,
 the receiver cannot find 10000 vertices to fill the pipeline, and a considerable
-part of the bandwidth is wasted. 
-%Moreover, the vertex splits selected contribute
-%less to the quality since the curve has a smaller slope even before the quality 
-%stops increasing. 
+part of the bandwidth is wasted in waiting for vertex splits to come from the sender. 
+On the contrary, when we add the children vertices into the consideration,
+the receiver can always have enough vertices to split, hence the quality
+curve increase continuously.
+\begin{figure}[htdp!]
+    \centering
+    \begin{tabular}{cc}
+        \epsfig{file=vp1_push_nopush.eps, angle=270, width=0.48\textwidth} & \\ 
+        \epsfig{file=vp2_push_nopush.eps, angle=270, width=0.48\textwidth} &  \epsfig{file=vp3_push_nopush.eps, angle=270, width=0.48\textwidth} \\ 
+        \epsfig{file=his1_push_nopush.eps, angle=270, width=0.48\textwidth}&  \epsfig{file=his2_push_nopush.eps,angle=270, width=0.48\textwidth} \\
+    \end{tabular}
+    \caption{Comparison of quality curves.}
+    \label{f:dstream:push_nopush}
+\end{figure}
 
-Next, we show the effect of updating period. 
-In Figure \ref{f:dstream:update_period} we list out the quality curves for
+Splitting Vertices will refine the mesh and change the virtual importance
+of the vertices. Therefore, we periodically do the visibility test to update
+the visual importance of each vertex. 
+Next, we show how updating period affects the quality cureve. 
+%i.e. how long is the interval 
+%between two visibility checking if there is no viewpoint change.  
+In Figure \ref{f:dstream:update_period} we show the quality curves for
 4 different updating periods: 1, 200, 15000, 30000. Updating period being 1 means
-we do visibility check after every vertex split, and meanwhile we ignore the RTT
-and assume vertex splits is available immediately after the request. This is the 
-ideal case and used as the base for comparison. 
+we do visibility check after every vertex split, and meanwhile we %ignore the RTT and
+assume vertex splits is available immediately after the request. This 
+ideal case is used as the reference for comparison. 
 %Updating period as 200, 15000, 30000
 %mean checking visibility every packet, 1 second, and 2 seconds, respectively,
 %if we assume the bandwidth is 1 Mbps and the size of vertex split is 40 bits. 
-From the figure, we can see when we increase the update period,
-the performance is slightly decreased but the difference is not apparent. 
-The performance is still close to the ideal case when the update period is 30000, which
+From this figure, we can see when the update period increases,
+the performance is slightly decreased but the difference is not significant. 
+The performance is still close to the ideal case with update period as 30000, which
 means 2 seconds if the bandwidth is 1 Mbps.
+Therefore, when implementating the system, we could choose a large update period 
+to reduce the overhead. 
 
-Next, we compare the screen-area based method with other two methods. One is level-based
-method, which means we split the visible vertices in the vertex hierarchy in a breadth-first
-order. In other words, the vertex splits of a vertex with lowest level will be sent first. 
+Next, we compare the screen-area based method with other two methods to justify our propose. 
+One is level-based method, 
+which means we split the visible vertices in the vertex hierarchy in a breadth-first
+order. %In other words, the vertex splits of a vertex at lowest level will be sent first. 
 The other one is random method, which just randomly pick visible vertices to split. 
 \begin{figure}[htdp!]
     \centering
     \begin{tabular}{cc}
-        \epsfig{file=vp1_weight_level.eps, angle=270, width=0.45\textwidth} & \\ 
-        \epsfig{file=vp2_weight_level.eps, angle=270, width=0.45\textwidth} &  \epsfig{file=vp3_weight_level.eps, angle=270, width=0.45\textwidth} \\ 
-        \epsfig{file=his1_weight_level.eps, angle=270, width=0.45\textwidth}&  \epsfig{file=his2_weight_level.eps,angle=270, width=0.45\textwidth} \\
+        \epsfig{file=vp1_weight_level.eps, angle=270, width=0.48\textwidth} & \\ 
+        \epsfig{file=vp2_weight_level.eps, angle=270, width=0.48\textwidth} &  \epsfig{file=vp3_weight_level.eps, angle=270, width=0.48\textwidth} \\ 
+        \epsfig{file=his1_weight_level.eps, angle=270, width=0.48\textwidth}&  \epsfig{file=his2_weight_level.eps,angle=270, width=0.48\textwidth} \\
     \end{tabular}
     \caption{Comparison of quality curves.}
     \label{f:dstream:comp}
 \end{figure}
-From Figure \ref{}, we see 
-that both screen-area based method and level-based method works much better than random method.
-When we compare the level-based method and the screen-area based method by examining the images
-they generated. We can see that the level-based method tends to leave some large block of error 
-in the middle part of the mesh but has a better silhouette. Therefore, we modify the screen-area
-based method by multiplying the faces in the silhouette with a weight larger than 1 so that they
-have higher priority. We can see that with this method, now we have a good silhouette and avoids
-the big block error in the middle, and it results in a better PSNR curve.
+Figure \ref{f:dstream:comp} shows 
+that both the screen-area based method and the level-based method work much better than the random method.
+The screen-based method has the best performance in most scenarios. 
+If based on only PSNR value, 
+the level-based method has similar performance in many scenarios and even is slightly better
+in some cases. 
+The PSNR value, however, sometimes cannot fully represent the visual quality.
+Figure \ref{} shows the rendered images using two methods after xxxxxx vertex splits.
+Although the level-based method generates an image with higher PSNR value,
+we can see some big error exists in the body of the mesh. The higher PSNR is caused by the
+better silhouette and the high contrast near silhouette (the background is dark black). 
+To avoid big error in the body and meanwhile have a more accurate silhouette, 
+%When we compare the level-based method and the screen-area based method by examining the images
+%they generated. We can see that the level-based method tends to leave some large block of error 
+%in the middle part of the mesh but has a better silhouette. Therefore, 
+we improve the screen-area based method by multiplying the faces in the silhouette
+with a weight larger than 1 so that they
+have higher priority. 
+We can see that with this method (with weight as 3), 
+the rendered image has a more accurate silhouette and in the same time has no big block error in the middle, 
+and it results in a better PSNR curve in Figure \ref{}.
 
 Finally, we check the accuracy of visibility test. 
 As we explained in Section \ref{ss:dstream:visual}, 
 if the receiver stop requesting vertex splits after all the visible splits received,
 some potentially visible vertices may not be generated.
-We use two metrics to compare the rendered images between the original mesh and the reconstructed mesh when all visible vertices
-are split. One is to find
+We use two metrics to compare the rendered image and the reference image (the rendered image of the original mesh)
+%and the reconstructed mesh 
+when all visible vertices are split. One is to find
 how many pixels are different and the other is to compute the PSNR value. 
 Table \ref{t:dstream:error} shows that the error is negligible.
-Moreover, if we force to split all the neighbors of vertices in the silhouette,
+Moreover, if we force to split all the neighbors of vertices in the silhouette
+(as introduced in Section \ref{ss:dstream:visual}),
 we can further reduce the error and have a more accurate silhouette.
+\begin{table}
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+        \multirow{2}{*}{Scenario}    &    \multicolumn{2}{c|}{Without force split}   & \multicolumn{2}{c|}{With force split}\\
+        \cline{2-5}
+         &   Number of Error Pixels   &   PSNR    &  Number of Error Pixels  & PSNR \\
+        \hline
+        Buddha viewpoint 1 &                           &           &                              &         \\
+        Buddha viewpoint 2 &                           &           &                              &         \\
+        Buddha viewpoint 3 &                           &           &                              &         \\
+        Thai   Statue      &                           &           &                              &         \\
+        \hline
+    \end{tabular}
+    \caption{The error in visibility determination (before and after force splitting silhouette)}
+    \label{t:dstream:error}
+\end{table}
 
-\subsection{The Compression Efficiency}
-In Table \ref{}, we show how our compression algorithm works. 
+%\subsection{The Compression Efficiency}
+%In Table \ref{}, we show how our compression algorithm works. 
 
 \begin{comment}
 \subsection{Transmitted Data Size}
@@ -1017,30 +1058,35 @@ Table \ref{t:dstream:error} shows that the error is negligible.
 %add figures and explanation here.
 \end{comment}
 \section{Conclusion}
-\begin{comment}
 \label{s:dstream:conclude}
 In traditional view-dependent systems,
 senders decide which refinements to send, so they are
-stateful and need expensive computation. %Not only the CPU time but also
+state-ful and need expensive computation. %Not only the CPU time but also
 Besides the CPU time,
 the output bandwidth also make the sender not scalable to many receivers,
-since cache proxy and peer-to-peer system cannot be applied easily.
+cache proxy and peer-to-peer system, the two common way to increase the scalability
+without deploy more servers, cannot be applied easily due to the state-ful design.
 
 We propose a receiver-driven protocol to address the above weakness.
 The main finding of us is that %the accuracy of rendered image is not
 %strictly required during previewing,
 receivers can estimate the visual importance of a vertex split, even before
-it is received, based on the current received mesh. Moreover, we can exploit the GPU
-in determining the visibility and visual importance of vertices.
+it is received, based on the current partially received mesh. 
+Moreover, we can exploit the GPU
+in determining the visibility and visual importance of vertices by
+analyzing the content in frame buffer. 
+In addition, we could easily detect the silhouette and hence can 
+assign it higher priority to ensure the rendered image has an accurate shape.
+We have done extensive experiments to validate the screen-area based method.
 
-In our protocol, the sender is stateless,  so the receiver can easily
+Now the sender is stateless in our implementation, so the receiver can easily
 switch from different senders during transmission or even simultaneously
 download from multiple senders. Therefore, we can easily apply
 the cache proxy or peer-to-peer techniques to solve the scalability problem. 
 
-Another benefit is that the receiver explicitly requesting the vertex splits
-frees sender from sending the IDs of vertex splits. As a result, the
-transmission data on the down-link of the sender is significantly reduced. 
+%Another benefit is that the receiver explicitly requesting the vertex splits
+%frees sender from sending the IDs of vertex splits. As a result, the
+%transmission data on the down-link of the sender is significantly reduced. 
 %In this chapter, we propose the receiver-driven approach for view-dependent 
 %streaming of 3D meshes.  Our preliminary study shows that the approach
 %is promising in reducing the sender's resource requirements, both in CPU and
@@ -1060,4 +1106,3 @@ transmission data on the down-link of the sender is significantly reduced.
 %object. 
 %\section*{Acknowledgment}
 %This work is supported by National University of Singapore Academic Research Fund R-252-000-306-112.
-    \end{comment}
