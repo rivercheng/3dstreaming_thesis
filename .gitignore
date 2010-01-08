@@ -7,8 +7,12 @@
 *.dvi
 *.blg
 *.png
+Template/
 figs
 figures
 plot
 papers
 vdstream_fig
+thesis.toc
+thesis.lof
+thesis.lot

@@ -1,7 +1,10 @@
 \documentclass[11pt, a4paper]{report}
+% define abstract
+
 \clubpenalty=10000
 \widowpenalty=10000
 \usepackage{fullpage}
+%\usepackage[top=1in, right=1in, bottom=1in, left=1.2in]{geometry}
 \usepackage{epsfig}
 \usepackage{setspace}
 \usepackage{latexsym}
@@ -16,13 +19,31 @@
 \usepackage{multirow}
 \usepackage{amssymb}
 
+\if 0
+\usepackage{fancyhdr}
+\pagestyle{empty}
+\newcommand\abstractname{Abstract}
+\newenvironment{abstract}%
+    {\cleardoublepage \null \vfill
+    \begin{center}%
+         \bfseries \abstractname
+    \end{center}}%
+    {\vfill \null}
+\fi 
+
+\newcommand\acknowledgename{Acknowledge}
+\newenvironment{acknowledge}%
+    {\cleardoublepage \null \vfill
+    \begin{center}%
+         \bfseries \acknowledgename
+    \end{center}}%
+    {\vfill \null}
+
 \newcommand\todo[1]{\textcolor{Red}{\textbf{#1}}}
 \newcommand\pOlost{\textrm{$P_0$ is lost}}
 \newcommand\QED{\hfill\ensuremath{\Box}}
 \newcommand\degree{\ensuremath{^\circ}}
 \let\showproof1
-
-
 \newtheorem{lemma}{Lemma}
 \newtheorem{theorem}{Theorem}
 \newenvironment{proof}[1][Proof]{\begin{trivlist}
@@ -37,16 +58,46 @@ National University of Singapore\\
 Supervisor\\
 Wei Tsang Ooi}
 \begin{document}
-%\maketitle
+\maketitle
 \doublespacing
-%\input{abstract}   
-%\include{intro}
-%\include{survey}
-%\include{mesh}
+\pagenumbering{roman}
+\input{abstract}   
+\begin{acknowledge}
+    First of all, I would like to express my sincere gratitude to my supervisor, Dr. Wei Tsang Ooi, for his continuous support and guidance. 
+    Wei Tsang always encourages me to try the new ideas and guides me to the promising direction. He has taught me not only a lot of valuable knowledge
+    but also many skills essential to a researcher, such as writing papers, preparing slides, and making presentations. 
+    I am also very grateful to him for his patience in improving my papers, presentations, and thesis. 
+    I could not imagine finishing the thesis and the Ph.D. candidature without his help.
+
+    I also would like to thank Dr. Kok-Lim Low, who gave me valuable suggestions in computer graphics. I am thankful to Prof. Yong Chiang Tay for his
+    wonderful course and precious suggestions on system modeling. I would like to thank my commit member for their constructive criticism to improve my thesis.
+
+    I would like to express my gratitude to Dr. Romulus Grigoras and Dr. G\'{e}raldine Morin for their continuous help during the collaboration. I would
+    like especially thank Sebastien Mondet. Working together with him is one of the most productive periods in my Ph.D. candidature. 
+
+    I am also grateful to Ransi De Silva for conducting the user study experiments and Dan Liu for her help in analyzing the user traces.
+    I appreciate the generous help from Bingjun Zhang in my experiment. 
+    I would like to thank all my colleges and friends, including Ma Lin, Nguyen Vu Thanh, Satish Verma, Pavel Korshunov, Balaji Raman, and Ke Liang for their
+    sharing and accompanying.
+
+    I can never express enough gratitude to my parents, who love me and support me unconditionally. Without their support and encouragement, I would have not
+    begun the challenging Ph.D student life at my thirties. I also express my thanks to my brother and his family for their supports. 
+    
+    Finally, this thesis is dedicated to my wife, Jingyan Yuan, for her endless caring, understanding, encouragement, and love.
+
+\end{acknowledge}
+\tableofcontents
+\listoffigures
+\listoftables
+\include{intro}
+\include{survey}
+\include{mesh}
 \include{dstream}
-%\include{mm09-3dstreaming}
-%\include{p2p}
-%\include{conclusion}
+\include{mm09-3dstreaming}
+\include{p2p}
+\include{conclusion}
+\appendix
+\chapter{Related Publications}
 
 \bibliographystyle{abbrv}
 \bibliography{thesis}

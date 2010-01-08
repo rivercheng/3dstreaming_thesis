@@ -13,13 +13,19 @@
     bounding spheres \cite{rusinkiewicz:qsplat, 364350} or surface splats \cite{383300} are used as rendering primitives. 
     More details about point-based models can be seen in the survey by Kobbelt and Botsch \cite{DBLP:journals/cg/KobbeltB04} 
     and the PhD thesis of Wand \cite{wand:point}.  
-    Moreover, some other representations also exist, such as simple solid models used in Second Life
-    and generalized cylinders used in representing plants \cite{plant:seb, compact:mondet}.
-    (TODO elaborate a little bit)
+    In addition to these surface modeling methods, 
+    constructive solid geometry(CSG), a commonly used technique used in solid modeling, 
+    constructs visually complex 3D objects with applying boolean operations
+    (union, intersection, and difference) on simple solid objects,
+    such as cubes, spheres, cylinders, cones, and  pyramids. 
+    CSG is extensively used in game development and CAD applications, because it is 
+    relatively easy to be constructed manually with computers and provides mathematical accuracy. 
+    As a specific example, we have used generalized cylinders to represent and streaming plants 
+    \cite{plant:seb, compact:mondet}.
 
     This thesis concentrates on meshes because of following reasons:
     \begin{itemize}
-        \item Most rendering hardware are optimized for meshes. Other model needs to be convert
+        \item Most rendering hardware are optimized for meshes, so other model needs to be convert
             to meshes before rendering either explicitly or implicitly. 
         \item Without connectivity information in the model, point-based model is relatively easier to deal with
             than meshes. Therefore, adapting techniques used in streaming meshes to streaming point-based model
@@ -197,12 +203,25 @@ vertex.\label{mesh_non_mesh}}\
             %triangle mesh, the valence of most vertices is six, and therefore
             Because of the regularity of the new mesh,
             the connectivity information can be coded almost without cost.
-            More details about these algorithms can be seen in the survey by Allienz and Gotsman
-            \cite{recent:alliez}, the survey by Peng, Kim and Kuo
-            \cite{technologies:peng} and the references therein.
-            Besides losing the correct topology information,
-            re-meshing based methods usually code a mesh as a whole, 
-            so there is no flexibility in streaming order.
+            %More details about these algorithms can be seen in the survey by Allienz and Gotsman
+            %\cite{recent:alliez}, the survey by Peng, Kim and Kuo
+            %\cite{technologies:peng} and the references therein.
+            In 2002, Gu et al. proposed an algorithm to remesh a
+            mesh to a completely regular structure and represented it 
+            as a \emph{geometry image} \cite{gu:geometry}. 
+            Geometry, color, and normal information
+            of a 3D mesh then can be stored all as 2D images. Therefore,
+            traditional image processing techinique can be used.
+            For example, spectral geometry processing are studied by many researchers
+            \cite{taubin:signal, karni:spectral}
+            and a state-of-art survey was done by Zhang et al. \cite{zhang:spectral}.
+            He et al. proposed \emph{spectral geometry images} to generate more 
+            visually pleasing shape with higher compression efficiency. Moreover, 
+            they proposed an error protection scheme to target networks with 
+            packet loss \cite{he:spectral}.
+            %Besides losing the correct topology information,
+            %re-meshing based methods usually code a mesh as a whole, 
+            %so there is no flexibility in streaming order.
 
         \item[Progressive Mesh-Based]
             In this thesis, we concentrate on progressive meshes, which provide 
