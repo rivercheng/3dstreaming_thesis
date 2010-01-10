@@ -227,8 +227,8 @@ lists in a highly dynamic environment is difficult.
     \begin{figure}
     \centering
     \epsfig{file =diff.eps, height = 2.5in}
-    \caption{
-    In video streaming, peers receive chunks in the same order, so $p$
+    \caption[Difference between P2P video streaming, P2P file sharing, and P2P view-dependent mesh streaming.]
+    {In video streaming, peers receive chunks in the same order, so $p$
     may request many chunks from $q$ (e.g, in the order of C3, C4, C5).
 	 In file sharing, peers can receive
     chunks in any order, so $p$ can request all chunks received by $q$
@@ -1022,7 +1022,8 @@ progressiveness among the chunks.
     \begin{figure}[t]
     \centering
     \epsfig{file = register.eps, height = 2.5in}
-    \caption{This peer will register in Group $00000$ for leader
+    \caption[Peer register in various groups.]
+    {This peer will register in Group $00000$ for leader
     updates from group $0$
     and $000$, and it will register in Group $0000300$ for leader
     updates from group $00003$. 
@@ -1135,7 +1136,7 @@ progressiveness among the chunks.
     \begin{figure}
     \centering
     \epsfig{file =thai.eps, height = 3.5in}
-    \caption{%Screen area of two vertices: v1 and v2.
+    \caption[The Thai Statue]{%Screen area of two vertices: v1 and v2.
     The Thai Statue. The top left is the whole mesh, and the 
     rest is the closeup of some parts of it.
     Original mesh courtesy of Stanford Computer Graphics Laboratory.
@@ -1170,7 +1171,8 @@ progressiveness among the chunks.
 \epsfig{file = plot/bandwidthCDF.eps, height=\picheight, angle=270}
 \\
 \end{tabular}
-\caption{CDF of the session length (mean = 91.4s), peer-to-peer delay (mean =
+\caption[CDF of the session length, delay, and bandwidth used in our simulation]
+{CDF of the session length (mean = 91.4s), peer-to-peer delay (mean =
 75.8ms), and peer
 bandwidth (download mean = 4292.8Kbps, upload mean = 1023.0Kbps) used in our simulation.
 \label{f:cdf}}
@@ -1256,7 +1258,9 @@ bandwidth (download mean = 4292.8Kbps, upload mean = 1023.0Kbps) used in our sim
 \epsfig{file = plot/serverVisit_stable.eps, height=\picheight, angle=270}
 \\
 \end{tabular}
-\caption{Comparison between centralized lookup approach and hierarchical
+\caption[Comparison between centralized lookup approach and hierarchical
+P2P lookup approach.]
+{Comparison between centralized lookup approach and hierarchical
 P2P lookup approach. The left column indicates how the results change with time, and
 the right column how the results change with the arriving rate of
 peers. The value in stable stage is averaged from $t = 300s$ to $t =
@@ -1279,7 +1283,9 @@ peers. The value in stable stage is averaged from $t = 300s$ to $t =
 \epsfig{file = plot/responseTime_stable.eps, height=\picheight, angle=270}
 \\
 \end{tabular}
-\caption{Comparison between centralized lookup approach and hierarchical
+\caption[Comparison between centralized lookup approach and hierarchical
+P2P lookup approach.]
+{Comparison between centralized lookup approach and hierarchical
 P2P lookup approach. The left column indicates how the results change with time, and
 the right column how the results change with the arriving rate of
 peers. The value in stable stage is averaged from $t = 300s$ to $t =

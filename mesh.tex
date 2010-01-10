@@ -758,7 +758,8 @@ where $t=nT_d+b$ and $n,b\in\mathbb{Z^+}; 0 \le b<T_d$.
 \begin{figure}[htbp]
 \centering
 \epsfig{file = figures/extreme40_1.eps, height=0.6\textwidth, angle = 270}
-\caption{The number of decodable packets for ideal case and worst case. $T_d= 40$, Loss rate $p =0.1$. In the figure, we assume the first packet arrives at time 1.}\label{model:extreme}
+\caption[The number of decodable packets for ideal case and worst case.]
+        {The number of decodable packets for ideal case and worst case. $T_d= 40$, Loss rate $p =0.1$. In the figure, we assume the first packet arrives at time 1.}\label{model:extreme}
 \end{figure}
 
 %including what is maximum delay. Hong long is the critical range, in which the optimization is meaningful.
@@ -984,7 +985,7 @@ help us select which node to pack.
     \begin{tabular}{cccccccccc}
     (b)            &&&&&&&&            (c)
     \end{tabular}
-    \caption{Intermediate quality of decoded mesh.  From left to right: (a) Strategy 2 is better than Strategy 1 since the area under the curve is larger. (b) Area sum of vertical slices.  (c) Area sum of horizontal slices.}\label{model:two_views}
+    \caption[Intermediate quality of decoded mesh.]{Intermediate quality of decoded mesh.  From left to right: (a) Strategy 2 is better than Strategy 1 since the area under the curve is larger. (b) Area sum of vertical slices.  (c) Area sum of horizontal slices.}\label{model:two_views}
     \end{figure*}
 
 Consider a node $v$.  We need to decide whether we should pack $v$ into
@@ -1463,7 +1464,7 @@ using various meshes and number of runs.}
 \subfigure[]{
 \epsfig{file = figures/plots/\tracea/\mesha/2/quality_curve_a_s.eps, width=\picwidth, angle=270}
 }
-\caption{Predicted quality curve and measured quality curve from our experiments. (a): using Hausdorff distance as quality metric, averaged over 10 runs; (b, c): quality curves from two different single runs.}
+\caption[Predicted quality curve and measured quality curve from our experiments.]{Predicted quality curve and measured quality curve from our experiments. (a): using Hausdorff distance as quality metric, averaged over 10 runs; (b, c): quality curves from two different single runs.}
 %\label{f:hausdorff}
 \label{f:model:hausdorff_and_1run}
 \end{figure*}
@@ -1525,7 +1526,7 @@ so our greedy method is not applicable.
 \def\picwidth{2.5in}
 \centering
 \epsfig{file= figures/f_g_comp_low.eps, height=\picwidth}
-\caption{The rendered \textit{Happy Buddha} at the time $T_d$, using \textsf{UDP-High} . Left: FIFO with quality 5.96, Right: greedy with quality 9.29.}
+\caption[The rendered \textit{Happy Buddha} at the time $T_d$, using \textsf{UDP-High}.]{The rendered \textit{Happy Buddha} at the time $T_d$, using \textsf{UDP-High}. Left: FIFO with quality 5.96, Right: greedy with quality 9.29.}
 \label{f:model:f_g_img}
 \end{figure*}
 \section{Conclusion}
