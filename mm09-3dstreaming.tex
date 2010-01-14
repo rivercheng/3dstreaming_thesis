@@ -92,7 +92,7 @@ synthetic traces.
 \textbf{Meshes}
 
 Three 3D meshes are chosen from the freely available
-Stanford 3D Scanning Repository\footnote{http://graphics.stanford.edu/data/3Dscanrep/}:
+Stanford 3D Scanning Repository:   %\footnote{http://graphics.stanford.edu/data/3Dscanrep/}:
 \textit{Happy Buddha}, \textit{Dragon}, and \textit{Thai Statue}.
 These meshes vary in complexity (amount of vertices), orientation, and
 symmetry in space from default viewing direction. \textit{Happy Buddha} is the
@@ -124,7 +124,7 @@ considerably.
 
 The meshes are encoded progressively and streamed over a simulated network of 320Kbps and 400ms round trip time.  
 
-\textbf{Participants.}
+\textbf{Participants}
 
 A total of 37 (25 male and 12 female) participants, aged 19 to 36
 (mean 23), mostly from the university community participated in the
@@ -239,7 +239,7 @@ during the experiments.}
         tilt backward & TB  & $\theta_x + 10\degree$ & CTRL + $\downarrow$\\
         tilt forward & TF   & $\theta_x - 10\degree$ & CTRL + $\uparrow$\\
         revolve anticlockwise & REAN & $\theta_y + 10\degree$ & $\rightarrow$\\
-        revolve clockwise & RED & $\theta_y - 10\degree$ & $\leftarrow$\\
+        revolve clockwise & REC & $\theta_y - 10\degree$ & $\leftarrow$\\
         rotate  anticlockwise & ROAN & $\theta_z + 10\degree$ & CTRL + $\leftarrow$\\\
         rotate  clockwise & ROC &  $\theta_z - 10\degree$ & CTRL + $\rightarrow$\\
         %reset      & RS     & $all = 0$  & R \\
@@ -274,7 +274,7 @@ In this sense, a session is a random walk in the 6-dimension space.
 
 \section{Predicting User Actions}
 \label{ss:user:predictability}
-it is interesting to see if user actions are predictable. 
+It is interesting to see if user actions are predictable. 
 If so, pre-fetching can be used to reduce response time when
 users change their viewpoints. For example, when the connection between the 
 receiver and the sender has limited bandwidth
@@ -289,8 +289,8 @@ The next action of a user, $A_n$, is a random variable with 14 possible values
 A naive way to predict the value of $A_n$ is based on the unconditional distribution 
 of $A_n$, which can be estimated as the frequency of each value in the traces
 we collected.  
-Then the $A_n$ can be predicted as the action with highest probability.
-We note this action as $a_{max}$ and its probability as $p_{max}$
+Then, $A_n$ can be predicted as the action with highest probability.
+We note this action as $a_{max}$ and its probability as $p_{max}$.
 Figure \ref{f:user:frequency}
 shows the frequency of occurrences of 12 different actions in the traces we collected,
 displayed as a bubble chart. 
@@ -332,7 +332,7 @@ such as the previous action of the user and the current viewpoint of the user.
 \end{figure}
 
 \textbf{Considering Previous Action}
-From the traces we found that the value of $A_n$ highly correlates
+From the traces, we found that the value of $A_n$ highly correlates
 with the value of $A_p$, the previous action taken by the user.
 Figure \ref{f:user:prev_next_relation} shows the conditional 
 probability of taking the next action given the previous action
@@ -356,8 +356,8 @@ According to this observation,
 we categorized the actions into two types: \textit{repeat}, \textit{non-repeat} and use 
 $P_{repeat}$ to represent the probability to repeat the previous action.
 Then we can predict the next action by choosing ``repeat'' unconditionally.
-The probability of ``repeat'' for three meshes can be seen in Figure \ref{f:user:cont_prob}.
-Therefore, always choosing ``repeat'' as the prediction has high accuracy 
+The $P_{repeat}$ for three meshes can be seen in Figure \ref{f:user:cont_prob}.
+We can see that always choosing ``repeat'' as the prediction has high accuracy 
 (larger than $80\%$ for all meshes). 
 \begin{figure}[htdp!]
     \centering
@@ -379,11 +379,11 @@ Therefore, always choosing ``repeat'' as the prediction has high accuracy
     'x' means that the sample size of this combination is too small (less than 10 samples) to obtain reliable probability.}
     \label{f:user:prev2}
 \end{figure}
-Next, we check whether it helps to consider one more action, the second latest action. 
+Next, we check whether it helps to consider one more action, the second previous action. 
 The $P_{repeat}$ under different combination of
 previous two actions for Thai Mesh is shown in Figure \ref{f:user:prev2}.
-In this figure, we can see that the second latest action does affect the 
-$P_{repeat}$y, but the effect is much less significant than the previous action. 
+In this figure, we can see that the second previous action does affect the 
+$P_{repeat}$, but the effect is much less significant than the previous action. 
 Moreover, we found that in around 99.9\% of the combinations, 
 repeating the previous action still has the largest probability,
 so the prediction based on previous action and the one based on previous two actions are the same in
@@ -413,10 +413,10 @@ samples (See Figure \ref{f:user:sample_size_1}).
     \label{f:user:sample_size_1}
 \end{figure}
 Including the viewpoints having few samples may exaggerate the accuracy.
-For example, the predictions on all the viewpoints having one sample are 
-always 100\%, which is not realistic.
+For example, the predictions on the viewpoints having one sample are 
+always true, which is not realistic.
 Therefore, we ignore all those viewpoints with less than 10 samples.
-The accuracy of this method can be seen in Figure \ref{f:user:accuracy_comp} (labelled ``Vp'').
+Figure \ref{f:user:accuracy_comp} (labelled ``Vp'') shows the accuracy of this method.
 We can see that this method has lower accuracy than the one based on previous action.
 
 \textbf{Considering Viewpoint and Previous Action}
@@ -443,9 +443,9 @@ This method has the highest accuracy among the four methods.
 
 We compare the four methods in Figure \ref{f:user:accuracy_comp} for three meshes\footnote{
 To increase the sample size, we aggregate the data of the three version of the same mesh together.
-It is reasonable because the meshes has a defect are almost identical to the original one, 
-and users do not know which one has defect in advance. Therefore, their behavior are similar to
-all three versions of the same mesh.}.
+It is reasonable because the meshes having a defect are almost identical to the original one, 
+and users do not know which one has defect in advance. Therefore, their behavior on 
+all three versions of the same mesh are similar.}.
 Our conclusion is that the user action is somewhat predictable and the prediction is simple.
 We can always predict the next action same as the previous one without considering
 any extra information, and the accuracy is good enough. 
@@ -474,7 +474,7 @@ then caching is much less effective. Therefore, to study user traces
 is crucial in designing a caching system.
 In this section, based on the analysis of the traces we collected, 
 we show that how caching is useful in three different scenarios:
-(1) progressive mesh streaming, (2) remote rendering, and (3) 
+(i) progressive mesh streaming, (ii) remote rendering, and (iii) 
 mesh rendering.
 %In this section, we show that the user traces exhibit access
 %patterns that can lead to efficient caching in three different scenarios.
@@ -693,7 +693,7 @@ A simple method to determine the think time is following the distribution
 we derived from the traces, without considering the current state.
 This may be not accurate since the current viewpoint may affect the 
 distribution of the think time. Furthermore, people tends to repeat the same
-action quickly, and when usually takes longer time if they change to another action.
+action quickly, and usually takes longer time if they change to another action.
 Therefore, whether next action is repeating last action is also an factor to be considered.
 
 To investigate the relation between think time and viewpoints, we
@@ -719,7 +719,7 @@ we decide the next action. Next, we introduce how we determine the next action.
 
 \subsection{Next Action}
 We decide the next action based the Markov chain method.
-The viewpoint, represented as a 6-tuple: {$x, y, z, \theta_x, \theta_y, \theta_z$}
+The viewpoint, represented as a 6-tuple: ($x, y, z, \theta_x, \theta_y, \theta_z$)
 as introduced in Section \ref{s:user:study}, can be defined as the states in the Markov chain.
 According to the observation that the previous actions highly affects the next action
 (Section \ref{ss:user:predictability}), it is not a first order Markov chain because
@@ -733,11 +733,11 @@ this simplification is reasonable.
 
 We can reduce the second order Markov chain to first order by defining the current state as
 (previous viewpoint, current viewpoint). After a user action, the new state becomes 
-(current viewpoint, next viewpoint) (See Figure \ref{f:user:reduction}(A)). 
+(current viewpoint, next viewpoint) (See Figure \ref{f:user:reduction}(a)). 
 Then, the transition probability only depends on the current state.
 Notice that (previous viewpoint, current viewpoint) is equivalent to (current viewpoint, previous action), 
 so we finally define the state to be ($x, y, z, \theta_x, \theta_y, \theta_z, A_p$). 
-(See Figure \ref{f:user:reduction}(B)).
+(See Figure \ref{f:user:reduction}(b)).
 \begin{figure}
     \centering
     \epsfig{file=reduction.eps, width=0.6\textwidth}
@@ -762,7 +762,7 @@ It is based on a simplified model, which does not directly derive and follow the
 
 \subsection{Simplified Model}
 To generate a synthetic trace, we need to determine the probability of each possible $A_n$ based on current
-state ``($x,y,z,\theta_x,\theta_y,\theta_z,A_p$)''. Due to the limited number of samples, we cannot obtain the reliable
+state ($x,y,z,\theta_x,\theta_y,\theta_z,A_p$). Due to the limited number of samples, we cannot obtain the reliable
 transition probability for most of the states. As a result, we need to find a new way to determine the 
 conditional distribution of $A_n$.
 
@@ -773,8 +773,8 @@ repeating the previous action has the highest probability in most cases.
 Therefore, the previous action is chosen as one of the most important factor. 
 Based on the relation with the previous action, we categorized actions to three groups: 
 \textit{repeat}, \textit{reverse}, and \textit{change}. 
-``Repeat'' means the next action is same to the previous action; ``reverse'' means
-the next action is the opposite of the previous action. For example, if the previous action
+``Repeat'' means the next action is the same as the previous action; ``reverse'' means
+the next action is in the opposite direction of the previous action. For example, if the previous action
 is ``Move Up'', then ``reverse'' means the next action is ``Move Down''. All other actions are 
 categorized as ``change'' action.
 
@@ -801,7 +801,7 @@ We determine the next action in two steps:
 %We assume that only step 1 depends on the previous action, and step 2
 %only depends on ($x,y,z,\theta_x,\theta_y,\theta_z$). 
 
-In step 1, besides this most important factor, the previous action, we consider only one coordinate instead of six.
+In Step 1, in addition to the most important factor, the previous action, we consider only one coordinate instead of six.
 %In step 1, the repeat probability depends on the previous action and the 6-tuple ($x, y, z, \theta_x, \theta_y, \theta_z$).
 %To simplify the model, we only consider the most important factor and ignore others. 
 As we know, an action only changes one coordinate in the 6-tuple. We call this coordinate \textit{corresponding coordinate}.
@@ -809,14 +809,14 @@ For example, the corresponding coordinate of ``Move Left'' is $x$, and the corre
 ``Revolving Clockwise'' is $\theta_y$. 
 When users are repeating or reversing the previous action, 
 only the corresponding coordinate is changed. 
-As a result, we only consider the corresponding coordinate in determining the $P_{repeat}$. 
+As a result, we only consider the corresponding coordinate in determining the $P_{repeat}$ and $P_{reverse}$. 
 For example, when a user keeps pressing ``Move Left'', the mesh may nearly be out of the viewable area, 
 then the $P_{repeat}$ decreases, and the $P_{reverse}$ increases. 
 Another example is that when the user keeps pressing ``Revolve Clockwise'' and find something interesting
 in the mesh from the current direction,
 the $P_{repeat}$ decreases and the $P_{change}$ increases (the user may ``Zoom In'' to see more details or ``Move'' to the interesting part).
 In summary, in this simplified model, we assume that $P_{repeat}$, $P_{reverse}$, and $P_{change}$
-only depends on ``(previous action, corresponding coordinate)''.
+only depends on (previous action, corresponding coordinate).
 As a result, the number of available samples of each combination increases a lot compared with the first method
 (See Figure \ref{f:user:newsample}). 
 \begin{figure}
@@ -827,7 +827,7 @@ As a result, the number of available samples of each combination increases a lot
     \label{f:user:newsample}
 \end{figure}
 
-In step 2, we need to determine $Pr(A_n |_{\textrm{current state}, A_n != A_p, An != \textrm{reverse}(A_p)})$
+In Step 2, we need to determine $Pr(A_n |_{\textrm{current state}, A_n != A_p, An != \textrm{reverse}(A_p)})$
 for each possible $A_n$. In this step, we ignore the effect of previous action. 
 We think that $P_{continue}$ is high mainly because users tend to press the same key multiple times. 
 It affects the $P_{change}$, but its effect on which action to be chosen as ``change'' is little.
@@ -836,13 +836,14 @@ It affects the $P_{change}$, but its effect on which action to be chosen as ``ch
 Hence, we assume that $Pr(A_n |_{\textrm{current state}, A_n != A_p, An != \textrm{reverse}(A_p)})$
 only depends on $(x, y, z, \theta_x, \theta_y, \theta_z)$. Here, all coordinates, except the corresponding coordinate
 (it will not be changed since ``repeat'' and ``reverse'' are already excluded from the choices),
-are important to decide the next action, so the sample size is not large enough to derive the probabilities
-from the trace.
+are important to decide the next action. 
+We cannot directly derive the probability from the traces we collected because the sample size is not large enough.
+%to derive the probabilities from the trace.
 Instead, we propose a heuristic based on the assumption
 \[
     Pr(x, y, z, \theta_x, \theta_y, \theta_z) = Pr(x)Pr(y)Pr(z)Pr(\theta_x)Pr(\theta_y)Pr(\theta_z)
 \]
-In other words, we assume that the probability for a viewpoint has a specific coordinate is independent with its 
+In other words, we assume that the probability for a viewpoint to have a specific coordinate is independent of its 
 other coordinates. This is an assumption to simplify our model, and will introduce some difference between
 synthetic traces and real traces. In the validation part, however, we show that the difference is not 
 significant.

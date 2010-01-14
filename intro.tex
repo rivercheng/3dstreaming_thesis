@@ -52,14 +52,14 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     such as Second Life, can become more realistic and interesting by
     supporting high-resolution 3D models. 
     Commercial users could show their products as 3D models to potential users all over 
-    the world. Sculptors could demonstrate their artworks freely without renting an gallery.
+    the world. Sculptors could demonstrate their artworks freely without renting a gallery.
     As another example, virtual earth applications, 
     such as Google Earth, could represent many landmark buildings or statues
     (e.g. Statue of Liberty) as high-resolution 3D models to
     give more realistic representation of the real world.
 
     When used in networked applications, 
-    high resolution 3D models may take long time to download completely
+    high resolution 3D models may take a long time to download completely
     for display at the client. 
     For example, the Stanford model of the David statue, with 28 million vertices and
     56 million triangles, is still 70 MB in size with
@@ -67,7 +67,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     to download at 1 Mbps.  
     To reduce the waiting time of the user, 
     streaming techniques can be used to transmit 3D models. 
-    The 3D streaming technology enables users to render the a coarse version of the model
+    The 3D streaming technology enables users to render a coarse version of the model
     based on partially received data as a preview, 
     and then improve the quality when more data becomes available. 
     Users can decide how much data to receive based on their requirement of quality
@@ -113,10 +113,10 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     the main difference is how users consume the data.
     In video streaming, usually the data are consumed in time order. 
     Whereas in 3D streaming, especially when high-resolution 3D models are used,
-    users may consume different subset of the data, and in various orders.
+    users may consume different subset of the data in various orders.
     
     This flexibility is important in streaming of high-resolution 3D models, 
-    because streaming a huge 3D model in a fix order leads to transmission of data not
+    because streaming a huge 3D model in a fixed order leads to transmission of data not
     useful to the user, wasting time and bandwidth.
     Ensuring this flexibility in streaming system is an important consideration
     in choosing representation and coding schemes. The details are discussed
@@ -299,10 +299,12 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
             }
     
     \subsection{Scope}
+            The scope of our research is as follows.
+
             First, only streaming of static 3D objects is considered in this thesis. 
-            Streaming of 3D animations beyonds the scope of this thesis. 
+            Streaming of 3D animations is beyond the scope of this thesis. 
             Second, streaming of 3D scenes is not concerned in this thesis.
-            Instead, this thesis concentrates on streaming of one large mesh.
+            Instead, this thesis concentrates on streaming of a single large mesh.
             Nonetheless, streaming of 3D scenes becomes easier when mature methods
             of streaming of single objects exist because a 3D scene is the collection
             of multiple single meshes.
@@ -388,10 +390,13 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     of a vertex after projected to the screen).
     %and level of vertex (how many times this vertex
     %has been split), respectively. 
-    To validate this method, we compared these two methods with two other
+    To validate this method, we compared it with two other
     methods. One is randomly selecting from the visible vertices and 
     the other is based the level of vertex (how many times this vertex
-    has been split). 
+    has been split). We found that the screen area based method improves
+    the quality significantly quicker than the random method. Moreover,
+    Screen area based method usually generated better rendered images in perception
+    than the level based method.
     
     To uniquely identify each vertex, we borrow the idea from Kim and Lee \cite{kim01truly}.
     In this system, IDs can be deduced by the receiver without any extra information. 
@@ -474,11 +479,11 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     essential for networked applications using high-resolution 3D models
     become popular.
 
-    In chapter\ref{c:related}, we introduce some backgrounds and related works.
-    The following four chapters introduce how we achieve our objectives in detail.
-    Chapter \ref{c:model} introduces our analytical model and its applications, and
+    In Chapter \ref{c:related}, we introduce some backgrounds and related works.
+    The subsequent four chapters introduce how we achieve our objectives in detail.
+    Chapter \ref{c:model} introduces our analytical model and its applications.
     Chapter \ref{c:rdstream} describes our receiver-driven view-dependent streaming
     protocol in detail. The result of our user study and its analysis are introduced
-    in Chapter \ref{c:user} and topics about implementing P2P mesh streaming systems
-    are discussed in Chapter \ref{c:p2p}. Finally, the whole thesis is concluded in
+    in Chapter \ref{c:user} and our P2P mesh streaming systems
+    are discussed in Chapter \ref{c:p2p}. Finally, the thesis is concluded in
     Chapter \ref{c:conclusion}.

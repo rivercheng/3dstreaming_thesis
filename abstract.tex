@@ -3,30 +3,29 @@
     High-resolution 3D meshes are increasingly available in networked
     applications, such as digital museum, online game, and virtual reality.
     The amount of data constituting a high-resolution 3D mesh can be
-    huge, leading to a long downloading time. 
+    huge, leading to long downloading time. 
     To reduce the waiting time of users, 
     a common technique for remote viewing is progressive streaming,
     which allows a low-resolution version of the mesh to be transmitted
-    and rendered with low latency. Then the quality of the transmitted 
-    mesh can be incrementally improved when the refinement information
-    is continuously being transmitted.
+    and rendered with low latency. The quality of the transmitted 
+    mesh is incrementally improved by continuously transmitting the refinement information.
 
     Progressive mesh is commonly used to support progressive
     streaming. A progressive mesh comprises a \emph{base mesh} and a series
     of refinements. The base mesh is obtained by simplifying the original mesh
     with a series of \emph{edge collapses}.
-    With the \emph{vertex splits}, the inverses of these edge
-    collapses, the original mesh can be reconstructed from the base mesh.
+    The inverses of these edge collapses, named \emph{vertex splits}, 
+    can reconstruct the original mesh from the base mesh.
     Therefore, progressive streaming can be implemented by sending the vertex
     splits as refinements after sending the base mesh.
 
     %Although streaming of videos is extensively studied, 
     Streaming of high-resolution progressive meshes is considerably different
-    to video streaming, which is extensively studied.
-    Frames of a video are usually sent following the time order,
-    vertex splits of a progressive mesh, however, can be sent in various orders.
-    Some new research problems arise due to the flexibility in sending order of 
-    vertex splits. In this thesis, four related topics are discussed. 
+    to video streaming, which has been extensively studied.
+    Frames of a video are usually sent following the time order.
+    Vertex splits of a progressive mesh, however, can be sent in various orders.
+    New research problems arise due to the flexibility in sending order of 
+    vertex splits. In this thesis, four such problems are addressed. 
     %After decoding, each frame contributes the same to a video, but vertex splits
     %in a progressive mesh vary considerably in their contribution to the quality
     %of the reconstructed mesh. 
@@ -70,23 +69,23 @@
     
     Furthermore, %closed-form expressions are derived in two extreme cases,
     this model is applied to study two extreme cases of dependency in 
-    progressive meshes and
+    progressive meshes. %and
     %providing insights to the importance of dependencies on the
     %decoded mesh quality. 
-    the main insight we found is that if each lost packet
+    The main insight we found is that if each lost packet
     is immediately retransmitted upon the packet loss is detected, 
     the effect of dependencies on decoded mesh quality diminishes with time.
     %the dependencies only matters in the first several round trip times. 
     Therefore, the effect of dependency is only significant in the applications
     requiring high interactivity. 
 
-    The accuracy of the analylitical model proposed in this thesis is validated
+    The accuracy of the analytical model proposed in this thesis is validated
     under a variety of network conditions, including bursty losses, fluctuating RTT,
     and varying sending rate. The values predicted from our model match the measured
     value reasonably well in all cases except when losses are too bursty.
     
-    Second, to further improve the quality curve, the viewpoint of the 
-    user can be considered in deciding the sending order.
+    Second, to improve the quality of rendered image in the receiver side quickly, 
+    the viewpoint of the user can be considered in deciding the sending order.
     %Usually, users can only see a part of a mesh, so sending non-visible data
     %before visible data wastes bandwidth. Moreover, 
     Non-visible vertex splits do not need to be sent, and 
@@ -104,9 +103,9 @@
     %Second, 
     The sender needs to maintain
     the rendering state of each receiver to avoid sending duplicate data. 
-    Due to the stateful design %and high computational requirements,
+    Due to the state-ful design, %and high computational requirements,
     the sender-driven approach cannot be easily extended to support 
-    many receivers with caching proxy and peer-to-peer system,
+    many receivers with caching proxy and peer-to-peer (P2P) system,
     two common solutions to scalability. 
 
     In this thesis, a receiver-driven protocol is proposed to 
@@ -123,8 +122,8 @@
     the scalability without adding more servers.  
 
     Third, 
-    when a progressive mesh is streamed in a view-dependent way, which set of the data is streamed
-    and in what order it is streamed both relate to how the user interacts with the mesh. 
+    when a progressive mesh is streamed in a view-dependent way, which set of the data is streamed,
+    and in what order it is streamed, relate to how the user interacts with the mesh. 
 %For example, if the user quickly rotates the mesh, only the vertex splits at the top levels
 %of the vertex hierarchy are required by the receiver. On the contrary, if the user
 %zoom in and examine certain part of the mesh carefully, the receiver requires the 

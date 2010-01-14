@@ -54,10 +54,10 @@
     of receivers (unless using more servers as senders, 
     which significantly increases the infrastructural cost) 
     due to its two characteristics:
-    (1), the sender is state-ful because it needs to remember which
+    (i), the sender is state-ful because it needs to remember which
     vertices are sent for each receiver to avoid sending duplicate data;
     %when receivers changes viewpoint;
-    (2), the sender has to do expensive computation to determine the 
+    (ii), the sender has to do expensive computation to determine the 
     visibility and visual contributions of vertex splits for each receiver.
     
     Due to the state-ful design and huge computational requirements,
@@ -75,7 +75,7 @@
     we propose a receiver-driven protocol, 
     in which the receiver decides the sending order and explicitly requests
     the vertex splits. The sender simply sends the data requested 
-    (See Figure\ref{dstream:protocol}c), so no expensive computation is needed.
+    (See Figure \ref{dstream:protocol}c), so no expensive computation is needed.
     %In this protocol, the server is stateless and free of expensive computation.
     %We can exploit the client's GPU in determining the requesting order.
     Furthermore, the server is stateless, so
@@ -126,7 +126,7 @@
     \subsection{Determine Visibility and Visual Contribution of a vertex split}
     We first define a term \emph{the visibility of a vertex split}. Under a certain
     viewpoint, if split a vertex will help improving the quality of the rendered image,
-    we call this vertex split \emph{visible}. Otherwise, we call it a \emph{invisible}
+    we call this vertex split \emph{visible}. Otherwise, we call it an \emph{invisible}
     vertex splits.
     In view-dependent streaming system, it is necessary to determine the visibility
     of each vertex split so that the sender can avoid wasting bandwidth in sending invisible 
@@ -178,15 +178,16 @@
     Similarly, a bounding cone of normal is used in back face culling \cite{258843}.
     Therefore, some extra information to represent the bounding sphere
     and bounding cone of normal is needed. A common practice is to
-    pre-compute the radius of the bounding sphere ($r_v$), the semi-angle of
-    the cone of normals ($\alpha$), and other two parameters
-    ($\mu$ and $\delta$) for deciding the screen-space error
+    pre-compute the radius of the bounding sphere, %($r_v$), 
+    the semi-angle of the cone of normals, % ($\alpha$),
+    and other two parameters %($\mu$ and $\delta$) 
+    for deciding the screen-space error
     and store them with the vertex together \cite{258843, kim:view}.
     
     These bounding object-based methods, however, are not appropriate
     in our receiver-driven protocol. 
     If these methods are applied to receiver driven protocol, the sender has to send
-    these bounding parameters with the vertex splits together, almost doubling 
+    the four bounding parameters with the vertex splits together, almost doubling 
     the data size. 
     %To increase the streaming data size is never a good solution
     %because the network bandwidth is one of the main bottleneck of the streaming system.
@@ -255,14 +256,14 @@
 
     \subsection{Compress Vertex Splits Efficiently}
     As we introduced above, in a sender-driven protocol, 
-    a vertex split usually includes five numbers {$IDs$, $ID_l$, $ID_r$,
-    $x$, $y$, $z$}. 
+    a vertex split usually includes six numbers $IDs$, $ID_l$, $ID_r$,
+    $x$, $y$, and $z$. 
     In the receiver-driven protocol, on one hand, the sender needs not send
     $IDs$ since the vertex splits can be sent according to
     the requesting order from the receiver. On the other hand, the other 
     five numbers are more difficult to be compressed efficiently.
     
-    \textbf{Encoding $ID_l$ and $ID_r$}
+    \textbf{Encoding $ID_l$ and $ID_r$.}
     In sender-driven protocol, instead of sending the two cut neighbors, $ID_l$ and $ID_r$, directly,
     only the information indicating their position among all the \emph{one ring neighbors}
     of vertex $IDs$ (the vertices directly connected to vertex $IDs$) is coded.  
@@ -271,7 +272,7 @@
     can be used to further improve coding efficiency because the vertex $ID_l$ and vertex $ID_r$
     are not equally possible in any position.
 
-    In the receiver-driven approach, however, the method introduced above is not easy to be applied.
+    In the receiver-driven approach, however, the method introduced above cannot be easily applied.
     Since the receiver may split the progressive mesh in many ways, the set of neighbors of 
     a vertex during the decoding, $\mathcal{N}'$, 
     may not be the set of neighbors during the encoding $\mathcal{N}$.
@@ -311,7 +312,7 @@
 	method is useful in progressive streaming as well. We implemented their method and
     the details are introduced in Section \ref{s:dstream:protocol}.
     
-    \textbf{Encoding ($x$, $y$, $z$)}
+    \textbf{Encoding ($x$, $y$, $z$).}
     As we introduced in Chapter \ref{c:related}, the coordinates of the newly generated
     vertex, ($x$, $y$, $z$) can be encoded based on the prediction. Usually, the prediction
     is based on position of some other vertices close to the vertex $IDs$. This method is 
@@ -333,7 +334,7 @@
      for view-dependent progressive mesh streaming.
      We first introduce the process of transmitting 
      a progressive mesh. Then, we explain how the receiver decides the requesting order.
-     Finally, we explain how we encode the data sent by the sender and the requests send from the receiver.
+     Finally, we explain how we encode the data sent by the sender and the requests sent from the receiver.
      
      \subsection{Mesh Transmission} 
      A streaming session is initiated when the receiver requests for a specific
@@ -364,9 +365,9 @@
 
      To avoid the receiver to request a non-exist vertex split (trying to split
      a leaf vertex in the vertex hierarchy),
-     In the base mesh, an extra bit is attached to every vertex to indicate whether it is a leaf or not.
-     Every vertex splits has two extra bits to indicate whether the two newly generated vertices are 
-     leave or not.
+     in the base mesh, an extra bit is attached to every vertex to indicate whether it is a leaf or not.
+     Every vertex splits has two extra bits to indicate whether each of the two newly generated vertices 
+     is a leaf.
      %This will be introduced in more detail when we discussing about coding vertex splits
      %later.
      \subsection{Determining Visual Importance}
@@ -415,17 +416,17 @@
     A vertex split will generate two new vertices and their screen-area need re-computation.
     Moreover, it also changes the area of some neighbor vertices. Ideally, we should 
     do the screen-area computation after each vertex split and then select the next 
-    vertex split. This \emph{vertex by vertex} method is not feasible for two reasons.
-    First, the screen-area computation for each vertex split is too expensive. Second,
-    due to the RTT between the receiver and the sender, vertex by vertex method means
-    to send a request and wait for the vertex splits to come before sending next vertex
-    split. As a result, the majority of network bandwidth will be wasted. 
+    vertex split. This \emph{vertex-by-vertex} method is not feasible for two reasons.
+    First, doing screen-area computation after each vertex split is too expensive. Second,
+    due to the RTT between the receiver and the sender, vertex-by-vertex method means
+    to send a request and wait for the vertex splits to arrive before sending next vertex
+    split. As a result, most of the network bandwidth will be wasted in waiting. 
     
     %Between a request is 
     %sent and the corresponding vertex is received, a considerable delay, roughly equal
     %to the RTT between the receiver and the sender, exists. 
     To use all the bandwidth available, the receiver should keep selecting vertices to be split
-    and send out the requests. If we only select from the existed vertices, i.e. 
+    and send out the requests. If we only select from the existed vertices, i.e.,
     the vertices in the vertex front, we will face two problems.
     %TOne solution could be select vertex to be split all from the If only vertex splits of 
     %With the method introduced above, we can estimate the visual importance of each existed vertex,
@@ -436,12 +437,12 @@
     %to fill the pipeline.
     %In other words, the receiver may have no vertex splits 
     to request before the vertex splits already requested arrive after one RTT. 
-    Then we cannot full utilize the network bandwidth when we need them most.
+    Then we cannot fully utilize the network bandwidth when we need them the most.
     Moreover, even when there are enough vertices splits to request during one RTT, only sending
     the splits of existed vertices may delay splits of some important children vertices.
     For example, if vertex $v$ has the highest importance, and if it is split, its two 
     children $v_1$ and $v_2$ are the next most important vertices. However, because these
-    two vertices do not exist, they will not be selected until the vertex splits of $v$ 
+    two vertices do not exist yet, they will not be selected until the vertex splits of $v$ 
     is received and applied after one RTT.
 
     To address this problem, we also estimate the visual importance of the children vertices
@@ -458,12 +459,11 @@
     be re-computed and a new list of vertex splits will be requested. 
     }.
     In Section \ref{s:dstream:evaluation}, we show that
-    that with periodical updating, this method works well. Compared with the ideal case,
-    using vertex by vertex approach and the RTT is $0$, this method has comparable performance
-    with a regular RTT.
+    that with periodical updating, this method works well. Compared with the ideal case that
+    uses vertex-by-vertex approach with no network latency, this method has comparable performance.
 
     The effectiveness of screen-based method is evaluated in Section \ref{s:dstream:evaluation},
-    compared with other two methods. One is based on the level of a vertex in the 
+    compared with other two methods: One is based on the level of a vertex in the 
     vertex hierarchy and the other is randomly pick a visible vertex to split.
 
     %With the screen-area based method, only the visual importance of currently existed
@@ -482,8 +482,8 @@
     
     During the streaming, when the receiver satisfies with the rendering quality, it 
     can either stop requesting or continue requesting the remaining vertex splits
-    for future use based on the prediction of the user's next action 
-    (In Chapter \ref{c:user}, we discuss about whether the user actions can be predicted).
+    for future use based on the prediction of the user's next action.
+    Chapter \ref{c:user} discusses whether the user actions can be predicted.
 
     If the receiver stops requesting % for more vertex splits 
     when the visual quality is satisfactory, it may miss some visible vertices.
@@ -512,10 +512,17 @@
     We can then split the neighbors of this pixel disregard of their visibility.
     In Section \ref{s:dstream:evaluation}, we can see that this method helps
     reduce the error significantly. Moreover, we show that we could assign
-    higher priority to the silhouette so that the reconstruted image has 
-    a more correct shape early. This is useful in some applicaions that the
+    higher priority to the silhouette so that the reconstructed image has 
+    a more correct shape early. This is useful in some applications that the
     shape of the mesh is important.
-    
+
+    Detecting the silhouette is also useful during the progressive streaming.
+    The vertices in the silhouette could be assigned higher weight so that
+    they are split earlier to generate more accurate profile of the mesh.
+    The weight can be configured by the users according to their preferences.
+    In Section \ref{s:dstream:evaluation}, we evaluated two screen area based
+    method, with weight as 1 and 3, respectively.
+
     \subsection{Encoding of Vertex Splits and IDs}
     \label{ss:dstream:encoding}
     %Our progressive meshes are generated using OpenMesh\footnote{http://www.openmesh.org}. 
@@ -526,7 +533,7 @@
 	In this section, we explain how we encode the vertex splits 
     and the IDs of the requested vertex splits.  
     Note that, in our work, we consider only manifold meshes and use half 
-	collapse in the simplification.
+	collapse in mesh simplification.
     
     \textbf{Encoding Vertex Splits}
 	To encode a vertex split, we need to encode the IDs of the two
@@ -599,7 +606,7 @@
     encoded vertex splits are stored in the associative array, so the encoding will
     not increase overhead to the sender.
 
-    According to the results of our experiments with the Stanford Happy Buddha model,
+    According to the results of our experiments with the Happy Buddha and Thai Statue,
     we can quantize $dx$, $dy$, and $dz$ to 14 bits. 
     We need 11 bpv for both $Id_l$ and $Id_r$ 
     and 20 bpv for all three of $dx$, $dy$, and $dz$ on average.
@@ -688,6 +695,9 @@
     (including the vertices to be split and their ancestors in their path
     to the roots). Thus, the code efficiency is higher when more vertices in one tree
     are encoded since the overhead is amortized across the vertices. 
+    According to our experimental results, these vertex split IDs can 
+    be coded in 18 bpv on average. 
+
     %In worst case, we traverse $d$ nodes just for encoding $1$ vertex,
     %so in maximum $2d$ bits are needed for a node ID. Here, $d$ is
     %the depth of a node. In best case, all leaves are needed to be split. 
@@ -706,8 +716,8 @@
     ID. But once there are some descendants to be split, this method encodes their IDs 
     efficiently (1 bpv for one level, and 0.5 bpv for two levels). 
     We force the descendants at the same level be requested together, and 
-    this rule is reasonable. Recall that the importance of the descendants at one level are all the same, 
-    one half of the parent's importance.
+    this rule is reasonable. Recall that we assume the importance of the descendants at one level are equal, 
+    and is equal to half of the parent's importance.
 \section{Validation}
 \label{s:dstream:evaluation}
 In this section, we introduce the experimental results to 
@@ -737,7 +747,8 @@ initial status so that our result is more representative.
 Two meshes, Happy Buddha (543,652 vertices)
 %, Asian Dragon (3,609,455 vertices), 
 and Thai Statue (5,000,000 vertices), both freely available
-from Stanford Graphic Lab, are used in our experiments to show how our 
+from Stanford 3D Scanning Repository\footnote{http://graphics.stanford.edu/data/3Dscanrep/}, 
+are used in our experiments to show how our 
 method works on meshes with various resolutions.
 Figure \ref{f:dstream:meshes} shows the rendered images of the original meshes
 as the reference image and the initial images, which are rendered from the base meshes.
@@ -745,10 +756,10 @@ as the reference image and the initial images, which are rendered from the base 
     \centering
     \begin{tabular}{cc}
         \epsfig{file=buddha_final.eps, width=0.48\textwidth} & \epsfig{file=buddha_initial.eps, width=0.48\textwidth} \\
-                 Happy Buddha viewpoint 1(reference)         &          Happy Buddha viewpoint 1(initial) \\
+                 Happy Buddha Viewpoint 1 (reference)         &          Happy Buddha Viewpoint 1 (initial) \\
         %\epsfig{file=dragon_final.eps, width=0.45\textwidth} & \epsfig{file=dragon_initial.eps, width=0.45\textwidth} \\
         \epsfig{file=thai_final.eps, width=0.48\textwidth} & \epsfig{file=thai_initial.eps, width=0.48\textwidth}\\
-                 Thai Statue(reference)                    &             Thai Statue (initial) \\
+                 Thai Statue (reference)                    &             Thai Statue (initial) \\
     \end{tabular}
     \caption{Meshes we used in the experiments.}
     \label{f:dstream:meshes}
@@ -763,9 +774,9 @@ and these two represent viewpoints with various distance, from far to near.
     \centering
     \begin{tabular}{cc}
         \epsfig{file=vp2_buddha_final.eps, width=0.48\textwidth} & \epsfig{file=vp2_buddha_initial.eps, width=0.48\textwidth} \\
-                Happy Buddha viewpoint 2(reference)              &      Happy Buddha viewpoint 2(initial)      \\    
+                Happy Buddha Viewpoint 2 (reference)              &      Happy Buddha Viewpoint 2 (initial)      \\    
         \epsfig{file=vp3_buddha_final.eps, width=0.48\textwidth} & \epsfig{file=vp3_buddha_initial.eps, width=0.48\textwidth} \\
-                Happy Buddha viewpoint 3(reference)              &      Happy Buddha viewpoint 3(initial)      \\
+                Happy Buddha Viewpoint 3 (reference)              &      Happy Buddha Viewpoint 3 (initial)      \\
     \end{tabular}
     \caption{Two more viewpoints of Buddha mesh we used.}
     \label{f:dstream:vps}
@@ -773,7 +784,7 @@ and these two represent viewpoints with various distance, from far to near.
 
 \textbf{Initial Status}
 When users change the viewpoint, they may see a mesh with uneven quality.
-The part they have already seen has fine quality, but the newly seen part
+The part they have already seen has fine quality, but the newly visible part
 is still coarse. To address these scenarios, we include the Buddha mesh
 with different initial status (see Figure \ref{f:dstream:histories}). 
 The first one is generated when the user just 
@@ -781,7 +792,7 @@ zoomed out from the central part of the Buddha mesh, so we can see that
 the central part of the mesh is already refined but the upper part
 and the lower part is still coarse. The second one
 is generated when the user revolved the mesh from left to right, so we
-can see a fine right part and a coarse left part.
+can see the right part is refined and the left part is coarse.
 \begin{figure}[htdp!]
     \centering
     \begin{tabular}{cc}
@@ -804,6 +815,7 @@ words, we assume the bandwidth is 1Mbps and each vertex splits has around
 to fill the pipeline due to the RTT existed between the sender and the receiver. 
 \end{comment}
 
+Now we begin to introduce the experimental results.
 In Section \ref{ss:dstream:visual} we explained why we estimate the visual importance
 of the two children vertices when their parent vertex is selected to be split.
 Here, we show how much it improves the quality.
@@ -816,7 +828,7 @@ is 40 bits.  As a result, the receiver needs to send
 From Figure \ref{f:dstream:push_nopush}, we see that
 without considering children vertex splits, during the first several rounds,
 the receiver cannot find 10000 visible vertices to fill the pipeline, and a considerable
-part of the bandwidth is wasted in waiting for new vertices being generated after
+part of the bandwidth is wasted in waiting for new vertices to be generated after
 vertex splits are received from the sender. 
 On the contrary, when we add the children vertices into the consideration,
 the receiver can always have enough vertices to split, hence the quality
@@ -835,14 +847,15 @@ curve increase continuously.
     \label{f:dstream:push_nopush}
 \end{figure}
 
-Splitting Vertices will refine the mesh and change the virtual importance
+Splitting vertices will refine the mesh and change the virtual importance
 of the vertices. Therefore, we periodically re-check the frame buffer to update
 the visual importance of each vertex. 
 Next, we show how updating period affects the quality curve. 
 %i.e. how long is the interval 
 %between two visibility checking if there is no viewpoint change.  
 In Figure \ref{f:dstream:update_period} we show the quality curves for
-4 different updating periods: 1, 200, 15000, 30000. We generate the curve with updating period 1
+four different updating periods: 1 vertex split, 200 vertex splits, 15000 vertex splits, 
+and 30000 vertex splits. We generate the curve with updating period of 1
 by doing visibility check after every vertex split and %ignore the RTT and
 assuming vertex splits is available immediately after the request. This 
 ideal case is used as the reference for comparison. 
@@ -855,14 +868,14 @@ The performance is still acceptable with update period as 30000, which
 corresponds to 1.2 seconds if the bandwidth is 1 Mbps.
 Therefore, using GPU to decide the visibility and visual importance
 can work on devices with limited rendering ability. We just need to 
-set a long updating period to reduce the overhead.
+set a longer updating period to reduce the overhead.
 \begin{figure}[htdp!]
     \centering
     \begin{tabular}{cc}
         \epsfig{file=vdstream_fig/vp1_period.eps, angle=270, width=0.48\textwidth} &  \epsfig{file=vdstream_fig/thai_period.eps, angle=270, width = 0.48\textwidth}\\
-                            Buddha, viewpoint 1                                         &                      Thai Statue \\
+                            Buddha, Viewpoint 1                                         &                      Thai Statue \\
         \epsfig{file=vdstream_fig/vp2_period.eps, angle=270, width=0.48\textwidth} &  \epsfig{file=vdstream_fig/vp3_period.eps, angle=270, width=0.48\textwidth} \\ 
-                            Buddha, viewpoint 2                                         &                      Buddha, viewpoint 3  \\
+                            Buddha, Viewpoint 2                                         &                      Buddha, Viewpoint 3  \\
         \epsfig{file=vdstream_fig/his1_period.eps, angle=270, width=0.48\textwidth}&  \epsfig{file=vdstream_fig/his2_period.eps,angle=270, width=0.48\textwidth} \\
                             Buddha, initial status 1                                    &                      Buddha, initial status 2\\
     \end{tabular}
@@ -870,7 +883,7 @@ set a long updating period to reduce the overhead.
     \label{f:dstream:update_period}
 \end{figure}
 
-Next, we compare the screen-area based method with other two methods to justify our propose. 
+Next, we compare the screen-area based method with other two methods to justify our proposal. 
 One of the methods compared is the level-based method. 
 We split the visible vertices in the vertex hierarchy in a breadth-first
 order. %In other words, the vertex splits of a vertex at lowest level will be sent first. 
@@ -888,8 +901,10 @@ The other one is random method, which just randomly pick visible vertices to spl
     \caption{Comparing Screen-area method (weight = 1, 3)  with level-based method and random method.}
     \label{f:dstream:comp}
 \end{figure}
+Moreover, We test two screen-area based methods with the weight of the vertices in silhouette as 1 and 3 respectively
+to show the effect of giving higher priority to the silhouette during transmission. %in the screen-area based
 Figure \ref{f:dstream:comp} shows 
-that both the screen-area based method and the level-based method work much better than the random method.
+that two screen-area based methods and the level-based method work much better than the random method.
 %The screen-based method has the best performance in most scenarios. 
 If based on only PSNR value, 
 the level-based method has similar performance in many scenarios and even is slightly better
@@ -898,40 +913,41 @@ The PSNR value, however, sometimes cannot fully represent the visual quality.
 Figure \ref{f:dstream:image_comp_1} shows the rendered images of Happy Buddha using two methods after 60000 vertex splits.
 Although the level-based method generates an image with similar PSNR value,
 we can see quality of the face and base is considerably worse. 
-The silhouette of the level-based method, however, is slightly better. 
+The silhouette of the level-based method, however, is slightly better
+than the screen-area based method with weight 1. 
 This is caused by our screen-based method tends to under-estimate the importance of the parallel (or near to parallel) faces.
 %The higher PSNR 
 %is caused by the better silhouette. % and the high contrast near silhouette (the background is dark black). 
-To have a more accurate silhouette without sacrificing much visual quality, 
+%To have a more accurate silhouette without sacrificing much visual quality, 
 %When we compare the level-based method and the screen-area based method by examining the images
 %they generated. We can see that the level-based method tends to leave some large block of error 
 %in the middle part of the mesh but has a better silhouette. Therefore, 
-we improve the screen-area based method by multiplying the faces in the silhouette
-with a weight larger than 1 so that they
-have higher priority. 
-We can see that with this method (with weight as 3), 
-the rendered image has a more accurate silhouette and in the same time has good quality. 
+%we improve the screen-area based method by multiplying the faces in the silhouette
+%with a weight larger than 1 so that they
+%have higher priority. 
+We can see that with %this method (with weight as 3), 
+weight as 3, the rendered image has a more accurate silhouette and in the same time has good quality. 
 \begin{figure}[htdp!]
     \centering
     \begin{tabular}{cc}
         \epsfig{file=vdstream_fig/vp1_60000_1.eps, width=0.48\textwidth} &  \epsfig{file=vdstream_fig/vp1_60000_l.eps, width = 0.48\textwidth}\\
-                 Screen-Area Based                                                  &       Level Based \\
+                 Screen-Area Based, Weight = 1                           &       Level Based \\
         \epsfig{file=vdstream_fig/vp1_60000_3.eps, width=0.48\textwidth}  & \epsfig{file=vdstream_fig/buddha_final.eps, width=0.48\textwidth}\\ 
                  Screen-Area Based, Weight = 3                        &               Original Mesh  \\
     \end{tabular}
     \caption{Comparing Screen-area method (weight = 1, 3) with level-based method. Happy Buddha with 60000 vertices are split.}
     \label{f:dstream:image_comp_1}
 \end{figure}
-Where there are many details in the screen and the user view it from a relative far distance, 
+When there are many details in the screen and the user view it from a relative far distance, 
 such as the Thai mesh in our case, 
 the difference between level-based method and screen-based method becomes hardly noticeable. 
-Although the PSNR value of level-based method after splitting 60000 vertices is slightly higher, we cannot tell which one is 
+Although the PSNR value of level-based method after splitting 60000 vertices is slightly higher, we cannot clearly tell which one is 
 better in Figure \ref{f:dstream:image_comp_2}, where the rendered images are shown.
 \begin{figure}[htdp!]
     \centering
     \begin{tabular}{cc}
         \epsfig{file=vdstream_fig/thai_60000_1.eps, width=0.48\textwidth} &  \epsfig{file=vdstream_fig/thai_60000_l.eps, width = 0.48\textwidth}\\
-                 Screen-Area Based                                                  &       Level Based \\
+                 Screen-Area Based, Weight = 1                            &       Level Based \\
     \epsfig{file=vdstream_fig/thai_60000_3.eps, width=0.48\textwidth}  & \epsfig{file=vdstream_fig/thai_final.eps, width=0.48\textwidth}\\ 
                  Screen-Area Based, Weight = 3                        &               Original Mesh  \\
     \end{tabular}
@@ -964,18 +980,20 @@ we can further reduce the error and have a more accurate silhouette.
         \cline{2-5}
          &   Number of Error Pixels   &   PSNR    &  Number of Error Pixels  & PSNR \\
         \hline
-        Buddha viewpoint 1 &          202              &   40.8971 &  112                         &    43.514\\
-        Buddha viewpoint 2 &          118              &   40.8434 &  44                          &    44.2068\\
-        Buddha viewpoint 3 &           37              &   48.234  &  22                          &    49.5148\\
-        Thai   Statue      &          372              &   36.3953 &  273                         &    37.3371\\
+        Buddha viewpoint 1 &          202 (0.081\%)    &   40.8971 &  112 (0.045\%)               &    43.514\\
+        Buddha viewpoint 2 &          118 (0.047\%)    &   40.8434 &  44  (0.018\%)               &    44.2068\\
+        Buddha viewpoint 3 &           37 (0.015\%)    &   48.234  &  22  (0.009\%)               &    49.5148\\
+        Thai   Statue      &          372 (0.149\%)    &   36.3953 &  273 (0.109\%)               &    37.3371\\
         \hline
     \end{tabular}
-    \caption{The error in visibility determination (before and after force splitting silhouette)}
+    \caption[The error in visibility determination (before and after force splitting silhouette)]
+    {The error in visibility determination (before and after force splitting silhouette).
+    The resolution is $500 \times 500$, so the total number of pixels is $250000$.}
     \label{t:dstream:error}
 \end{table}
 
-In summary, our screen-based method could improve the quality of rendered image significantly quicker than random method. Compared
-with level-based method, the screen-based method usually generates better rendered image, especially when the viewpoint is close to the mesh. 
+In summary, our screen-based method improves the quality of rendered image significantly quicker than the random method. Compared
+with level-based method, the screen-based method usually generates better rendered image in perception, especially when the viewpoint is close to the mesh. 
 Moreover, by treating silhouette specially, we can have a better profile of the mesh both in the intermediate state and the final state (after
 all visible vertices are split). 
 
