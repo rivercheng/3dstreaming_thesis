@@ -31,8 +31,7 @@
     to frequently search for peers to download visible mesh
     data from when its view point changes.  Second, we
     found that a user stays in the system for a short time,
-    in the order of minutes
-    (Figure \ref{f:cdf}(a))
+    in the order of minutes (See Section \ref{ss:user:session})
     when viewing a mesh, leading to high churn rate.  Third,
     determining the visible region of a mesh given a view
     point is computationally intensive and is
@@ -1124,7 +1123,7 @@ progressiveness among the chunks.
     The client-server system is programmed in C++ based on 
     OpenGL and OpenMesh\footnote{http://www.openmesh.org}. 
     In our experiments, we use the Thai Statue from  
-    Stanford Computer Graphics Laboratory\footnote{http://www-graphics.stanford.edu/data/3Dscanrep/}, 
+    Stanford Computer Graphics Laboratory, %\footnote{http://www-graphics.stanford.edu/data/3Dscanrep/}, 
     which has 5 millions vertices and takes up 22.5 MB after
     being compressed with our encoding method. The mesh is packetized 
     into 147897 chunks following the approach introduced in Section
@@ -1143,20 +1142,22 @@ progressiveness among the chunks.
     \label{thai}}
     \end{figure}
 
-    We collected 60 traces from 37 students from our
-    university.  The session length of these traces ranges
-    from 9 seconds to 380 seconds. When collecting the
-    traces, the streaming bandwidth is set to 320 Kbps, with
-    a client-server RTT of 400 millisecond.
+    %We collected 60 traces from 37 students from our
+    %university.  The session length of these traces ranges
+    %from 9 seconds to 380 seconds. When collecting the
+    %traces, the streaming bandwidth is set to 320 Kbps, with
+    %a client-server RTT of 400 millisecond.
 
-    To simulate many users, we generated 4000
-    random traces after analyzing  
-    the collected user behavior traces, 
-    following the same distribution of the session length (log-normal
-    with $\mu = 18.23$, $\sigma = 0.754$ in $\mu$s), 
-    inter-action time interval (generalized extreme value distribution
-    with $\mu = 266,370$, $\sigma = 199,870$, and $\xi = 0.51$, in $\mu$s), and the probability of
-    selecting an action (zoom, pan, or rotate).
+    To simulate many users, we generated 6000
+    synthetic traces following the model introduced in Section \ref{s:user:synthetic}.
+    %after analyzing  
+    %the collected user behavior traces, 
+    %The session length follows a log-normal distribution
+    %with $\mu = 18.23$, $\sigma = 0.754$ in $\mu$s. 
+    %inter-action time interval (generalized extreme value distribution
+    %with $\mu = 266,370$, $\sigma = 199,870$, and $\xi = 0.51$, in $\mu$s), 
+    %and the probability of
+    %selecting an action (zoom, pan, or rotate).
     We replay these generated
     traces to obtain the sequence of chunk requests
     and use the latter in the simulation.
@@ -1164,16 +1165,16 @@ progressiveness among the chunks.
 \centering
 \def\picheight{3.0in}
 \begin{tabular}{c}
-\epsfig{file = plot/sessionLengthCDF.eps, height=\picheight, angle=270}
-\\
+%\epsfig{file = plot/sessionLengthCDF.eps, height=\picheight, angle=270}
+%\\
 \epsfig{file = plot/delayCDF.eps, height=\picheight, angle=270}
 \\
 \epsfig{file = plot/bandwidthCDF.eps, height=\picheight, angle=270}
 \\
 \end{tabular}
-\caption[CDF of the session length, delay, and bandwidth used in our simulation]
-{CDF of the session length (mean = 91.4s), peer-to-peer delay (mean =
-75.8ms), and peer
+\caption[CDF of the delay and bandwidth used in our simulation]
+{CDF of peer-to-peer delay (mean =
+75.8ms) and peer
 bandwidth (download mean = 4292.8Kbps, upload mean = 1023.0Kbps) used in our simulation.
 \label{f:cdf}}
 \end{figure*}
@@ -1185,8 +1186,8 @@ bandwidth (download mean = 4292.8Kbps, upload mean = 1023.0Kbps) used in our sim
     Our experiment lasts for 320 seconds, and the period from $300s$
     to $320s$ is seemed as the stable stage (approximately).
     We choose the arrival rate ($\lambda$) as 20, 40, 60, and 80. 
-    During the stable stage, the number of online peers are around 1720, 3550,
-    5200, and 6920, respectively.
+    During the stable stage, the number of online peers are around 1974, 4030,
+    6014, and 7974, respectively.
 
 
     %Figure \ref{f:peerNumber} shows the number of peers in the system
@@ -1210,7 +1211,7 @@ bandwidth (download mean = 4292.8Kbps, upload mean = 1023.0Kbps) used in our sim
     recording the pair-wise delay between 2500 DNS servers. We assign
     each peer and the server a random DNS server and assume that the
     end-to-end delay of two peers equals the delay between their DNS servers
-    (see Figure \ref{f:cdf}(b) for the CDF of end-to-end delay).
+    (see Figure \ref{f:cdf}(a) for the CDF of end-to-end delay).
 
     The downloading and uploading bandwidth of peers are randomly
     selected from the data reported by DSLReports.com
@@ -1218,7 +1219,7 @@ bandwidth (download mean = 4292.8Kbps, upload mean = 1023.0Kbps) used in our sim
     and updates daily the
     access speed of users over the world. We use 21,206 samples, 
     collected on 14 April 2009.
-    Figure \ref{f:cdf}(c) shows the CDF of the downlink and uplink
+    Figure \ref{f:cdf}(b) shows the CDF of the downlink and uplink
     bandwidth.
 
     In the following sections, we evaluate our P2P design in terms of

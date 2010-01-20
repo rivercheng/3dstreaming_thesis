@@ -910,7 +910,9 @@ If based on only PSNR value,
 the level-based method has similar performance in many scenarios and even is slightly better
 in some cases. 
 The PSNR value, however, sometimes cannot fully represent the visual quality.
-Figure \ref{f:dstream:image_comp_1} shows the rendered images of Happy Buddha using two methods after 60000 vertex splits.
+Figure \ref{f:dstream:image_comp_1} shows the rendered images of Happy Buddha using three methods after 60000 vertex splits.
+To show the comparison clearer, we enlarge three parts of the images (see \ref{f:dstream:three_parts} and
+show their comparison in Figure \ref{f:dstream:detail_comp}.
 Although the level-based method generates an image with similar PSNR value,
 we can see quality of the face and base is considerably worse. 
 The silhouette of the level-based method, however, is slightly better
@@ -938,6 +940,30 @@ weight as 3, the rendered image has a more accurate silhouette and in the same t
     \caption{Comparing Screen-area method (weight = 1, 3) with level-based method. Happy Buddha with 60000 vertices are split.}
     \label{f:dstream:image_comp_1}
 \end{figure}
+\begin{figure}[htdp]
+    \centering
+    \epsfig{file=vdstream_fig/vp1_final.eps, width=0.40\textwidth}
+    \caption{Three parts of the Buddha: head, base, and edge.}
+    \label{f:dstream:three_parts}
+\end{figure}
+\begin{figure}
+    \centering
+    \begin{tabular}{ccc}
+        \epsfig{file=vdstream_fig/vp1_head_1.eps, width=0.3\textwidth} & \epsfig{file=vdstream_fig/vp1_base_1.eps, width=0.3\textwidth} & \epsfig{file=vdstream_fig/vp1_edge_1.eps, width=0.3\textwidth}\\
+                         Head, Weight = 1                 &       Base, Weight = 1                            &            Edge, Weight = 1  \\      
+        \epsfig{file=vdstream_fig/vp1_head_level.eps, width=0.3\textwidth} & \epsfig{file=vdstream_fig/vp1_base_level.eps, width=0.3\textwidth} & \epsfig{file=vdstream_fig/vp1_edge_level.eps, width=0.3\textwidth}\\
+                         Head, Level Based                 &       Base, Level Based                            &            Edge, Level Based  \\      
+        \epsfig{file=vdstream_fig/vp1_head_3.eps, width=0.3\textwidth} & \epsfig{file=vdstream_fig/vp1_base_3.eps, width=0.3\textwidth} & \epsfig{file=vdstream_fig/vp1_edge_3.eps, width=0.3\textwidth}\\
+                         Head, Weight = 3                 &       Base, Weight = 3                            &            Edge, Weight = 3  \\      
+        \epsfig{file=vdstream_fig/vp1_head_final.eps, width=0.3\textwidth} & \epsfig{file=vdstream_fig/vp1_base_final.eps, width=0.3\textwidth} & \epsfig{file=vdstream_fig/vp1_edge_final.eps, width=0.3\textwidth}\\
+                         Head, Original                 &       Base, Original                            &            Edge, Original  \\      
+    \end{tabular}
+    \caption{The enlarged images of the three parts of the Buddha Mesh}
+    \label{f:dstream:detail_comp}
+\end{figure}
+
+
+
 When there are many details in the screen and the user view it from a relative far distance, 
 such as the Thai mesh in our case, 
 the difference between level-based method and screen-based method becomes hardly noticeable. 
