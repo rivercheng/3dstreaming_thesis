@@ -17,3 +17,5 @@ vdstream_fig
 thesis.toc
 thesis.lof
 thesis.lot
+thesis_*
+diff_*

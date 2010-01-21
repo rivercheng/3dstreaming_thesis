@@ -1,8 +1,6 @@
 \chapter{Characterizing User Interaction with Progressively Transmitted Meshes}
 \label{c:user}
 \section{Introduction}
-In a view-dependent progressive mesh streaming system, which set of the data is streamed
-and in what order it is streamed both depend on how the user interacts with the mesh. 
 %For example, if the user quickly rotates the mesh, only the vertex splits at the top levels
 %of the vertex hierarchy are required by the receiver. On the contrary, if the user
 %zoom in and examine certain part of the mesh carefully, the receiver requires the 
@@ -20,25 +18,32 @@ and in what order it is streamed both depend on how the user interacts with the 
 %Hence, if we know which part of data are requested more often, we could
 %store them in caching proxy close to the end users to increase the capacity
 %and reduce the response time of the system. 
-
-
 %First, with the view-dependent streaming strategy and the efficient coding 
 %system introduced in Chapter \ref{c:dstream}, the quality of the rendered image
 %in the receiver side could become satisfying in only seconds. The user may stay
 %in a certain viewpoint longer than 
-
 %Understanding user interaction is not only useful in designing the system, but
 %also in testing the system. 
-The ideal way to test a streaming system is to 
-test it with a large number of real users. This method, however, is expensive 
-and not always feasible. If we could characterize users' interaction with
-progressively streamed meshes from a small number of real user traces
+In a view-dependent progressive mesh streaming system, which set of the data is streamed
+and in what order it is streamed both depend on how the user interacts with the 
+progressively streamed mesh. 
+Hence, user interaction needs to be considered when testing a mesh streaming system.
+%The diversity in streaming order and streaming subsets increases the difficulty
+%in testing the performance of view-dependent streaming system, 
+%People interact with the mesh in their own unique ways. 
+%How to decide the streaming order when testing the streaming system becomes a problem
+%due to this kind of diversity.
+The ideal way of testing the mesh streaming system is inviting a large number of real users
+and record their interaction. 
+This method, however, is expensive and not always feasible. 
+If we could characterize user interaction from a small number of real user traces
 (the records of the interaction of users), 
 we could create a large number of synthetic traces,
-which simulate users' actions, to be used in measuring system performance. 
-This method is much cheaper than collecting a large number of traces from real users
-and can be used in developing and evaluating
-prototypes. 
+which simulate users' actions, to be used in measuring the performance
+of our system. 
+This method is much cheaper than collecting a large number of real traces from users.
+%and can be used in developing and evaluating
+%prototypes. 
 %For example, we use the synthetic traces we generated to test our P2P mesh
 %streaming systems introduced in Chapter \ref{c:p2p}.
 
@@ -55,12 +60,13 @@ prototypes.
 %traces to simulate user actions.
 %No such prior study exists for progressive meshes. This chapter presents our first step towards filling 
 %this gap.
-For the objectives introduced above,
-We conducted a experiment
+%For the objectives introduced above,
+Therefore, we conducted an experiment
 %\footnote{Thanks for Ransi De Silva for conducting this experiment.}
 with 37 users interacting with 9 meshes.
-We log the user's actions while they interact and view the meshes in a mock online shop.  
-We present some preliminary results of our analysis in this chapter.
+We logged the user's actions while they interact and view the meshes in a mock online shop.  
+Then we did some preliminary analysis on the user traces we logged.
+%We present some preliminary results of our analysis in this chapter.
 %We present the analysis of these traces in this chapter
 %\footnote{Dan Liu helps in part of the analysis (session time,
 %think time, and predictability).}, 
@@ -70,7 +76,9 @@ We present some preliminary results of our analysis in this chapter.
 %(i) in certain scenarios, user actions are highly predictable, making pre-fetching useful in these cases; 
 %(ii) users' viewpoint concentrates on part of the meshes, making caching these popular spots useful. 
 Based on this analysis, 
-we also develop a simple model, which can be used to generate synthetic traces for evaluating large-scale progressive mesh streaming systems.
+we developed a simple model, which can be used to generate synthetic traces for evaluating 
+our peer-to-peer view-dependent mesh streaming system introduced in the next chapter.
+
 \begin{figure}[htp]
 \centering
 \begin{tabular}{cc}
@@ -86,9 +94,10 @@ Thai Statue (5 million vertices), Dragon (3.6 million vertices), and Happy Buddh
 \label{fig:3dmodels}
 \end{figure}
 
-We first introduce how we did the experiment and recorded the data. Then 
-we show some interesting findings from our preliminary analysis, and how
-we generate synthetic traces based this analysis.
+We first introduce how we did the experiment and recorded the data. 
+Then we show some interesting findings from our preliminary analysis. 
+Finally, we introduce how we generate synthetic traces and 
+compare them with the real traces we collected.
 
 \section{Experiment Setup}
 \label{s:user:study}
@@ -275,11 +284,24 @@ In this sense, a session is a random walk in the 6-dimension space.
 %In this section, we present our analysis on the user behavior. We present only on the analysis of the original (non-defect) statues, unless otherwise specified.
 %In addition, we also discuss what implications these results have on system design.
 
-\section{Predicting User Actions}
+\section{Preliminary Analysis}
+The original purpose of our analysis on the traces we collected
+is to find some patterns to help us generate the synthetic traces. 
+Some preliminary findings we obtained, however, are interesting themselves and 
+may lead to a potential important research topic. We found that 
+in our traces we collected, the user actions are somewhat predictable.
+It indicates the possibility of applying pre-fetching in our mesh streaming
+system. Moreover, we found that locality exists in the traces we collected and
+it means caching technique can be useful in our scenario.
+In this section, we introduce these two potentially useful
+by-products of our experiment in detail. 
+
+\subsection{Predictability}
 \label{ss:user:predictability}
 It is interesting to see if user actions are predictable. 
 If so, pre-fetching can be used to reduce response time when
-users change their viewpoints. For example, when the connection between the 
+users change their viewpoints. 
+For example, when the connection between the 
 receiver and the sender has limited bandwidth
 or long delay, the requests for vertex splits of the new viewpoint 
 can be sent based on the prediction before the user changes the viewpoint.
@@ -456,9 +478,11 @@ Considering both previous action and viewpoint has the highest accuracy,
 but it depends on the statistics of user behavior and differs on every mesh. 
 Hence, it can only be done when enough user traces are already collected for a specific mesh. 
 The slightly better accuracy may not justify the much higher complexity.
-This is an interesting finding, but due to the small number of traces and the specific scenario we chose,
-we cannot achieve general conclusion yet. Further study with more experiments and more participants could 
-be an interesting future work.
+The interesting finding provides a preliminary evidence that pre-fetching can be useful
+in mesh streaming.
+%This is an interesting finding, but due to the small number of traces and the specific scenario we chose,
+%we cannot achieve general conclusion yet. Further study with more experiments and more participants could 
+%be an interesting future work.
 \begin{figure}
     \centering
     \epsfig{file=accuracy_comp.eps, width=0.65\textwidth}
@@ -466,7 +490,7 @@ be an interesting future work.
     \label{f:user:accuracy_comp}
 \end{figure}
 
-\section{Guiding Caching with User Traces}
+\subsection{Guiding Caching with User Traces}
 %According to our observations, parts of a mesh have different popularity. 
 %popular parts of the mesh. 
 Caching techniques are used to spend limited resources (such as 
@@ -598,8 +622,8 @@ leading to more evenly distributed viewpoints around the mesh.
 \caption{The hit rate when we save part of the faces in the graphic card.\label{fig:face_hit_rate}}
 \end{figure}
 
-These finding are still preliminary due to the limited number of traces we obtained. More user traces
-could be obtained in the future to obtain more mature results.
+%These finding are still preliminary due to the limited number of traces we obtained. More user traces
+%could be obtained in the future to obtain more mature results.
 
 \section{Generating Synthetic Traces}
 \label{s:user:synthetic}
@@ -996,7 +1020,7 @@ has nothing to do with these values.
 \end{figure}
 
 The final comparison is on the transition probability on certain state, $Pr(A_n|_{(x, y, z, \theta_x, \theta_y, \theta_z, A_p)})$. 
-If the Markov chain method used, the synthetic traces should have the same transition probability with the real trace.
+If the Markov chain method is used, the synthetic traces should have the same transition probability with the real trace.
 Due to the limited sample size, however, we have to use a simplified method. 
 This comparison shows the difference introduced by this simplification. 
 We only choose some states with enough number of samples to ensure the transition probabilities
@@ -1024,24 +1048,36 @@ In this case, the transition probability derived from the real traces itself is 
 In summary, due to the limited number of real traces, 
 we cannot completely validate the synthetic traces we generated 
 by checking the transition probability on each state.
-According to the comparison we did already, however,  
+According to the comparison we did, however,  
 the synthetic traces we generated are similar to the real traces. 
 Moreover, according to our observation, the traces we generated has much less
 abnormal states (upside down, tilted, our of viewable area, etc.) than the random trace.
-Therefore, we think it may be more realistic to use these synthetic traces rather than random traces to test system performance.
+Therefore, we think it may be more realistic to use these synthetic traces rather than random traces to test the performance of
+our mesh streaming system.
 
 \section{Conclusion}
-We conclude this chapter by showing some interesting preliminary findings we have.
-First, the analysis of the user traces we collected reveals that locality exists in both data and viewpoint access. 
-We may exploit this locality in designing progressive mesh streaming systems and rending systems.
-%storing the most popular mesh data in caching proxies, the server overhead could be significantly reduced. 
-Second, in our scenario, user actions are predictable to certain extent. 
+In this chapter we introduced how we generate synthetic traces based on real traces we collected.
+These synthetic traces are similar with the real traces in the properties we compared.
+Hence, we use them instead of random traces to measure the performance of the peer-to-peer 
+mesh streaming system introduced in the next chapter.
+
+%We conclude this chapter by showing some interesting preliminary findings we have.
+With a preliminary analysis of the real traces we collected, we have obtained some
+interesting findings.
+First, in our usage scenario, user actions are predictable to certain extent. 
 The prediction based on previous action is simple and effective. 
-Therefore, pre-fetching is possible both in streaming and rendering in our case.
-Third, we proposed a simple model to generate synthetic traces based on real traces we collected. 
-These synthetic traces are similar with the real traces in some properties we compared.
-Hence, they may be used in simulations to measure system performance without collecting
-a large number of traces.
+Therefore, it indicates pre-fetching is possible both in streaming and rendering within our scenario.
+Second, our analysis reveals that in the traces we collected, 
+locality exists in both data and viewpoint access. 
+It may be possible to exploit this locality in 
+designing progressive mesh streaming systems and rending systems.
+%storing the most popular mesh data in caching proxies, the server overhead could be significantly reduced. 
+%Third, we proposed a simple model to generate synthetic traces based on real traces we collected. 
+%These synthetic traces are similar with the real traces in some properties we compared.
+%Hence, they may be used in simulations to measure system performance without collecting
+%a large number of traces.
 
-
-
+While our original goal is to gather user traces to evaluate our system, 
+our findings above, despite limited to a single usage scenario, 
+points to a potentially important new research topic.  
+Our study in this thesis establish the first step towards that direction.

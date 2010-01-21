@@ -126,12 +126,12 @@ Nonetheless, the control overhead could be further reduced in the future.
 The response time less than one second is acceptable in many application without 
 strict real time requirement. For those application where do require low latency, such
 as 3D games, pre-fetching can help to reduce the response time. It could be an interesting 
-research topic to improve the P2P system with the insight from our user study.
+research topic to improve the P2P system by applying pre-fetching technique. %with the insight from our user study.
 
-In a view-dependent progressive mesh streaming system, the interaction of users directly
-affect which data is streamed and in which order they are streamed.
-We have done some preliminary study on how users interact 
-with a progressively streamed mesh.
+%In a view-dependent progressive mesh streaming system, the interaction of users directly
+%affect which data is streamed and in which order they are streamed.
+%We have done some preliminary study on how users interact 
+%with a progressively streamed mesh.
 %With the analysis of user records, we found that user actions are 
 %somewhat predictable since the user tends to repeat the previous 
 %action. 
@@ -141,18 +141,27 @@ with a progressively streamed mesh.
 %We can exploit this locality and use caching technique in progressive mesh streaming systems and rending systems.
 
 %After studying the user records, 
-We proposed a simple model 
-to generate synthetic traces based on real traces we collected. 
-These synthetic traces have some similar properties with the real traces and 
-could be used in simulations to measure system performance.
-Due to the limited number of user traces collected, we have to 
-sacrifice the accuracy in this simple model. In the future, if we could develop a real 
-online shop or online museum, we could collect a large number of real traces.
-With more real traces, we could develop a more accurate model.
+%We proposed a simple model 
+%to generate synthetic traces based on real traces we collected. 
+%These synthetic traces have some similar properties with the real traces and 
+%could be used in simulations to measure system performance.
+%Due to the limited number of user traces collected, we have to 
+%sacrifice the accuracy in this simple model. In the future, if we could develop a real 
+%online shop or online museum, we could collect a large number of real traces.
+%With more real traces, we could develop a more accurate model.
 
 \section{Future Work in Other Topics}
-In addition to the four aspects we investigated into, more interesting topics exist to be examined.
-For example, we found that in some cases the bottleneck can be the rendering of the meshes in the local 
+In addition to the three aspects we investigated into, more interesting topics exist to be examined.
+We have obtained some interesting findings from the preliminary analysis of the real user
+traces introduced in Chapter \ref{c:user}. 
+We found in our limited number of traces and specific usage scenario, 
+the user action is somewhat predicable and locality exists in the data access pattern.
+In the future, if we could develop a real online shop or online museum, 
+we could collect a large number of real traces under
+various scenarios. Then, with analysis on extensive data, 
+we may obtain some more general findings to help system design.
+
+Furthermore, we found that in some cases the bottleneck can be the rendering of the meshes in the local 
 terminal, especially when the GPU is also used to decide the visibility of vertices. 
 Improving the rendering efficiency of the progressive mesh during the streaming 
 could be an interesting research problem.  
