@@ -107,28 +107,6 @@ Moreover, we found that force splitting the neighbors of vertices in silhouette 
 For applications that tolerate no error, 
 further research could be done to remove this kind of error. 
 
-\section{Understanding User Interaction With Progressively Transmitted Meshes} 
-In a view-dependent progressive mesh streaming system, the interaction of users directly
-affect which data is streamed and in which order they are streamed.
-We have conducted a user study to have a better understanding of the user interactions when the users are 
-viewing a progressively streamed mesh.
-With the analysis of user records, we found that user actions are 
-somewhat predictable since the user tends to repeat the previous 
-action. 
-Therefore, pre-fetching becomes possible and it can be used both in streaming and rendering to
-reduce response time.
-Furthermore, the analysis of user traces reveals that locality exists in both data and viewpoint access. 
-We can exploit this locality and use caching technique in progressive mesh streaming systems and rending systems.
-
-After studying the user records, we proposed a simple model 
-to generate synthetic traces based on real traces we collected. 
-These synthetic traces have similar properties with the real traces and 
-can be used in simulations to measure system performance.
-Due to the limited number of user traces collected, we have to 
-sacrifice the accuracy in this simple model. In the future, if we could develop a real 
-online shop or online museum, we could collect a large number of real traces.
-With more real traces, we could develop a more accurate model.
-
 \section{P2P View-Dependent Progressive Mesh Streaming}
 To increase the scalability of the view-dependent mesh-streaming systems, 
 a P2P mesh streaming system was proposed in this thesis based on the receiver-driven approach. 
@@ -149,6 +127,28 @@ The response time less than one second is acceptable in many application without
 strict real time requirement. For those application where do require low latency, such
 as 3D games, pre-fetching can help to reduce the response time. It could be an interesting 
 research topic to improve the P2P system with the insight from our user study.
+
+In a view-dependent progressive mesh streaming system, the interaction of users directly
+affect which data is streamed and in which order they are streamed.
+We have done some preliminary study on how users interact 
+with a progressively streamed mesh.
+%With the analysis of user records, we found that user actions are 
+%somewhat predictable since the user tends to repeat the previous 
+%action. 
+%Therefore, pre-fetching becomes possible and it can be used both in streaming and rendering to
+%reduce response time.
+%Furthermore, the analysis of user traces reveals that locality exists in both data and viewpoint access. 
+%We can exploit this locality and use caching technique in progressive mesh streaming systems and rending systems.
+
+%After studying the user records, 
+We proposed a simple model 
+to generate synthetic traces based on real traces we collected. 
+These synthetic traces have some similar properties with the real traces and 
+could be used in simulations to measure system performance.
+Due to the limited number of user traces collected, we have to 
+sacrifice the accuracy in this simple model. In the future, if we could develop a real 
+online shop or online museum, we could collect a large number of real traces.
+With more real traces, we could develop a more accurate model.
 
 \section{Future Work in Other Topics}
 In addition to the four aspects we investigated into, more interesting topics exist to be examined.

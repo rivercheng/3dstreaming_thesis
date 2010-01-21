@@ -121,49 +121,8 @@
     Furthermore, caching proxy and P2P streaming systems can be applied to improve
     the scalability without adding more servers.  
 
-    Third, 
-    when a progressive mesh is streamed in a view-dependent way, which set of the data is streamed,
-    and in what order it is streamed, relate to how the user interacts with the mesh. 
-%For example, if the user quickly rotates the mesh, only the vertex splits at the top levels
-%of the vertex hierarchy are required by the receiver. On the contrary, if the user
-%zoom in and examine certain part of the mesh carefully, the receiver requires the 
-%vertex splits deep down to the bottom of the vertex hierarchy. 
-%Different user interactions have different demand to the streaming system,
-%so 
-    Understanding of how users interact with the progressively streamed mesh will
-    help us in designing a view-dependent mesh streaming system to %minimize negative 
-    improve user experience. 
-%and improving user experience.
-    For example, if the system can predict the next viewpoint of the user, it can pre-fectch
-    the vertex splits useful in the next viewpoint to reduce the response time of the system. 
-    Moreover, if we know some part of data are requested most frequently due to the common
-    pattern of users, 
-    we could store them in caching proxy close to the end users to increase the system capacity
-    and reduce the response time. 
-
-
-    Understanding user interaction is 
-    also useful in testing the system. To test a streaming system  
-    with a large number of real users is expensive 
-    and not always feasible. If we could characterize users' interaction with
-    progressively streamed meshes from a small number of real user records,
-    we could generate arbitrary number of synthetic traces,
-    which simulate users' actions, to be used in measuring system performance. 
-    This method is much cheaper than collecting a large number of traces from real users
-    and can be used in developing and evaluating prototypes. 
     
-    We conducted a user experiment with 37 users, whose actions are logged
-    while they interact and view the meshes in a mock online shop.  
-    We present the analysis of these traces in this thesis
-    and highlight findings that are significant to the design of efficient 
-    and scalable progressive mesh streaming systems.  
-    In particular, we found that 
-    (i) user actions are predictable to some extent, making pre-fetching useful in certain cases; 
-    (ii) users' viewpoint concentrates on part of the meshes, making caching technique useful. 
-    We also developed a simple model, which can be used to generate synthetic traces
-    for evaluating progressive mesh streaming systems.
-    
-    Fourth, based on the receiver-driven protocol we proposed, 
+    Third, based on the receiver-driven protocol we proposed, 
     P2P techniques are applied to view-dependent progressive mesh streaming in this thesis. 
     In the implementation of P2P mesh streaming system,
     two issues are considered: how to partition a progressive mesh into chunks and 
@@ -176,5 +135,17 @@
     Simulation results show that our proposed systems are robust under high churn rate. It reduces the server overhead
     by more than $90\%$, keeps control overhead below $10\%$, and achieves
     average response time lower than 1 second.
+    
+    When a progressive mesh is streamed in a view-dependent way, which set of the data is streamed,
+    and in what order it is streamed, relate to how the user interacts with the mesh. 
+    To test the system performance of a P2P system, 
+    it is desirable that a large number of user traces,
+    recording how users interact with the mesh, 
+    are collected and replayed in the simulation to obtain the more realistic results. 
+    Collecting a large number of user traces is expensive and not always feasible.
+    Instead, we have collected some traces from 37 real users 
+    and did some preliminary analysis on them and then 
+    developed a simple model, which can be used to generate synthetic traces
+    for testing progressive mesh streaming systems.
 %\end{comment}
 \end{abstract}

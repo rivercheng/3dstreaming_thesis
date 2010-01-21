@@ -221,6 +221,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
             the visibility and the sending order decided by the receiver instead of the sender,
             thus making the sender stateless and improving the scalability of the system.}
 
+            \begin{comment}
     \subsection{Patterns of User Behaviors in Viewing 3D Meshes}
     In a view-dependent steaming system, the sending order and sending subset 
     of data highly depend on the interactivity of users. 
@@ -261,6 +262,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
             such as predictability and access patterns (for caching), and
             find a model to generate synthetic traces to simulate user behaviors.
             }
+        \end{comment}
 
     \subsection{P2P View-Dependent Progressive Mesh Streaming System}
     The receiver-driven protocol significantly reduces the computing cost at the sender,
@@ -412,6 +414,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     Therefore, the receiver-driven approach may eventually
     enable the view-dependent streaming of high-resolution meshes to huge number of receivers.
     
+    \begin{comment}
     \subsection{Analyze User Behaviors in Interacting with Meshes}
     Our third objective is to study user behavior from the system design point of view, 
     such as predictability and access pattern, and to develop a model, with which we
@@ -433,6 +436,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     and use them in simulations, which are useful in testing protocols and measuring system performance.
     We compared the synthetic user traces and the real traces in various aspects and found
     that they have similar properties.
+\end{comment}
     
     \subsection{Peer Assisted View-Dependent Progressive Mesh Streaming}
     The final objective in this thesis is to implement a prototype of 
@@ -469,8 +473,6 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     simulation results show that server overhead can be
     reduced by 90\%. Meanwhile,  average response time and
     control overhead are low.
-    The synthetic traces we generated with the simple model we proposed 
-    was used in the simulation to simulate the actions from a large number peers.
 
     Our results indicate that with the help of P2P technique,
     sharing high-resolution
@@ -479,11 +481,25 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     essential for networked applications using high-resolution 3D models
     become popular.
 
+    In the simulation to test the P2P performance, how each peer 
+    request data needs to be decided. Ideally, we use can use
+    the traces recorded from real users. It is, however, too expensive
+    and not feasible to invite thousands of users to use our system yet.
+    Instead, we invited 37 users and record their actions as user traces. 
+    We have did some preliminary analysis on these traces and developed 
+    a simple model to generate a large number of synthetic traces. 
+
+    The rest of the thesis is organized as follows.
     In Chapter \ref{c:related}, we introduce some backgrounds and related works.
-    The subsequent four chapters introduce how we achieve our objectives in detail.
+    The subsequent chapters introduce how we achieve our objectives in detail.
     Chapter \ref{c:model} introduces our analytical model and its applications.
     Chapter \ref{c:rdstream} describes our receiver-driven view-dependent streaming
-    protocol in detail. The result of our user study and its analysis are introduced
-    in Chapter \ref{c:user} and our P2P mesh streaming systems
-    are discussed in Chapter \ref{c:p2p}. Finally, the thesis is concluded in
+    protocol in detail. 
+    %The result of our user study and its analysis are introduced
+    %in Chapter \ref{c:user} and 
+    We included the introduction of how we collected the real user traces and 
+    how we generated the synthetic traces in Chapter \ref{user} for completeness. 
+    Then, we introduce the P2P mesh streaming systems we proposed
+    Chapter \ref{c:p2p}. Finally, the thesis is concluded in
     Chapter \ref{c:conclusion}.
+
