@@ -33,8 +33,9 @@ Hence, user interaction needs to be considered when testing a mesh streaming sys
 %People interact with the mesh in their own unique ways. 
 %How to decide the streaming order when testing the streaming system becomes a problem
 %due to this kind of diversity.
-The ideal way of testing the mesh streaming system is inviting a large number of real users
-and record their interaction. 
+The ideal way is to record interaction of a large number of users with a variety of meshes under multiple usage scenarios. 
+%of testing the mesh streaming system is inviting a large number of real users
+%and record their interaction. 
 This method, however, is expensive and not always feasible. 
 If we could characterize user interaction from a small number of real user traces
 (the records of the interaction of users), 
@@ -284,12 +285,14 @@ In this sense, a session is a random walk in the 6-dimension space.
 %In this section, we present our analysis on the user behavior. We present only on the analysis of the original (non-defect) statues, unless otherwise specified.
 %In addition, we also discuss what implications these results have on system design.
 
-\section{Preliminary Analysis}
+%\section{Preliminary Analysis}
+\section{Predictability and Locality}
 The original purpose of our analysis on the traces we collected
 is to find some patterns to help us generate the synthetic traces. 
-Some preliminary findings we obtained, however, are interesting themselves and 
-may lead to a potential important research topic. We found that 
-in our traces we collected, the user actions are somewhat predictable.
+Some preliminary findings we obtained, however, are interesting themselves.
+%and may lead to a potential important research topic. 
+We found that 
+in the traces we collected, the user actions are somewhat predictable.
 It indicates the possibility of applying pre-fetching in our mesh streaming
 system. Moreover, we found that locality exists in the traces we collected and
 it means caching technique can be useful in our scenario.
