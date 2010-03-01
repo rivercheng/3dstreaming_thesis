@@ -158,7 +158,8 @@
     In the model, we assume that packet losses are independent to each other for simplicity.
     In Section \ref{s:model:experiment}, we %will
     show that our model still works well under realistic packet losses (more bursty).
-    We assume a retransmission-based protocol -- the sender resends a packet when its loss is detected.
+    We assume a retransmission-based protocol -- the sender resends a packet 
+    immediately when its loss is detected.
     %a retransmission request (NACK) is sent back to the sender,
     %triggering a retransmission.  
     %the sender resends this packet. 
@@ -166,9 +167,9 @@
     average period between the time a packet %$P$ 
     is sent and the
     time %$P$'s 
-    its loss is detected at the sender.
+    its loss is detected at the sender (hence the time it is retransmitted).
     %$T_d$ is the round trip time plus some constant.
-    While $B$, $p$, and $T_d$ are likely to varies in practice during to network dynamics, 
+    While $B$, $p$, and $T_d$ are likely to varies in practice due to network dynamics, 
     we adopt a common technique in performance modeling by constructing our model using 
     their average values and assuming that they are constants.
     We study the effects of this assumption in Section \ref{s:model:experiment}.
@@ -185,7 +186,8 @@
     is not lost) as $0$.  Therefore, a packet sent at time $t$ will be 
     received at time $t$ if it is not lost.  Thanks to the different 
     timeline at the
-    receiver, we avoid an additional term, $RTT/2$, in
+    receiver, we avoid an additional term, the propagation time of a packet
+    sent from the sender to the receiver, in
     equations related to the received time and decoded time. 
     We denote the $i$-th packet sent (and not retransmitted) as $P_i$, where $i = 0, 1, ...$.
     Table~\ref{t:model:notation} summarizes these notations as well as
@@ -193,7 +195,7 @@
 
 % NOTATION
 
-    \begin{table}
+    \begin{table}[htp!]
     \begin{centering}
     \begin{tabular}{|r|l|}
     \hline
@@ -228,26 +230,36 @@
 Let $S_i$ be the time when $P_i$ is sent. %If $k$ packets have been lost and retransmitted before $S_i$ then packet $i$ is sent at time $S_i=i+k$. Lemma~\ref{theorem_ts} computes the probability of this event and the expected value $E[S_i]$ of the time when the packet $i$ is sent.
 Lemma~\ref{model:theorem_ts} computes the distribution of $S_i$ and the expected value $E[S_i]$.
 \begin{lemma} \label{model:theorem_ts}
-If $i \geq T_{d}$, %then for any $k \geq 0$,
+If $i < T_{d}$, %then for any $k \geq 0$,
+\begin{eqnarray*}
+S_i = i.
+\end{eqnarray*}
+Otherwise, 
 \begin{eqnarray*}
 E[S_i]          &=& (i - T_d + 1)\frac{1}{1-p} + T_d - 1.
 %$E[S_i]          = (i - T_d + 1)\frac{1}{1-p} + T_d - 1$.
 \end{eqnarray*}
 %Pr(S_i = i+k)     &=& \binom{i-T_d+k}{k}p^k(1-p)^{i-T_d+1}\\
 %ooiwt - no need pdf in the lemma since not using it elsewhere.
-Otherwise, %if $i < T_d$, then 
-$S_i = i$.
+%Otherwise, %if $i < T_d$, then 
 \end{lemma}
 \if\showproof1
 \begin{proof}
     If $i<T_d$, then $S_i = i$ since no retransmission exists.
     Now we consider the case when $i \geq T_d$.
-    The number of transmissions before one successful transmission
+    After time $T_d$, a slot $t$ will be used in retransmission if packet
+    sent in $t - T_d$ is lost. As a result, a new packet can only be sent
+    if a packet sent in $t - T_d$ is successful. If packet $i$ is sent 
+    at time $S_i$, then $i - (T_d - 1) $ new packets are sent after
+    time $T_d$. In other words, there are $i - T_d + 1$ known successful 
+    transmissions.
+    The number of transmissions for a transmission to succeed
     is a random variable with geometric distribution and its
     expected value is $1/(1-p)$.  Therefore, the expected value of
-    total transmissions after time $T_d$ when there are
-    $i - T_d + 1$ known successful transmissions is $(i - T_d +1)/(1-p)$.
-    Hence, we have 
+    transmissions when there are $i - T_d + 1$ known successful 
+    transmissions is $(i - T_d +1)/(1-p)$. 
+    Notice there are also $T_d - 1$ recently sent packets 
+    whose status we do not know, we have 
     \begin{displaymath}
         E[S_i]          = (i - T_d + 1)\frac{1}{1-p} + T_d - 1.
     \end{displaymath}
@@ -364,17 +376,25 @@ is given as follows.
 
 \begin{lemma}
 \label{l:model:prlet}
-\begin{equation*}
-Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
+\begin{eqnarray*}
+Pr(R_i \leq t) &=& 1 - p^{n_{i,t}+1};\\
 %$Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}$.
-\end{equation*}
+    Pr(R_i < t) &=& \left\{
+   \begin{array}{ll}
+        1 - p^{n_{i,t}}                  & \mbox{if } (t-S_i) \mod T_d = 0  \\
+        1 - p^{n_{i,t}+1}                & \mbox{otherwise}
+   \end{array}
+   \right.
+\end{eqnarray*}
 \end{lemma}
 
     %\textit{Proof sketch}
     \begin{proof}
     A packet is received strictly after time $t$ if and only if the packet
     is lost at least $n_{i,t}+1$ times and the probability is
-    $p^{n_{i,t}+1}$. 
+    $p^{n_{i,t}+1}$. Then, we have $Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}$.
+    Considering $Pr(R_i < t) = Pr(R_i \leq t) - Pr(R_i = t)$ and Lemma~\ref
+    {l:model:preqt}, 
     %Given $t$, the probability that a packet is received strictly after
     %time $t$ is the same as the probability that the packet has been
     %lost $n_{i,t} + 1$ times, or $p^{n_{i,t}+1}$.  
@@ -395,7 +415,7 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
     is received before time $t$.
     \begin{eqnarray}
     \label{e:model:pdvt}
-        Pr(D_v = t) = \sum_{i \in \mathcal{P}(v)} \frac{Pr(R_i = t)}{Pr(R_i < t)} \prod_{k \in \mathcal{P}(v)} Pr(R_k < t).
+        Pr(D_v = t) = \sum_{i \in \mathcal{P}(v)}\big( \frac{Pr(R_i = t)}{Pr(R_i < t)} \prod_{k \in \mathcal{P}(v)} Pr(R_k < t)\big).
     \end{eqnarray}
 
     Lemma~\ref{l:model:preqt} and \ref{l:model:prlet} give the expression
@@ -507,7 +527,7 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
     time $t$, is given by the following equation:
     \begin{eqnarray}
     \label{e:model:endt}
-    E[N_{d,t}] = \sum_{i=0}^{m} \prod_{j=0}^i Pr(R_j \le t),
+    E[N_{d,t}] = \sum_{i=0}^{m} \big(\prod_{j=0}^i Pr(R_j \le t)\big),
     \end{eqnarray}
     where $m$ is the total number of packets\footnote{When $p=0$, $N_{d,t}$ is always $t+1$.  We assume non-zero $p$ in this section.}.
 
@@ -560,9 +580,12 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
     and hence
     \begin{eqnarray}
     \label{e:model:equal}
-       \prod_{i=0}^{m}Pr(R_i \le t|_\pOlost) = \prod_{i=0}^{m}Pr(R_i \le t-1) & \textrm{for any $n \ge T_d$},
+       \prod_{j=0}^{i}Pr(R_j \le t|_\pOlost) = \prod_{j=0}^{i}Pr(R_j \le t-1) & \textrm{for any $i \ge T_d$}.
     \end{eqnarray}
-    where $m$ is the total number of packets.
+    In other words, changing sending order of first $T_d$ packets will not
+    affect the decodable probability of later packets.
+
+    %where $m$ is the total number of packets.
     %Also, we note that 
     %\begin{eqnarray}
     %\label{e:zero}
@@ -585,7 +608,7 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
     \end{eqnarray*}
     \end{lemma}
     \begin{proof}
-    The sending time of packet $i$ ($ 0 \leq i \le T_d$) 
+    The sending time of packet $i$ ($ 0 \leq i < T_d$) 
     is always $i$ (recall that the time unit is the time to transmit a packet). Before time $nT_d$, 
     they all have $n$ chances to be transmitted, and the probability to
     be received before time $nT_d$ is $1 - p^n$.
@@ -597,12 +620,17 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
     \QED
     \end{proof}
 
+    The above lemma means when $t$ is a multiple of $T_d$, then all first
+    $T_d$ packets have same probability to be received before or at time $t$.
+    If $t = nT_d + b$, then the first $b$ packets will have higher probability
+    to be received since they have one more chance to be retransmitted.
+
     Then we can prove the following lemma:
     \begin{lemma}
     \label{l:model:p0lost}
     \begin{eqnarray*}
     E[N_{d,t}|_\pOlost] - E[N_{d,t-1}] = \dfrac{p-1}{p}(1-(1-p^{n+1})^b) \\
-    \textrm{where $t = nT_{d}+b > 0$ and $n,b \in\mathbb{Z^+}; 0 \le b<T_d$.}
+    \textrm{where $t = nT_{d}+b > 0$; $0 \le b<T_d$.}
     \end{eqnarray*}
     \end{lemma}
     \begin{proof}
@@ -612,22 +640,38 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
         \text{(from Eqn. \ref{e:model:endt})} \\
     =& \sum_{i=0}^{T_d - 1}\big[\prod_{j=0}^{i}Pr(R_{j} \le t|_\pOlost) - \prod_{j=0}^{i}Pr(R_{j} \le t-1)\big] &
         \text{(from Eqn. \ref{e:model:equal})}\\
-    =& \sum_{i=0}^{T_d - 1}\big\{[Pr(R_{T_d-1} \le t-1) - Pr(R_{i} \le t-1)]\prod_{j=0}^{i-1}Pr(R_{j} \le t-1)\big\} 
+    =& [Pr(R_0 \le t|_\pOlost) - Pr(R_0 \le t - 1)] \\
+     &+ \sum_{i=1}^{T_d-1}\big[\prod_{j=0}^{i}Pr(R_{j} \le t|_\pOlost) - \prod_{j=0}^{i}Pr(R_{j} \le t-1)\big]\\ 
+    =& [Pr(R_{T_d-1} \le t-1) - Pr(R_0 \le t-1)] \\
+     &+ \sum_{i=1}^{T_d - 1}\big\{[Pr(R_{T_d-1} \le t-1) - Pr(R_{i} \le t-1)]\prod_{j=0}^{i-1}Pr(R_{j} \le t-1)\big\} 
         & \text{(from Eqn. \ref{e:model:p0notreceived})}\\
     \end{align*}
 
     We now consider two cases.  First, suppose $b = 0$.  From Lemma~\ref{l:model:recv_td}, the receiving probability of 
-    all packets from 0 to $T_d - 1$ are the same. So $[Pr(R_{T_d-1} \leq t-1)
-    - Pr(R_i \leq t-1)]$ is always 0 and hence $E[N_{d,t}|_\pOlost] - E[N_{d,t-1}] = 0$. 
-    Since $\dfrac{p-1}{p}(1- (1-p^{n+1})^b) = 0$ when $b = 0$, the lemma holds.
+    all packets from 0 to $T_d - 1$ are the same. So 
+    \begin{displaymath}
+    [Pr(R_{T_d-1} \leq t-1) - Pr(R_i \leq t-1)]
+    \end{displaymath}
+    is always 0 and hence 
+    \begin{displaymath}
+    E[N_{d,t}|_\pOlost] - E[N_{d,t-1}] = 0. 
+    \end{displaymath}
+    Since $\dfrac{p-1}{p}(1- (1-p^{n+1})^b) = 0$
+    when $b = 0$, the lemma holds.
 
     Now, consider the case where $0 < b < T_d$.
-    From Lemma~\ref{l:model:recv_td}, packet $0$ to packet $b-1$ has $n+1$ chances to
-    be transmitted, while packet $b$ to packet $T_d - 1$ has $n$ chances to
-    be transmitted. Therefore, 
+    From Lemma~\ref{l:model:recv_td},
+    %packet $0$ to packet $b-1$ has $n+1$ chances to
+    %be transmitted, while packet $b$ to packet $T_d - 1$ has $n$ chances to
+    %be transmitted. Therefore, 
+    we have
     \begin{align*}
-     &E[N_{d,t}|_\pOlost] - E[N_{d,t-1}] & \\
-    =&\sum_{i=0}^{b-1}[(1-p^{n})-(1-p^{n+1})](1-p^{n+1})^{i}\\
+     &E[N_{d,t}|_\pOlost] - E[N_{d,t-1}] \\
+    =&[1-p^n - (1-p^{n+1})]\\
+     &+ \sum_{i=1}^{b-1}\big\{[1-p^n - (1-p^{n+1})]\prod_{j=0}^{i-1}(1-p^{n+1})\big\} \\
+    =&(p^{n+1} - p^n)\big[1 + \sum_{i=1}^{b-1}(1-p^{n+1})^i\big]\\
+    =&(p^{n+1} - p^n)\sum_{i=0}^{b-1}(1-p^{n+1})^i\\
+    %=&\sum_{i=0}^{b-1}[(1-p^{n})-(1-p^{n+1})](1-p^{n+1})^{i}\\
     =&\dfrac{p-1}{p}(1- (1-p^{n+1})^b) \\
     \end{align*}
     Hence, the lemma still holds in this case.
@@ -642,7 +686,7 @@ Pr(R_i \leq t) = 1 - p^{n_{i,t}+1}.
     \[
         \Delta_t = (1-p)(1-p^{n+1})^b,
     \]
-where $t=nT_d+b$ and $n,b\in\mathbb{Z^+}; 0 \le b<T_d$.
+    where $t=nT_d+b$; $0 \le b<T_d$.
     %\end{theorem}
     \end{lemma}
     \if\showproof1
@@ -679,7 +723,7 @@ where $t=nT_d+b$ and $n,b\in\mathbb{Z^+}; 0 \le b<T_d$.
        \dfrac{1-(1-p^{n+1})^{b+1}}{p^{n+1}}\Big\}
     %\]
     \end{eqnarray*}
-    where $t=nT_d+b$ and $n,b\in\mathbb{Z^+}; 0 \le b<T_d$.
+    where $t=nT_d+b$; $0 \le b<T_d$.
     \end{theorem}
     %\textbf{Proof sketch}
     \begin{proof}
@@ -712,7 +756,15 @@ where $t=nT_d+b$ and $n,b\in\mathbb{Z^+}; 0 \le b<T_d$.
     f(1)         &=& (1-p)T_d - (1-p)\frac{1}{p}[1-(1-p)^{T_d}]\\
         f(i)-f(i-1)  &=& (1-p)T_d - (1-p)\frac{1}{p^i}[1-(1-p^i)^{T_d}],
     \end{eqnarray*}
-    where $i \geq 1$. After some mathematical manipulations, we have
+    where $i \geq 1$. Considering 
+    \begin{eqnarray*}
+        &(1-p)\dfrac{1}{p^i}[1-(1 - p^i)^{T_d}]\\
+        =&-(1-p)\dfrac{1}{p^i}\displaystyle\sum_{j=1}^{T_d}\Big[(-1)^j\dbinom{T_d}{j}p^{ij}\Big]\\
+        =&-(1-p)\displaystyle\sum_{j=1}^{T_d}\Big[(-1)^j\dbinom{T_d}{j}p^{i(j-1)}\Big]\\
+        =& (1-p)T_d - (1-p)\displaystyle\sum_{j=2}^{T_d}\Big[(-1)^j\dbinom{T_d}{j}p^{i(j-1)}\Big],
+    \end{eqnarray*}
+    %After some mathematical manipulations, 
+    we have
     \begin{eqnarray*}
     f(i) - f(i-1) &=& (1-p)\sum_{j=2}^{T_d}\Big[(-1)^j\binom{T_d}{j}p^{(j-1)i}\Big];\\
     f(i)          &=& (1-p)\sum_{j=2}^{T_d}\Big[(-1)^{j}\binom{T_d}{j}\sum_{k=1}^i p^{(j - 1)k}\Big];\\
