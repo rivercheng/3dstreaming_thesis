@@ -38,7 +38,7 @@
     video streaming research does not apply.  This chapter aims to study
     the effect of dependencies in progressive mesh streaming by
     proposing an analytical model, relating the decoded mesh quality
-    of progressive mesh to packet loss rate, given the dependencies
+    of progressive meshes to packet loss rate, given the dependencies
     among vertex splits.
 
     The decoded mesh quality at a given time $t$ is determined by 
@@ -112,7 +112,7 @@
     %rendering quality given the dependencies and packet loss
     %probability.
     can be used to design a packetization strategy for transmitting
-    progressive mesh.  Section~\ref{s:model:experiment} presents validation
+    progressive meshs.  Section~\ref{s:model:experiment} presents validation
     of our model and evaluation of the proposed packetization strategy,
     using network traces using UDP and DCCP under various
     network conditions.  
@@ -169,7 +169,7 @@
     time %$P$'s 
     its loss is detected at the sender (hence the time it is retransmitted).
     %$T_d$ is the round trip time plus some constant.
-    While $B$, $p$, and $T_d$ are likely to varies in practice due to network dynamics, 
+    While $B$, $p$, and $T_d$ are likely to vary in practice due to network dynamics, 
     we adopt a common technique in performance modeling by constructing our model using 
     their average values and assuming that they are constants.
     We study the effects of this assumption in Section \ref{s:model:experiment}.
@@ -410,9 +410,9 @@ Pr(R_i \leq t) &=& 1 - p^{n_{i,t}+1};\\
     Let $\mathcal{P}(v)$ be the set of
     all parent packets of the vertex split $v$ and the packet including $v$, then the
     probability that vertex split $v$ can be decoded at time $t$
-    is given by the probability that one of the packet in $\mathcal{P}(v)$
+    is given by the probability that one of the packets in $\mathcal{P}(v)$
     is received at time $t$ and all other packets in $\mathcal{P}(v)$
-    is received before time $t$.
+    are received before time $t$.
     \begin{eqnarray}
     \label{e:model:pdvt}
         Pr(D_v = t) = \sum_{i \in \mathcal{P}(v)}\big( \frac{Pr(R_i = t)}{Pr(R_i < t)} \prod_{k \in \mathcal{P}(v)} Pr(R_k < t)\big).
@@ -441,7 +441,7 @@ Pr(R_i \leq t) &=& 1 - p^{n_{i,t}+1};\\
 
     Our analytical model is useful in several ways.  
     These equations can help us in understanding the effect of dependency (see Section \ref{s:model:effect}) when transmitting 
-    a progressive mesh over a lossy network.  Our model can lead to some simple close form equations in two special cases.  
+    a progressive mesh over a lossy network.  Our model can lead to some simple closed form equations in two special cases.  
     We can also compute the expected decoded quality analytically, leading to a faster alternative to 
     simulation (see Section \ref{s:model:analytical_quality}) as a way to evaluate the effects of network conditions on
     progressive mesh streaming.
@@ -497,7 +497,7 @@ Pr(R_i \leq t) &=& 1 - p^{n_{i,t}+1};\\
     In the ideal case, each packet can be decoded independently
     regardless of other packets.  Thus, at any time $t$,
     $N_{d,t} = N_{r,t}$.
-    Let $a_i$ represents the result of a transmission at time $i$,  
+    Let $a_i$ represent the result of a transmission at time $i$,  
     that is
     \begin{displaymath}
     a_i = \left\{\begin{array}{ll}
@@ -507,8 +507,8 @@ Pr(R_i \leq t) &=& 1 - p^{n_{i,t}+1};\\
     \end{displaymath}
     The expected number of successful transmissions at time $t$ is
     \begin{eqnarray*}
-    E\big[\sum_{i=0}{t}a_i\big] &=& \sum_{i=0}{t}E[a_i]\\
-                                &=& \sum_{i=0}{t}(1-p)\\
+    E\big[\sum_{i=0}^{t}a_i\big] &=& \sum_{i=0}^{t}E[a_i]\\
+                                &=& \sum_{i=0}^{t}(1-p)\\
                                 &=& (t+1)(1-p)
     \end{eqnarray*}
     %The number of successful transmission at time $t$ is equivalent to
@@ -557,10 +557,12 @@ Pr(R_i \leq t) &=& 1 - p^{n_{i,t}+1};\\
     %when $t>0$.
 
     Now consider what happens if $P_0$ is lost in its first transmission. 
+    For simplicity, we use ``$P_0$ is lost'' in the equations when we actually
+    mean $P_0$ is lost in the first transmission.
 \begin{figure}[htbp]
 \centering
 \epsfig{file = figures/comparison.eps, width=0.6\textwidth}
-\caption{If packet $0$ is lost, compared with the transmissions begin from time slot 1, only the sending order of first $T_d$ packets is different.}\label{f:model:comp}
+\caption{If packet $0$ is lost in the first transmission, compared with the transmissions begin from time slot 1, only the sending order of first $T_d$ packets is different.}\label{f:model:comp}
 \end{figure}
     $P_0$ will be retransmitted at time $T_d$. If we view time $t=1$ as
     the new starting time of transmission, then the only difference between the new
@@ -677,6 +679,18 @@ Pr(R_i \leq t) &=& 1 - p^{n_{i,t}+1};\\
     Hence, the lemma still holds in this case.
     \QED
     \end{proof}
+
+    In Lemma \ref{l:model:p0lost}, $E[N_{d,t}|_\pOlost] - E[N_{d,t-1}]$ is negative if $b > 0$. 
+    This case occurrs if packet $0$ lost in the first transmission and is sent after 
+    %Intuitively, it is because that packet $0$ will be sent after 
+    %packet $1$ to 
+    packet $T_d - 1$ (See Figure \ref{f:model:comp}).
+    %if is lost in the first transmission (See Figure \ref{f:model:comp}). 
+    Therefore, packet $0$ will 
+    have less chance to be retransmitted and packet $b$ will have more chance to be retransmitted instead.
+    Since packet $0$ has more dependants than packet $b$, $E[N_{d,t}|_\pOlost]$ is smaller than 
+    $E[N_{d,t-1}]$. Moreover, this difference decreases when $n$ increase since the probability for 
+    packet $0$ and packet $b$ to be lost after $n$ retransmissions is exponentially decreasing.
     
     Combining the results in this section, we have the following:
     %\begin{theorem}
@@ -811,7 +825,7 @@ Pr(R_i \leq t) &=& 1 - p^{n_{i,t}+1};\\
 \centering
 \epsfig{file = figures/extreme40_1.eps, height=0.6\textwidth, angle = 270}
 \caption[The number of decodable packets for ideal case and worst case.]
-        {The number of decodable packets for ideal case and worst case. $T_d= 40$, Loss rate $p =0.1$. In the figure, we assume the first packet arrives at time 1.}\label{model:extreme}
+        {The number of decodable packets for ideal case and worst case. $T_d= 40$, Loss rate $p =0.1$. In the figure, we assume the transmission begins at time 1 so all curves begin from the origin.}\label{model:extreme}
 \end{figure}
 
 %including what is maximum delay. Hong long is the critical range, in which the optimization is meaningful.
@@ -1009,9 +1023,9 @@ help us select which node to pack.
     quality of the progressive mesh at time $t$, and let
     $a_t$ be the area under the curve at time $t$.  Then,
     $a_t = \sum_{i=0}^t q_i$.  Here, the area under the curve
-    is computed as the area sum of vertical slices.
+    is computed as the area sum of vertical slices (see Figure~\ref{model:two_views}(b)).
     We can also compute the area as the area sum of
-    horizontal slices (see Figure~\ref{model:two_views}).  Thus,
+    horizontal slices (see Figure~\ref{model:two_views}(c)).  Thus,
     to compute the area, we can sum up the product of a
     vertex split's importance and the amount of time since
     it was decoded.
@@ -1030,14 +1044,14 @@ help us select which node to pack.
     \begin{figure*}
     \centering
     \begin{tabular}{c}
-    \epsfig{file = figures/point_period.eps, height = 2.0in}\\
+    \epsfig{file = figures/point_period.eps, height = 1.6in}\\
     (a)\\
-    \epsfig{file = figures/point_period2.eps,height = 2.0in}\\
+    \epsfig{file = figures/point_period2.eps,height = 1.6in}\\
     \end{tabular}\\
     \begin{tabular}{cccccccccc}
     (b)            &&&&&&&&            (c)
     \end{tabular}
-    \caption[Intermediate quality of decoded mesh.]{Intermediate quality of decoded mesh.  From left to right: (a) Strategy 2 is better than Strategy 1 since the area under the curve is larger. (b) Area sum of vertical slices.  (c) Area sum of horizontal slices.}\label{model:two_views}
+    \caption[Intermediate quality of decoded mesh.]{Intermediate quality of decoded mesh (imaginary).  From left to right: (a) Strategy 2 is better than Strategy 1 since the area under the curve is larger. (b) Area sum of vertical slices.  (c) Area sum of horizontal slices.}\label{model:two_views}
     \end{figure*}
 
 Consider a node $v$.  We need to decide whether we should pack $v$ into
@@ -1054,7 +1068,7 @@ we pack $v$ into the current packet, versus the subsequent packet.  From Equatio
 where $D_v^{curr}$ and $D_v^{next}$ are the decoding time of $v$ if $v$ is
 packed in the current packet and next packet respectively.  We call the
 metric $\delta_v$ as the \textit{penalty}.  To compute the penalty, we use Equation~\ref{e:model:e_et}
-from our model, which give us the expected decoding time for these two cases.
+from our model, which gives us the expected decoding time for these two cases.
 Minimizing the penalty maximizes the difference in decoded mesh quality
 (Equation \ref{e:model:quality}).
 
@@ -1106,7 +1120,7 @@ order of their importance.  We evaluate the effectiveness of our proposed greedy
 
 In deriving our analytical model, we made several 
 simplification to make the model tractable.  We use the average
-packet loss rate, sending rate, and RTT in modeling the network conditions.
+packet loss rate, sending rate, and round trip time (RTT) in modeling the network conditions.
 When we model the mesh, we assume that the importance of a vertex split is 
 independent of the order and is additive.  In this section, we validate the
 accuracy of our analytical model to show that, despite the simplifications,
@@ -1165,7 +1179,7 @@ Tunnelling with UDP
 allows us to preserve the loss rate and the RTT of the underlying network.
 At the sender, our tunnel captures the outgoing packets (using \texttt{libpcap} and filtering),
 encapsulates them in UDP packets and transmits the packets.  At the receiver, 
-the tunnel decapsulates the UDP packet and sends the DCCP packet through raw socket
+the tunnel decapsulates the UDP packet and sends the DCCP packet through a raw socket
 to the DCCP receiver.  %To avoid duplicated packets we block totally de actual DCCP connection by fire-walling
 %    (using \texttt{iptables}).  [\textcolor{red}{Add tunnel figure ??}]
     Moreover, we use our tunnel to \emph{spy} on the DCCP protocol by decoding
@@ -1196,16 +1210,15 @@ Trace    & Length  & Loss Rate& Sending Rate & RTT & $T_d$\\
 \end{table*}
 
 \begin{figure*}[htb!]
-\def\picwidth{2.2in}
+\def\picwidth{2.6in}
 \centering
-\begin{tabular}{ccc}
+\begin{tabular}{cc}
 \epsfig{file = figures/plots/traces/lossrate.eps, width=\picwidth, angle=270}
 &
 \epsfig{file = figures/plots/traces/rtt.eps, width=\picwidth, angle=270}
-&
-\epsfig{file = figures/plots/traces/bandwidth.eps, width=\picwidth, angle=270}
-\\
 \end{tabular}
+\\
+\epsfig{file = figures/plots/traces/bandwidth.eps, width=\picwidth, angle=270}
 \caption{Loss rate, RTT, and throughput of our traces}.
 \label{f:model:traces}
 \end{figure*}
@@ -1250,17 +1263,17 @@ The measured values are then compared to the expected value predicted by our mod
     along with the predicted values from our model (using the mesh \textit{Happy Buddha}) in Figure~\ref{f:model:r_dtime_comp}.  
 
 \begin{figure*}[htb!]
-\def\picwidth{2.2in}
+\def\picwidth{2.6in}
 \centering
-\begin{tabular}{ccc}
+\begin{tabular}{cc}
 \epsfig{file = figures/plots/\tracea/\mesha/f/10/rec_comp_s_z.eps, width=\picwidth, angle=270}
 &
 \epsfig{file = figures/plots/\traceb/\mesha/f/10/rec_comp_s_z.eps, width=\picwidth, angle=270}
-&
-\epsfig{file = figures/plots/\tracec/\mesha/f/10/rec_comp_s_z.eps, width=\picwidth, angle=270}
 \\
-\epsfig{file = figures/plots/\tracea/\mesha/f/10/dec_comp_s_z.eps, width=\picwidth, angle=270}
+\epsfig{file = figures/plots/\tracec/\mesha/f/10/rec_comp_s_z.eps, width=\picwidth, angle=270}
 &
+\epsfig{file = figures/plots/\tracea/\mesha/f/10/dec_comp_s_z.eps, width=\picwidth, angle=270}
+\\
 \epsfig{file = figures/plots/\traceb/\mesha/f/10/dec_comp_s_z.eps, width=\picwidth, angle=270}
 &
 \epsfig{file = figures/plots/\tracec/\mesha/f/10/dec_comp_s_z.eps, width=\picwidth, angle=270}
@@ -1312,28 +1325,39 @@ The measured values are then compared to the expected value predicted by our mod
     We repeat the comparisons above using two other meshes
     \textit{Horse} and \textit{Thai Statue}.  We present the results
     for \textsf{UDP-High} in %Figure~\ref{f:horse_thai_1}. 
-    Figures~\ref{f:model:other_time_comp} (a)-(d).
+    Figures~\ref{f:model:other_time_comp}.
     Results for other traces are similar and are therefore omitted. 
 
    \begin{figure*}[htb!]
-\def\picwidth{2.1in}
+\def\picwidth{2.6in}
 \centering
-\subfigure[]{
-%\begin{tabular}{ccc}
+%\subfigure[]{
+\begin{tabular}{cc}
 \epsfig{file = figures/plots/\tracea/\meshb/f/10/rec_comp_s_z.eps, width = \picwidth, angle=270}
-}
-%&
-\subfigure[]{
+%}
+&
+%\subfigure[]{
 \epsfig{file = figures/plots/\tracea/\meshb/f/10/dec_comp_s_z.eps, width = \picwidth, angle=270}
-}
-%&
-\subfigure[]{
+%}
+\\
+%\subfigure[]{
 \epsfig{file = figures/plots/\tracea/\meshc/f/10/rec_comp_s_z.eps, width = \picwidth, angle=270}
-}
-%\\
-\subfigure[]{
+%}
+&
+%\subfigure[]{
 \epsfig{file = figures/plots/\tracea/\meshc/f/10/dec_comp_s_z.eps, width = \picwidth, angle=270}
-}
+%}
+\end{tabular}
+\caption{Comparing the values of receiving time $E[R_i]$ and decoding time $E[D_i]$ as predicted by our model and as measured from our experiments, 
+using various meshes.}
+%using the meshes \textit{Horse} and \textit{Thai Statue}, averaged over 10 runs, using the \textsf{UDP-High} trace.}
+%\label{f:horse_thai_1}
+\label{f:model:other_time_comp}
+\end{figure*}
+
+\begin{figure*}[htb!]
+\def\picwidth{2.6in}
+\centering
 %&
 \subfigure[]{
 \epsfig{file = figures/plots/\tracea/\mesha/f/1/rec_comp_s_z.eps, width = \picwidth, angle=270}
@@ -1356,12 +1380,12 @@ The measured values are then compared to the expected value predicted by our mod
 using various meshes and number of runs.}
 %using the meshes \textit{Horse} and \textit{Thai Statue}, averaged over 10 runs, using the \textsf{UDP-High} trace.}
 %\label{f:horse_thai_1}
-\label{f:model:other_time_comp}
+\label{f:model:other_time_comp_2}
 \end{figure*}
   %we can interpret the meaning of this metric
     \paragraph*{Single Run}
     %Figure~\ref{f:1_run} 
-    Figures~\ref{f:model:other_time_comp}(e)-(f) shows the predicted values of receiving time and decoding time compared to the measured ones 
+    Figures~\ref{f:model:other_time_comp_2}(a)-(b) shows the predicted values of receiving time and decoding time compared to the measured ones 
     %values of receiving time and decoding time 
     for a single run.
     We can see that most measured values are slightly smaller
@@ -1389,7 +1413,7 @@ using various meshes and number of runs.}
 %\end{figure*}
 
     \paragraph*{Large Number of Runs}
-    Figures~\ref{f:model:other_time_comp}(g)-(h) compares the predicted values of
+    Figures~\ref{f:model:other_time_comp_2}(c)-(d) compares the predicted values of
     receiving time and decoding time to the measured
     ones, averaged over 1000 runs.
     %The average measured value fits our prediction very well.  
@@ -1403,25 +1427,23 @@ using various meshes and number of runs.}
     we use the length of the collapsed edge as the importance of the vertex 
     split.  We use this metric because 
     (i) it is used by the library we use in our experimental testbed (GTS \footnote{www.gts.org}),
-    ; and
-    (ii) it is strictly independent of the decoding order. 
+    and (ii) it is strictly independent of the decoding order. 
     We then compare the quality curve measured using split
     edge length with another commonly accepted metric, 
     the mean face-to-face Hausdorff distance, to show that
-    our model is still accurate when a different metric is used.
+    our model are still accurate when a different metric is used.
     
     \paragraph*{Different Traces}
 \begin{figure*}[htb!]
-\def\picwidth{2.2in}
+\def\picwidth{2.6in}
 \centering
-\begin{tabular}{ccc}
+\begin{tabular}{cc}
 \epsfig{file = figures/plots/\tracea/\mesha/10/quality_curve_a_s.eps, width=\picwidth, angle=270}
 &
 \epsfig{file = figures/plots/\traceb/\mesha/10/quality_curve_a_s.eps, width=\picwidth, angle=270}
-&
-\epsfig{file = figures/plots/\tracec/\mesha/10/quality_curve_a_s.eps, width=\picwidth, angle=270}
-\\
 \end{tabular}
+\\
+\epsfig{file = figures/plots/\tracec/\mesha/10/quality_curve_a_s.eps, width=\picwidth, angle=270}
 %\caption{Comparing the quality curve as predicted by our model and as measured from our experiments, using the \textit{Happy Buddha} mesh and three different traces, averaged over 10 runs.}
 \caption{Comparing the quality curve as predicted by our model and as measured from our experiments, using three different traces.}
 \label{f:model:udps}
@@ -1476,7 +1498,7 @@ using various meshes and number of runs.}
     order-independent.  We use M.E.S.H \cite{mesh:aspert} to compute this
     mean face-to-face distance.
     
-    Figure~\ref{f:model:hausdorff_and_1run}(a) shows the quality curve plotted with Hausdorff
+    Figure~\ref{f:model:hausdorff} shows the quality curve plotted with Hausdorff
     distance, using the \textsf{UDP-High} trace on \textit{Happy Buddha}.
     The Hausdorff distance-based metric depends 
     on the decoding order, which depends on packet loss patterns. 
@@ -1505,26 +1527,31 @@ using various meshes and number of runs.}
 %\label{f:hausdorff}
 %\end{figure*}
 \begin{figure*}[htb!]
-\def\picwidth{2.1in}
+\def\picwidth{2.6in}
 \centering
-\subfigure[]{
 \epsfig{file = figures/plots/\tracea/\mesh_h/10/quality_curve_a_s.eps, width = \picwidth, angle=270}
-}
-\subfigure[]{
-\epsfig{file = figures/plots/\tracea/\mesha/1/quality_curve_a_s.eps, width=\picwidth, angle=270}
-}
-\subfigure[]{
-\epsfig{file = figures/plots/\tracea/\mesha/2/quality_curve_a_s.eps, width=\picwidth, angle=270}
-}
-\caption[Predicted quality curve and measured quality curve from our experiments.]{Predicted quality curve and measured quality curve from our experiments. (a): using Hausdorff distance as quality metric, averaged over 10 runs; (b, c): quality curves from two different single runs.}
+\caption[Predicted quality curve and measured quality curve from our experiments.]{Predicted quality curve and measured quality curve using Hausdorff distance as quality metric, averaged over 10 runs.}
 %\label{f:hausdorff}
-\label{f:model:hausdorff_and_1run}
+\label{f:model:hausdorff}
+\end{figure*}
+
+\begin{figure*}[htb!]
+\def\picwidth{2.6in}
+\centering
+\begin{tabular}{cc}
+\epsfig{file = figures/plots/\tracea/\mesha/1/quality_curve_a_s.eps, width=\picwidth, angle=270}
+&
+\epsfig{file = figures/plots/\tracea/\mesha/2/quality_curve_a_s.eps, width=\picwidth, angle=270}
+\end{tabular}
+\caption[Predicted quality curve and measured quality curve from our experiments.]{Predicted quality curve and measured quality curve from two different single runs.}
+%\label{f:hausdorff}
+\label{f:model:1run}
 \end{figure*}
     \paragraph*{Single Run}
     We also validate the accuracy of the quality curve from a single run.  
     We pick two sample runs here.  The predicted curve is higher than the measured
     curve for one run and is lower for the other
-    (see Figure \ref{f:model:hausdorff_and_1run}(b, c)).  The measured quality is lower for the second sample
+    (see Figure \ref{f:model:1run}).  The measured quality is lower for the second sample
     since it suffers from some early packet losses.  Our model, however, still
     matches the overall shape of the curve fairly well.
 
@@ -1550,12 +1577,12 @@ the greedy method, and $f$ is the quality of the mesh if transmitted using the F
 The results, shown in Figure \ref{f:model:f_g},
 shows that our greedy method outperforms the FIFO
 in the first several round trip times.
-The results for \textsf{DCCP} trace are omitted because this trace has negligible packet losses, and 
+The results for the \textsf{DCCP} trace are omitted because this trace has negligible packet losses, and 
 thus, the two algorithms works equally well.  
 
-The largest gap in the average quality between FIFO and greedy occur at time slot 85.  
+The largest gap in the average quality between FIFO and greedy occurs at time slot 85.  
 The average qualities for FIFO and greedy at this time slot are 5.96 and 9.29 respectively.
-To visualize the difference, the rendered \textit{Happy Buddha} with these qualities are shown on Figure \ref{f:model:f_g_img}.
+To visualize the difference, the rendered images of \textit{Happy Buddha} mesh with these qualities are shown in Figure \ref{f:model:f_g_img}.
 
 Note that we choose the edge length of a vertex
 split as its importance. The Hausdorff distance-based metric is not
@@ -1563,7 +1590,7 @@ suitable here since it depends on the decoding order of the vertex splits.
 Changing the sending order changes the importance of vertex splits,
 so our greedy method is not applicable.
 \begin{figure*}[htb!]
-\def\picwidth{2.5in}
+\def\picwidth{2.6in}
 \centering
 \begin{tabular}{cc}
 \epsfig{file = figures/plots/\tracea/\mesha/1000/quality_curve_f_g_relative.eps, width = \picwidth, angle=270}
@@ -1575,7 +1602,7 @@ so our greedy method is not applicable.
 \label{f:model:f_g}
 \end{figure*}
 \begin{figure*}[htb!]
-\def\picwidth{2.5in}
+\def\picwidth{2.6in}
 \centering
 \epsfig{file= figures/f_g_comp_low.eps, height=\picwidth}
 \caption[The rendered \textit{Happy Buddha} at the time $T_d$, using \textsf{UDP-High}.]{The rendered \textit{Happy Buddha} at the time $T_d$, using \textsf{UDP-High}. Left: FIFO with quality 5.96, Right: greedy with quality 9.29.}

@@ -118,7 +118,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     This flexibility is important in streaming of high-resolution 3D models, 
     because streaming a huge 3D model in a fixed order leads to transmission of data not
     useful to the user, wasting time and bandwidth.
-    Ensuring this flexibility in streaming system is an important consideration
+    Ensuring this flexibility in streaming systems is an important consideration
     in choosing representation and coding schemes. The details are discussed
     in Chapter \ref{c:related}.
     Meanwhile, this flexibility introduces some new research questions, 
@@ -197,20 +197,20 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     many receivers with caching proxy and peer-to-peer system,
     two common solutions to scalability. 
 
-    To address the drawbacks of sender-driven protocol, we want to 
+    To address the drawbacks of the sender-driven protocol, we want
     to design a stateless sender for scalable view-dependent progressive 
     mesh streaming, in which the sending order is decided by the receiver.
     We call this approach the \textit{receiver-driven} approach.
     
     To design a receiver-driven view-dependent mesh streaming
     system is challenging. The most important
-    challenge is how the receiver determine the visibility and visual contribution
+    challenge is how the receiver determines the visibility and visual contribution
     of vertex splits before receiving them. The receiver does not have
     the complete data, unlike the sender. The receiver thus has to estimate
     the visibility and visual contribution of vertex splits based on 
     partially received data. Moreover, the sender, being stateless, increases
     the difficulty in compressing data, because now the sender is not aware
-    of the sending order of the vertex splits, and most existed compression algorithms
+    of the sending order of the vertex splits, and most existing compression algorithms
     are not applicable since they require specific sending orders.
     As a result, we need to find an efficient 
     compression algorithm which does not rely on the sending order.
@@ -218,7 +218,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     In summary, the second objective in this thesis is 
             \textit{to design and implement
             a receiver-driven view-dependent streaming system, where
-            the visibility and the sending order decided by the receiver instead of the sender,
+            the visibility and the sending order are decided by the receiver instead of the sender,
             thus making the sender stateless and improving the scalability of the system.}
 
             \begin{comment}
@@ -270,7 +270,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     from the same sender and the number of receivers becomes large. 
     Peer-to-peer (P2P) technique is a common solution to increase
     the scalability without incurring high infrastructural cost. 
-    As a result, applying P2P technique in view-dependent mesh steaming
+    As a result, applying P2P technique in a view-dependent mesh steaming
     system enables small companies and individual users to publish
     their high-resolution 3D models. Hence, P2P technique is essential
     to popularize applications using high-resolution 3D models.
@@ -313,7 +313,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
             
             This thesis focuses on the streaming of progressive meshes. 
             Streaming of other representations of 3D objects is not discussed in this thesis,
-            but the methods proposed in this thesis should be possible
+            but the methods proposed in this thesis should be possibly
             extended to support streaming of other representations with some modifications.
             
             Textures are not considered in this thesis. Texture coordinates could be assigned
@@ -350,7 +350,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     Further, we derive closed-form expressions in two extreme cases,
     providing insights to the importance of dependencies on the
     decoded mesh quality. The main insight is that if each lost packet
-    is immediately retransmitted upon the packet loss is detected, 
+    is immediately retransmitted upon the packet loss detection, 
     then the dependency only matters in the first several round trip times. 
     Therefore, the effect of dependency is only significant in the applications
     requiring high interactivity. 
@@ -389,7 +389,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     estimation suffices in our scheme. 
     We propose a method to estimate the visual importance of a vertex
     using its screen space area (the area of the neighbor faces
-    of a vertex after projected to the screen).
+    of a vertex after projection to the screen).
     %and level of vertex (how many times this vertex
     %has been split), respectively. 
     To validate this method, we compared it with two other
@@ -397,7 +397,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     the other is based the level of vertex (how many times this vertex
     has been split). We found that the screen area based method improves
     the quality significantly quicker than the random method. Moreover,
-    Screen area based method usually generated better rendered images in perception
+    the screen area based method usually generated better rendered images in perception
     than the level based method.
     
     To uniquely identify each vertex, we borrow the idea from Kim and Lee \cite{kim01truly}.
@@ -456,7 +456,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     their visibility are similar. Third, the dependency among chunks
     are minimized.
 
-    We investigate on two content discovery schemes for P2P
+    We investigate two content discovery schemes for P2P
     mesh streaming: centralized lookup and hierarchical P2P lookup.
     The first design is easy to implement and works well in small to 
     middle scale network. The structure of the progressive
@@ -478,9 +478,9 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
 
     Our results indicate that with the help of P2P technique,
     sharing high-resolution
-    3D models to a large number of users over network is affordable
+    3D models to a large number of users over the network is more affordable
     to small companies and even individuals. We believe this is
-    essential for networked applications using high-resolution 3D models
+    essential for networked applications using high-resolution 3D models to
     become popular.
 
     %When testing the P2P system performance in the simulation, we need
@@ -501,7 +501,7 @@ scanned (image source: http://graphics.stanford.edu/projects/mich).}\label{f:int
     %The result of our user study and its analysis are introduced
     %in Chapter \ref{c:user} and 
     We include the introduction of how we collected the real user traces and 
-    generated the synthetic traces in Chapter \ref{user} for completeness. 
+    generated the synthetic traces in Chapter \ref{c:user} for completeness. 
     Then, we introduce the P2P mesh streaming systems we proposed
     in Chapter \ref{c:p2p}. Finally, the thesis is concluded in
     Chapter \ref{c:conclusion}.

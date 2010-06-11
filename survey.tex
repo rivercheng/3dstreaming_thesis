@@ -15,7 +15,7 @@
     and the PhD thesis of Wand \cite{wand:point}.  
     In addition to these surface modeling methods, 
     constructive solid geometry (CSG), a commonly used technique used in solid modeling, 
-    constructs visually complex 3D objects with applying boolean operations
+    constructs visually complex 3D objects by applying boolean operations
     (such as union, intersection, and difference) on simple solid objects,
     such as cubes, spheres, cylinders, cones, and  pyramids. 
     CSG is extensively used in game development and CAD applications, because it is 
@@ -23,16 +23,16 @@
     As a specific example, we have used generalized cylinders to represent and streaming plants 
     \cite{plant:seb, compact:mondet}.
 
-    This thesis concentrates on meshes because of following reasons:
+    This thesis concentrates on meshes for the following reasons:
     \begin{itemize}
         \item Most rendering hardware are optimized for meshes, so other model needs to be convert
             to meshes before rendering either explicitly or implicitly. 
-        \item Without connectivity information in the model, point-based model is relatively easier to deal with
+        \item Without connectivity information in the model, point-based models are relatively easier to deal with
             than meshes. Therefore, adapting techniques used in streaming meshes to streaming point-based model
             is easier than the opposite direction.
     \end{itemize}
     
-    A triangle mesh can be donated as a tuple $(K, V)$, where $K$ is a
+    A triangle mesh can be represented as a tuple $(K, V)$, where $K$ is a
     \emph{simplicial complex} including all the mesh simplices 
     (vertices, edges and triangles) and $V =\{v_{1}, v_{2}, ...,
     v_{n}\}$ is the set of geometry positions of vertices. Therefore,
@@ -94,7 +94,7 @@ vertex.\label{mesh_non_mesh}}\
     progressive coding methods, because the latter are more suitable for progressive streaming.
     
     \subsection{Single-rate Coding} \label{single_rate}
-    In a mesh, three kind of information needs to be coded:
+    In a mesh, three kinds of information need to be coded:
     connectivity, geometry and property. 
     Since most property data are associated with vertices, 
     many compression algorithms either treats them as geometry data or 
@@ -151,18 +151,18 @@ vertex.\label{mesh_non_mesh}}\
     It is similar to the cut-border machine but has better
     compress efficiency and much slower decompression speed.
     
-    After introduction of connectivity coding, we briefly introduce geometry
+    After this introduction of connectivity coding, we briefly introduce geometry
     coding. Most single-rate geometry compression methods involve three steps:
     quantization, prediction, and entropy coding.
 
     In VRML, geometry data is represented with 32 bit floating-point
-    number, but this precision is highly beyond the perceiving
+    numbers, but this precision is beyond the perceiving
     capability of human eyes. Hence, quantization can be performed to
     compress the geometry data. Typically, each coordinate in a mesh is
     uniformly quantized to 8-16 bits integer.
 
-    After quantization of vertex coordinates, prediction is taken in
-    encoding by exploiting correlations between adjacent vertex
+    After quantization of vertex coordinates, vertex coordinates are predicted
+    by exploiting correlations between adjacent vertex
     coordinates. An effective prediction scheme generates prediction
     errors with highly compact distribution, which can be effectively
     encoded by entropy coders, such as Huffman coder or arithmetic
@@ -179,7 +179,7 @@ vertex.\label{mesh_non_mesh}}\
     Single-rate coded meshes can only be decoded after they are
     completely received, so they are not suitable for streaming. Therefore,
     some progressive coding schemes have been proposed. According to
-    how the original mesh is simplified, these coding scheme can be
+    how the original mesh is simplified, these coding schemes can be
     categorized into three classes: progressive mesh-based, vertex
     clustering-based, and re-meshing-based.
     
@@ -192,10 +192,10 @@ vertex.\label{mesh_non_mesh}}\
             and the quality of reconstructed model increases. Vertex clustering
             based coding can code geometry information efficiently, but it is 
             difficult to code connectivity information. Moreover, the quality
-            of base mesh is poor.
+            of base meshes is poor.
 
         \item[Re-meshing-Based]
-            Re-meshing-based method only keeps the shape of a model
+            Re-meshing-based methods only keep the shape of a model
             and does not keep the accurate topology. 
             An irregular mesh can be converted into a semi-regular mesh
             with similar shape. 
@@ -216,7 +216,7 @@ vertex.\label{mesh_non_mesh}}\
             (e.g. Taubin \cite{taubin:signal}, Karni and Gotsman \cite{karni:spectral}).
             A state-of-art survey was done by Zhang et al. \cite{zhang:spectral}.
             He et al. proposed \emph{spectral geometry images} to generate more 
-            visually pleasing shape with higher compression efficiency. Moreover, 
+            visually pleasing shapes with higher compression efficiency. Moreover, 
             they proposed an error protection scheme to target networks with 
             packet loss \cite{he:spectral}.
             %Besides losing the correct topology information,
@@ -233,10 +233,10 @@ vertex.\label{mesh_non_mesh}}\
     introduced by Hoppe in 1996 \cite{hoppe96progressive}. In this
     scheme, the simplification is based on \emph{edge collapse}, which
     collapses an edge into a vertex (see Figure \ref{split2}).
-    After a series of edge collapse, a coarser \emph{base mesh} remains. 
+    After a series of edge collapses, a coarser \emph{base mesh} remains. 
     Then the PM is constructed by the base mesh and a series of \emph{vertex
-    splits}, the inverse of edge collapse, in a reverse order.
-    Different level-of-detail can be achieved by applying different number
+    splits}, the inverse of edge collapses, in a reverse order.
+    Different level-of-detail can be achieved by applying different numbers
     of vertex splits.
     %Rendering can be done  n receiver side at any time after the base
     %mesh is received. More vertex splits received, better
@@ -260,19 +260,19 @@ vertex.\label{mesh_non_mesh}}\
     edge to one of its ends (i.e. $v_{s}$ keeps unchanged), is used, 
     we only need to code the position of $v_r$. 
     
-    If the number of vertices in current model is
+    If the number of vertices in the current model is
     $V$, then $s$ can be any one of them, 
     and ${\lceil}log_{2}V{\rceil}$ bits are needed to encode $s$. 
     
     Many compression methods are proposed to reduce this cost.
     Hoppe \cite{efficient:hoppe} present an efficient implementation,
-    in which the vertex splits are ordered such that next one
+    in which the vertex splits are ordered such that the next one
     is as close to current one as possible. This method reduces the cost
     from $O(Vlog_{2}V)$ to $O(V)$.
     Karni, Bogomjakov, and Gotsman \cite{602153}, 
-    also use specific order of vertex split to reduce the cost of connectivity. 
+    also use a specific order of vertex splits to reduce the cost of connectivity. 
     The vertex sequence is generated by recursively cutting a mesh into two
-    balanced part with minimum cut. With their algorithm, the connectivity can
+    balanced parts with minimum cut. With their algorithm, the connectivity can
     be encoded with in average 4.5 bpv. 
 
     Another idea is to group many vertex splits together, 
@@ -286,8 +286,8 @@ vertex.\label{mesh_non_mesh}}\
     idea. They group about $50\%$ vertex splits into one batch. To
     differentiate vertices to be split with others, one bit per vertex
     is used as indicative. 
-    Other methods have the similar idea
-    but based on vertex removal (remove a vertex and triangulates the hole
+    Other methods have a similar idea
+    but are based on vertex removal (remove a vertex and triangulate the hole
     generated) \cite{319358}. 
 
     More methods exist to reduce the cost in encoding connectivity information.
@@ -297,13 +297,13 @@ vertex.\label{mesh_non_mesh}}\
 
     All compression methods introduced above 
     have a common drawbacks. After compression, the 
-    data becomes linear and has to be decoded in a fix order. 
+    data becomes linear and has to be decoded in a fixed order. 
     Therefore, these methods improve the coding efficiency at the cost
     of losing flexibility, which is essential in streaming of high-resolution
     progressive meshes.
     
-    Flexibility of choosing streaming order 
-    is restricted by the dependency among the vertex splits.
+    Even without compression, flexibility of choosing streaming order 
+    is still restricted by the dependency among the vertex splits.
     For a manifold mesh, a vertex split operation depends on the existence of
     \begin{itemize}
         \item 
@@ -351,7 +351,7 @@ vertex.\label{mesh_non_mesh}}\
     
     \subsection{Error Resilient Streaming}
     To improve the quality quickly, we need to mitigate distortion of the 
-    rendered quality of rendered mesh in the presence of packet losses.
+    rendered quality of a rendered mesh in the presence of packet losses.
 
     At the transport layer, Al-Regib and Altunbasak \cite{3tpregib}, Li
     et al. \cite{Li2006, li:3dmulticast}, and Chen et al. \cite{chen05hybrid} have
@@ -369,7 +369,7 @@ vertex.\label{mesh_non_mesh}}\
     
     Existing work in robust mesh compression aims to
     reduce dependencies among the mesh \cite{error:Park,error:Yan}.
-    Similar to introducing key frames or restart marker in video/image
+    Similar to introducing key frames or restart markers in video/image
     coding, mesh segmentation is used to reduce the affected range of one
     packet loss. In robust mesh compression, a mesh is typically
     partitioned into several independent segments and then coded separately.
@@ -399,11 +399,12 @@ vertex.\label{mesh_non_mesh}}\
     
     Some studies use retransmission to recover the packet loss.
     For example, Tian \cite{Tian2006} uses selective retransmission in their system.
-    We think that retransmission is more suitable than FEC when the feedback
+    This thesis concentrates on retransmission because it can be argued that 
+    retransmission is more suitable than FEC when the feedback
     channel is available, because there is no playback deadline in streaming
     of 3D meshes and data is always useful.
 
-    Most of methods introduced above treat the meshes streamed as 
+    Most of the methods introduced above treat the meshes streamed as 
     traditional linear data. When the flexibility of progressive mesh
     is considered, a new question arises: how to select a sending order
     to improve the quality quickly and mitigate the effect of packet loss.
@@ -433,7 +434,7 @@ vertex.\label{mesh_non_mesh}}\
     need to trade off between minimizing the dependency and sending 
     vertex split with higher contribution first. To achieve this objective,
     the effect of dependency needs to be quantitatively measured.
-    There is no existing study is done for this problem
+    No existing study is done for this problem
     prior to this thesis.
 
     A commonly used metric of contribution of vertex splits is 
@@ -475,16 +476,17 @@ vertex.\label{mesh_non_mesh}}\
     view-dependent streaming to address limited network bandwidth.
     Yang et al. proposed a scheme where the server chooses the appropriate resolution
     according to the available network bandwidth.
-    Zheng et al. \cite{zheng:interactive} use prediction to
+    Zheng et al. \cite{zheng:interactive} predict the user action to
+    request data in advance in order to
     reduce the effect of network latency and 
     compensate the round-trip delay with the rendering time.
-    Moreover, Yang et al. \cite{optimized:yang} proposed an joined 
+    Moreover, Yang et al. \cite{optimized:yang} proposed a joined 
     optimizing transmission method based on a general rate-distortion
     model that considers both mesh and texture data. Their method
     allocates bits between mesh and texture to optimize the display 
     quality at every stage of progressive transmission.
      
-    These systems use sender-driven approach and do not address
+    These systems use a sender-driven approach and do not address
     server scalability issues. Due to the stateful design, 
     the sender-driven approach is difficult to be extended to
     support caching proxy and peer-to-peer techniques, two 

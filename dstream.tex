@@ -3,11 +3,11 @@
 \section{Introduction}
 \label{s:dstream:intro}
     During streaming of a progressive mesh, it is desirable to 
-    increase the visual quality of the reconstructed mesh in the client side
+    increase the visual quality of the reconstructed mesh on the client side
     as quickly as possible. 
     Therefore, vertex splits having high contribution to the visual quality
     should be sent early. 
-    Because what the user really see is the rendered image on the screen,
+    Because what users really see is the rendered image on the screen,
     and the quality of the rendered image depends on not only the quality of the reconstructed
     mesh but also the viewpoint of the user,  the contribution of a vertex split 
     also depends on the viewpoint of the user. 
@@ -96,7 +96,7 @@
     Implementing the receiver-driven protocol is non-trivial. 
     %It introduces some new research questions.
     First, the receiver has to efficiently determine the visibility and visual contribution
-    of a vertex split based on partially received mesh. 
+    of a vertex split based on the partially received mesh. 
     Second, we need to assign each vertex a unique identification number
     so that the receiver can explicitly request vertex splits. 
     To avoid sending extra data, the identification number of each vertex 
@@ -125,10 +125,10 @@
 \label{s:dstream:terms}
     \subsection{Determine Visibility and Visual Contribution of a vertex split}
     We first define a term \emph{the visibility of a vertex split}. Under a certain
-    viewpoint, if split a vertex will help improving the quality of the rendered image,
+    viewpoint, if splitting a vertex will help improving the quality of the rendered image,
     we call this vertex split \emph{visible}. Otherwise, we call it an \emph{invisible}
-    vertex splits.
-    In view-dependent streaming system, it is necessary to determine the visibility
+    vertex split.
+    In a view-dependent streaming system, it is necessary to determine the visibility
     of each vertex split so that the sender can avoid wasting bandwidth in sending invisible 
     vertex splits and use the saved bandwidth to send more visible vertex splits.
 
@@ -175,19 +175,18 @@
     a common method is to use a bounding sphere to include a vertex and all its descendants.
     Then, we can safely ignore a vertex split if its bounding sphere
     falls outside the view frustum.
-    Similarly, a bounding cone of normal is used in back face culling \cite{258843}.
+    Similarly, a bounding cone of face normals is used in back face culling \cite{258843}.
     Therefore, some extra information to represent the bounding sphere
-    and bounding cone of normal is needed. A common practice is to
+    and bounding cone of face normal is needed. A common practice is to
     pre-compute the radius of the bounding sphere, %($r_v$), 
     the semi-angle of the cone of normals, % ($\alpha$),
-    and other two parameters %($\mu$ and $\delta$) 
-    for deciding the screen-space error
-    and store them with the vertex together \cite{258843, kim:view}.
+    and other parameters %($\mu$ and $\delta$) 
+    and store them with the vertex together for deciding the screen-space error \cite{258843, kim:view}.
     
     These bounding object-based methods, however, are not appropriate
     in our receiver-driven protocol. 
-    If these methods are applied to receiver driven protocol, the sender has to send
-    the four bounding parameters with the vertex splits together, almost doubling 
+    If these methods are applied to a receiver driven protocol, the sender has to send
+    the four bounding parameters together with the vertex splits, almost doubling 
     the data size. 
     %To increase the streaming data size is never a good solution
     %because the network bandwidth is one of the main bottleneck of the streaming system.
@@ -208,7 +207,7 @@
     \subsection{Identify Vertices}
     After deciding the visibility, the sender sends the chosen vertex splits to the receiver.
     Six parameters are needed in a vertex split of a manifold mesh: the identification number
-    (we call ID from now on) of the vertex to be split
+    (ID) of the vertex to be split
     ($V_s$ in Figure \ref{dstream:split}) $Ids$, 
     the IDs for two cut neighbors 
     ($V_l$ and $V_r$ in Figure \ref{dstream:split}), $Id_l$ and $Id_r$,
@@ -219,7 +218,7 @@
     Many sender-driven implementations use the sequence number of a vertex generated as its ID,
     then the IDs of two newly generated vertices can be implicitly known by the receiver without
     extra information. This method, however, 
-    enforces the sender to be state-ful since the sender has to remember 
+    forces the sender to be state-ful since the sender has to remember 
     the sending order of vertex splits for each receiver. 
     Therefore, it is not applicable in our receiver-driven protocol, where the sender is stateless and 
     does not remember the sending order. 
@@ -279,12 +278,12 @@
     Moreover, a stateless sender does not remember the sending
     order, so it has no idea what the set is. 
     As a result, even coding on the fly is not possible. 
-    In the receiver-driven approach, $ID_l$ and $ID_r$ need to be encoded independent to the decoding order. 
+    In the receiver-driven approach, $ID_l$ and $ID_r$ need to be encoded independent of the decoding order. 
 
     Kim et al. \cite{multiresolution:kim} proposed an efficient algorithm to encode the IDs
     of two cut neighbors. With their method, the proper cut neighbors can be selected from
     the one ring neighbors $\mathcal{N}'$, no matter what $\mathcal{N}'$ is that time. 
-    Moreover, even the vertex $ID_l$ or vertex $ID_r$ itself is not in $\mathcal{N'}$ that
+    Moreover, even if vertex $ID_l$ or vertex $ID_r$ itself is not in $\mathcal{N'}$ that
     time, the vertex split still could be applied properly.
     %Their method is based on the following observation.
     %The above property is also essential in splitting
@@ -337,7 +336,7 @@
      Finally, we explain how we encode the data sent by the sender and the requests sent from the receiver.
      
      \subsection{Mesh Transmission} 
-     A streaming session is initiated when the receiver requests for a specific
+     A streaming session is initiated when the receiver requests a specific
      mesh.
      The sender returns the complete base mesh and other necessary information,
      such as the Huffman tables used in decoding vertex splits, to the receiver
@@ -363,7 +362,7 @@
      The sender does only two things -- decode IDs and retrieve the 
      vertex splits, and is therefore stateless. 
 
-     To avoid the receiver to request a non-exist vertex split (trying to split
+     To avoid that the receiver requests a non-existing vertex split (trying to split
      a leaf vertex in the vertex hierarchy),
      in the base mesh, an extra bit is attached to every vertex to indicate whether it is a leaf or not.
      Every vertex splits has two extra bits to indicate whether each of the two newly generated vertices 
@@ -395,7 +394,7 @@
      We propose to use the screen-space area of all the neighbor faces of a vertex as the 
      metric of its visual importance (see Figure \ref{dstream:screen_area}).
      The rationale is that if the screen area of a vertex ($V_1$ in Figure \ref{dstream:screen_area}) 
-    is larger, it is likely the quality can be improved more by splitting this vertex. 
+    is larger, it is likely the quality can be improved by splitting this vertex further. 
     In other words, we use the neighbor faces as an approximation of the projection of bounding sphere used
     in sender-driven protocol.
     
@@ -413,12 +412,12 @@
     the receiver sends the requests following the descending order of the 
     screen-space area. 
     
-    A vertex split will generate two new vertices and their screen-area need re-computation.
+    A vertex split will generate two new vertices and their screen-areas need re-computation.
     Moreover, it also changes the area of some neighbor vertices. Ideally, we should 
     do the screen-area computation after each vertex split and then select the next 
     vertex split. This \emph{vertex-by-vertex} method is not feasible for two reasons.
     First, doing screen-area computation after each vertex split is too expensive. Second,
-    due to the RTT between the receiver and the sender, vertex-by-vertex method means
+    due to the RTT between the receiver and the sender, the vertex-by-vertex method means
     to send a request and wait for the vertex splits to arrive before sending next vertex
     split. As a result, most of the network bandwidth will be wasted in waiting. 
     
@@ -426,20 +425,20 @@
     %sent and the corresponding vertex is received, a considerable delay, roughly equal
     %to the RTT between the receiver and the sender, exists. 
     To use all the bandwidth available, the receiver should keep selecting vertices to be split
-    and send out the requests. If we only select from the existed vertices, i.e.,
+    and send out the requests. If we only select from the existing vertices, i.e.,
     the vertices in the vertex front, we will face two problems.
     %TOne solution could be select vertex to be split all from the If only vertex splits of 
-    %With the method introduced above, we can estimate the visual importance of each existed vertex,
+    %With the method introduced above, we can estimate the visual importance of each existing vertex,
     %i.e. the vertices in the vertex front. For several reasons, we need to estimate 
     %the visual importance of some children of these vertices too. 
-    %the existed vertices are sent, 
+    %the existing vertices are sent, 
     In the beginning, when the mesh is still coarse, the receiver may have no enough requests
     %to fill the pipeline.
     %In other words, the receiver may have no vertex splits 
-    to request before the vertex splits already requested arrive after one RTT. 
-    Then we cannot fully utilize the network bandwidth when we need them the most.
-    Moreover, even when there are enough vertices splits to request during one RTT, only sending
-    the splits of existed vertices may delay splits of some important children vertices.
+    to send before the vertex splits already requested arrive after one RTT. 
+    Then we cannot fully utilize the network bandwidth when we need it the most.
+    Moreover, even when there are enough vertex splits to request during one RTT, only sending
+    the splits of existing vertices may delay splits of some important children vertices.
     For example, if vertex $v$ has the highest importance, and if it is split, its two 
     children $v_1$ and $v_2$ are the next most important vertices. However, because these
     two vertices do not exist yet, they will not be selected until the vertex splits of $v$ 
@@ -448,7 +447,7 @@
     To address this problem, we also estimate the visual importance of the children vertices
     when their parent vertex is selected. Whenever a vertex is selected to be split, its two children
     are added into the candidates. Their virtual importance are both estimated as the half
-    of the selected vertex. For example, if vertex $v$ having importance $a_v$ is selected,
+    of the selected vertex. For example, if vertex $v$ has importance $a_v$ is selected,
     its two children $v_1$ and $v_2$ are added to the candidates with importance $\frac{a_v}{2}$.
     Then they will also be considered for the next selection.
     This estimation introduces some error, and the error could propagate to
@@ -459,18 +458,18 @@
     be re-computed and a new list of vertex splits will be requested. 
     }.
     In Section \ref{s:dstream:evaluation}, we show that
-    that with periodical updating, this method works well. Compared with the ideal case that
-    uses vertex-by-vertex approach with no network latency, this method has comparable performance.
+    with periodical updating, this method works well. Compared with the ideal case that
+    uses a vertex-by-vertex approach with no network latency, this method has comparable performance.
 
-    The effectiveness of screen-based method is evaluated in Section \ref{s:dstream:evaluation},
-    compared with other two methods: One is based on the level of a vertex in the 
+    The effectiveness of the screen-based method is evaluated in Section \ref{s:dstream:evaluation},
+    compared with two other methods: One is based on the level of a vertex in the 
     vertex hierarchy and the other is randomly pick a visible vertex to split.
 
-    %With the screen-area based method, only the visual importance of currently existed
+    %With the screen-area based method, only the visual importance of currently existing
     %vertices can be estimated. For several reasons, we need to estimate the visual importance
     %of their children too. First, the visual importance of some children vertices may
-    %be higher than some current existed vertices. Second, if only the vertex splits of 
-    %current existed vertices are requested, the requests may not fill the pipeline when RTT
+    %be higher than some current existing vertices. Second, if only the vertex splits of 
+    %current existing vertices are requested, the requests may not fill the pipeline when RTT
     %between the receiver and the sender is high. Therefore,
     %the receiver may be idle before requested vertex splits are received. (This paragraph to be elaborated)
     
@@ -480,7 +479,7 @@
     %introduced by this simple method can be reduced. 
     %In Section \ref{s:dstream:evaluation}, we show that this simple method works well.
     
-    During the streaming, when the receiver satisfies with the rendering quality, it 
+    During the streaming, when the receiver is satisfied with the rendering quality, it 
     can either stop requesting or continue requesting the remaining vertex splits
     for future use based on the prediction of the user's next action.
     Chapter \ref{c:user} discusses whether the user actions can be predicted.
@@ -489,8 +488,8 @@
     when the visual quality is satisfactory, it may miss some visible vertices.
     %As we introduced in Section \ref{s:dstream:terms}, we cannot simply ignore 
     %all invisible vertices, because they may have visible descendants.
-    Unlike sender-driven approach, where the visibility of a vertex and its all descendants
-    can be determined with its bounding sphere, we estimate the visibility of 
+    Unlike the sender-driven approach, where the visibility of a vertex and all its descendants
+    can be determined by its bounding sphere, we estimate the visibility of 
     a vertex and its descendants based on the visibility the neighbor faces of this vertex. 
     This estimation may introduce some error (mostly on the silhouette), 
     but fortunately, in most cases this kind of error is small and tolerable
@@ -499,29 +498,29 @@
     %for the remaining vertex splits.  
 
 	%Furthermore, %some methods may reduce 
-    We can reduce the error by split the vertices close to the silhouette even 
+    We can reduce the error by splitting the vertices close to the silhouette even 
     when they are invisible. During the process of determining visibility, we can also
-    detect the silhouette. Recall that we assign a unique color to each faces.
-    Lets define the set of colors used for a mesh is $\mathcal{C}$.  
+    detect the silhouette. Recall that we assign a unique color to each face.
+    Lets define the set of colors used for a mesh as $\mathcal{C}$.  
     %As a result, if a pixel has an ``alien'' color (the color not belongs to the 
     %mesh), we know that it is not a part of the mesh.
     Then, whenever we find a pixel with color in $\mathcal{C}$ 
     is a neighbor (any of the four directions: up, bottom, left, and right)
     of a pixel with color not in $\mathcal{C}$, 
     we know that the corresponding face of this pixel is in the silhouette.
-    We can then split the neighbors of this pixel disregard of their visibility.
+    We can then split the neighbors of this pixel disregarding their visibility.
     In Section \ref{s:dstream:evaluation}, we can see that this method helps
     reduce the error significantly. Moreover, we show that we could assign
-    higher priority to the silhouette so that the reconstructed image has 
-    a more correct shape early. This is useful in some applications that the
+    a higher priority to the silhouette so that the reconstructed image has 
+    a more correct shape early. This is useful in some applications where the
     shape of the mesh is important.
 
-    Detecting the silhouette is also useful during the progressive streaming.
+    Detecting the silhouette is also useful during progressive streaming.
     The vertices in the silhouette could be assigned higher weight so that
-    they are split earlier to generate more accurate profile of the mesh.
+    they are split earlier to generate a more accurate profile of the mesh.
     The weight can be configured by the users according to their preferences.
     In Section \ref{s:dstream:evaluation}, we evaluated two screen area based
-    method, with weight as 1 and 3, respectively.
+    methods, with the weight of silhouette set as 1 and 3, respectively.
 
     \subsection{Encoding of Vertex Splits and IDs}
     \label{ss:dstream:encoding}
@@ -533,7 +532,7 @@
 	In this section, we explain how we encode the vertex splits 
     and the IDs of the requested vertex splits.  
     Note that, in our work, we consider only manifold meshes and use half 
-	collapse in mesh simplification.
+	collapse (an edge is always collapsed to one of its two ends) in mesh simplification.
     
     \textbf{Encoding Vertex Splits}
 	To encode a vertex split, we need to encode the IDs of the two
@@ -543,12 +542,12 @@
     We use Kim et al.'s algorithm \cite{multiresolution:kim}
     to encode the IDs of the cut neighbors ($Id_l$ and $Id_r$). 
     Since the neighbors of a vertex is a much smaller set 
-    than the whole vertices, a shorter code than the ID is sufficient
+    than all vertices, a shorter code than the ID is sufficient
     to differentiate the cut neighbors from other neighbors. 
-    Let $\mathcal{N}$ represents the set of the IDs 
-    (Here IDs are bit strings begin with the first bit after leading 1)
+    Let $\mathcal{N}$ represent the set of the IDs 
+    (Here IDs are bit strings beginning with the first bit after leading 1)
     of the neighbors of $V_s$, the vertex to be split. 
-    Then we encode the $Id_l$ and $Id_r$ one by one 
+    Then we encode $Id_l$ and $Id_r$ one by one 
     (if one cut neighbor does not exist, we set its ID as $0$)
     with Algorithm \ref{a:encode_neighbor}.
     \begin{algorithm}
@@ -568,41 +567,41 @@
     \end{algorithm}
     In brief, each bit in the \emph{code} excludes one or more neighbors
     from $\mathcal{N}$ until only the cut neighbor with $Id$ is left. 
-    In ideal case, each bit excludes half of the members
+    In the ideal case, each bit excludes half of the members
     in $\mathcal{N}$, so the code length is $log_{2}d$, 
     where $d$ is the number of neighbors.
-    In worst case, each bit of the code only excludes one neighbor,
+    In the worst case, each bit of the code only excludes one neighbor,
     so the code length is $d-1$. 
-    After obtaining the two codes for $Id_l$ and $Id_r$, we encode them with Huffman coding algorithm.
+    After obtaining the two codes for $Id_l$ and $Id_r$, we encode them with the Huffman coding algorithm.
 
     The decoding of these two codes is tricky. %not simply the reverse of the encoding.
     Since we enable splitting a mesh in random order, the set of neighbors of a vertex
-    during the decoding $\mathcal{N}'$ may not be $\mathcal{N}$, the set during the encoding.
+    during decoding $\mathcal{N}'$ may not be $\mathcal{N}$, the set during the encoding.
     If a cut neighbor with ID as $Id$ %in $\mathcal{N}$
     is not in $\mathcal{N}'$, then either one of its 
     ancestors or some of its descendants are in $\mathcal{N}'$ \cite{multiresolution:kim}.
-    In former case, with the \emph{code}, the ancestor can be found and used as 
+    In the former case, with the \emph{code}, the ancestor can be found and used as 
     the cut neighbor since its ID is the prefix of $Id$ 
     (recall the property of the unique identification number scheme).
     %Some bits of the code may not used since they are supposed to
     %be used to differentiate the descendants of this neighbor.
     %We will save these unused bits for future use.
-    In latter case, with the \emph{code} we find the descendants of the original 
+    In the latter case, with the \emph{code} we find the descendants of the original 
     cut neighbor in $\mathcal{N}'$ since they all have $Id$ as their prefix.
-    Kim et al. \cite{multiresolution:kim} propose a method to find out the 
+    Kim et al. \cite{multiresolution:kim} proposed a method to find the 
     proper one as the cut neighbor and they show that despite using replacement
-    in the vertex splitting, the original mesh can be 
+    in vertex splitting, the original mesh can be 
     reconstructed with all the vertex splits are applied. It is also verified 
     by us both in theory and experiments.
     
     To encode the coordinates, instead of encoding $x$, $y$, and $z$ directly, 
-    we encode $dx$, $dy$, and $dz$ with Huffman coding algorithm. 
+    we encode $dx$, $dy$, and $dz$ with Huffman coding. 
     Here $dx = x - x_0$, $dy = y - y_0$, 
     and $dz = z - z_0$, and $x_0$, $y_0$, and $z_0$ are the coordinates of
     $V_s$, the vertex to be split. 
     The rationale to code the differences is that they have less entropy, especially
     for the later part of vertex splits, which only change the coordinates slightly.
-    It is worth noting that all the encoding process are done off-line and the 
+    It is worth noting that all the encoding processes are done off-line and the 
     encoded vertex splits are stored in the associative array, so the encoding will
     not increase overhead to the sender.
 
@@ -620,14 +619,14 @@
 
     \textbf{Encoding IDs of vertex splits}
     We now introduce how we encode the vertex split IDs sent from the receiver to the
-    sender. Since we use an 32bit integer to represent an ID, 32 bpv is needed for each ID
-    without compression. It is already larger than the vertex split (31 bpv in average)
+    sender. Since we use a 32bit integer to represent an ID, 32 bpv are needed for each ID
+    without compression. It is already larger than the vertex split (31 bpv on average)
     corresponding to the ID, so compression is desired.
     
     We separate vertex split IDs into blocks, and one block will be compressed as a unit and
-    be sent as a packet. Inside a block, we first filter out all the vertex splits ID
-    whose parent ID are also in this packet. They can be encoded with a special way introduced
-    later. We then focused on those remaining vertex split IDs.
+    be sent as a packet. Inside a block, we first filter out all the vertex split IDs
+    whose parent ID is also in this packet. They can be encoded in a special way introduced
+    later. We then focus on those remaining vertex split IDs.
     
     %First we choose the number of vertex identifications to be packetized appropriately
     %such that their vertex splits after encoded will no exceed
@@ -640,7 +639,7 @@
     We use a bit string \textit{code} to store the encoded result.
     First, we sort the IDs in a packet according to the tree IDs, in increasing order. 
     Then, we store the first tree ID to \textit{code} and 
-    store each of the following tree ID as the difference from the previous tree ID.
+    store each of the following tree IDs as the difference from the previous tree ID.
     Since they are sorted, the differences are positive and relatively small numbers.
 
     \begin{figure}
@@ -680,12 +679,12 @@
     subtree, we append `0' and check its right subtree. Vertices to be split exist in the right
     subtree, so we append `1' and encode its right subtree recursively as `100100'. 
     Finally, we return back to the root and append `0' since 
-    no nodes in the right subtree needs to be split. 
+    no node in the right subtree needs to be split. 
     Therefore, the result is `1011001000'.
         
     During decoding, the sender traverses the tree according to the bits of the code. 
     The bit `1' means to decode the subtree and the bit `0' means to stop and return.
-    If a vertex has no descendants that needs to be decoded, then this vertex is split. 
+    If a vertex has no descendants that need to be decoded, then this vertex is split. 
     Decoding is done when the procedure returns to the roots.
     
     The advantage of this method is that the code length is variable and the 
@@ -730,8 +729,8 @@ validate the screen-area based method.
 
 %\subsection{Testing Screen-Area Based Method}
 We test the effectiveness of screen-area based method by checking
-how fast the quality of rendered image is improved. PSNR value 
-is used to measure the quality of a rendered
+how fast the quality of rendered image is improved. PSNR values
+are used to measure the quality of a rendered
 image, with the rendered image of the original mesh as the reference. 
 The PSNR value tends to increase when more vertices are split, 
 and plotting the PSNR value versus number of vertices split
@@ -812,7 +811,7 @@ as 400 ms. The receiver sends 125 packets per second and each packet has
 send a 125 packet, each has a size around 1K bytes, to the receiver. In other
 words, we assume the bandwidth is 1Mbps and each vertex splits has around
 50 bits. It also means the receiver has to send 10000 vertex split requests
-to fill the pipeline due to the RTT existed between the sender and the receiver. 
+to fill the pipeline due to the RTT exist between the sender and the receiver. 
 \end{comment}
 
 Now we begin to introduce the experimental results.
@@ -822,7 +821,7 @@ Here, we show how much it improves the quality.
 During this evaluation, 
 %we assume we need to
 %send 10000 vertex splits to fill the pipeline between receiver and the sender.
-We assume the RTT is 400ms, the bandwidth is 1Mbps, and the size of vertex split 
+We assume the RTT is 400ms, the bandwidth is 1Mbps, and the size of a vertex split 
 is 40 bits.  As a result, the receiver needs to send
 10000 vertex splits to fill the pipeline between receiver and the sender.
 From Figure \ref{f:dstream:push_nopush}, we see that
@@ -832,7 +831,7 @@ part of the bandwidth is wasted in waiting for new vertices to be generated afte
 vertex splits are received from the sender. 
 On the contrary, when we add the children vertices into the consideration,
 the receiver can always have enough vertices to split, hence the quality
-curve increase continuously.
+curve increases continuously.
 \begin{figure}[htdp!]
     \centering
     \begin{tabular}{cc}
@@ -850,21 +849,21 @@ curve increase continuously.
 Splitting vertices will refine the mesh and change the virtual importance
 of the vertices. Therefore, we periodically re-check the frame buffer to update
 the visual importance of each vertex. 
-Next, we show how updating period affects the quality curve. 
+Next, we show how the updating period affects the quality curve. 
 %i.e. how long is the interval 
 %between two visibility checking if there is no viewpoint change.  
 In Figure \ref{f:dstream:update_period} we show the quality curves for
 four different updating periods: 1 vertex split, 200 vertex splits, 15000 vertex splits, 
-and 30000 vertex splits. We generate the curve with updating period of 1
+and 30000 vertex splits. We generate the curve with an updating period of 1
 by doing visibility check after every vertex split and %ignore the RTT and
-assuming vertex splits is available immediately after the request. This 
+assuming vertex splits are available immediately after the request. This 
 ideal case is used as the reference for comparison. 
 %Updating period as 200, 15000, 30000
 %mean checking visibility every packet, 1 second, and 2 seconds, respectively,
 %if we assume the bandwidth is 1 Mbps and the size of vertex split is 40 bits. 
 This figure shows that when the update period increases,
 the performance is slightly decreased. 
-The performance is still acceptable with update period as 30000, which
+The performance is still acceptable with an update period of 30000, which
 corresponds to 1.2 seconds if the bandwidth is 1 Mbps.
 Therefore, using GPU to decide the visibility and visual importance
 can work on devices with limited rendering ability. We just need to 
@@ -887,7 +886,7 @@ Next, we compare the screen-area based method with other two methods to justify 
 One of the methods compared is the level-based method. 
 We split the visible vertices in the vertex hierarchy in a breadth-first
 order. %In other words, the vertex splits of a vertex at lowest level will be sent first. 
-The other one is random method, which just randomly pick visible vertices to split. 
+The other one is random method, which just randomly picks visible vertices to split. 
 \begin{figure}[htdp!]
     \centering
     \begin{tabular}{cc}
@@ -901,7 +900,7 @@ The other one is random method, which just randomly pick visible vertices to spl
     \caption{Comparing Screen-area method (weight = 1, 3)  with level-based method and random method.}
     \label{f:dstream:comp}
 \end{figure}
-Moreover, We test two screen-area based methods with the weight of the vertices in silhouette as 1 and 3 respectively
+Moreover, we test two screen-area based methods with the weight of the vertices in silhouette as 1 and 3 respectively
 to show the effect of giving higher priority to the silhouette during transmission. %in the screen-area based
 Figure \ref{f:dstream:comp} shows 
 that two screen-area based methods and the level-based method work much better than the random method.
@@ -914,10 +913,10 @@ Figure \ref{f:dstream:image_comp_1} shows the rendered images of Happy Buddha us
 To show the comparison clearer, we enlarge three parts of the images (see \ref{f:dstream:three_parts} and
 show their comparison in Figure \ref{f:dstream:detail_comp}.
 Although the level-based method generates an image with similar PSNR value,
-we can see quality of the face and base is considerably worse. 
+we can see that the quality of the face and base is considerably worse. 
 The silhouette of the level-based method, however, is slightly better
 than the screen-area based method with weight 1. 
-This is caused by our screen-based method tends to under-estimate the importance of the parallel (or near to parallel) faces.
+This is caused by our screen-based method, which tends to under-estimate the importance of the parallel (or near to parallel) faces.
 %The higher PSNR 
 %is caused by the better silhouette. % and the high contrast near silhouette (the background is dark black). 
 %To have a more accurate silhouette without sacrificing much visual quality, 
@@ -928,7 +927,7 @@ This is caused by our screen-based method tends to under-estimate the importance
 %with a weight larger than 1 so that they
 %have higher priority. 
 We can see that with %this method (with weight as 3), 
-weight as 3, the rendered image has a more accurate silhouette and in the same time has good quality. 
+weight as 3, the rendered image has a more accurate silhouette and at the same time has good quality. 
 \begin{figure}[htdp!]
     \centering
     \begin{tabular}{cc}
@@ -964,9 +963,9 @@ weight as 3, the rendered image has a more accurate silhouette and in the same t
 
 
 
-When there are many details in the screen and the user view it from a relative far distance, 
+When there are many details on the screen and the user views it from a relative far distance, 
 such as the Thai mesh in our case, 
-the difference between level-based method and screen-based method becomes hardly noticeable. 
+the difference between the level-based method and screen-based method becomes hardly noticeable. 
 Although the PSNR value of level-based method after splitting 60000 vertices is slightly higher, we cannot clearly tell which one is 
 better in Figure \ref{f:dstream:image_comp_2}, where the rendered images are shown.
 \begin{figure}[htdp!]
@@ -980,15 +979,15 @@ better in Figure \ref{f:dstream:image_comp_2}, where the rendered images are sho
     \caption{Comparing Screen-area method (weight = 1, 3) with level-based method. Thai Statue with 60000 vertices are split.}
     \label{f:dstream:image_comp_2}
 \end{figure}
-To compare the quality of these images are not so important, because most likely, 
-the quality for current viewpoint is good enough and users have already zoomed in to check the details they are interested. 
-We have not included the closer viewpoints of Thai Status here, because once zoomed in, the visible part of the Thai Status are no longer more complex
+To compare the quality of these images is not so important, because most likely, 
+the quality for the current viewpoint is good enough and users have already zoomed in to check the details they are interested in. 
+We have not included the closer viewpoints of Thai Statue here, because once zoomed in, the visible part of the Thai Statue is no longer more complex
 than Buddha mesh. In other words,  the results of Thai statue with a near viewpoint are similar to the results of Happy Buddha with a far viewpoint.
 
 
-Finally, we check the accuracy of visibility test. 
+Finally, we check the accuracy of the visibility test. 
 As we explained in Section \ref{ss:dstream:visual}, 
-if the receiver stops requesting vertex splits after all the visible splits received,
+if the receiver stops requesting vertex splits after all the visible splits are received,
 some potentially visible vertices may not be generated.
 We use two metrics to compare the rendered image and the reference image (the rendered image of the original mesh)
 %and the reconstructed mesh 
@@ -1019,8 +1018,9 @@ we can further reduce the error and have a more accurate silhouette.
 \end{table}
 
 In summary, our screen-based method improves the quality of rendered image significantly quicker than the random method. Compared
-with level-based method, the screen-based method usually generates better rendered image in perception, especially when the viewpoint is close to the mesh. 
-Moreover, by treating silhouette specially, we can have a better profile of the mesh both in the intermediate state and the final state (after
+with the level-based method, 
+the screen-based method usually generates better rendered images in perception, especially when the viewpoint is close to the mesh. 
+Moreover, by treating the silhouette specially, we can have a better profile of the mesh both in the intermediate state and the final state (after
 all visible vertices are split). 
 
 
@@ -1168,18 +1168,18 @@ In traditional view-dependent systems,
 senders decide which refinements to send, so they are
 state-ful and need expensive computation. %Not only the CPU time but also
 Besides the CPU time,
-the output bandwidth also make the sender not scalable to many receivers,
-cache proxy and peer-to-peer system, the two common way to increase the scalability
-without deploy more servers, cannot be applied easily due to the state-ful design.
+the output bandwidth also makes the sender not scalable to many receivers.
+Cache proxy and peer-to-peer system, the two common way to increase the scalability
+without deploying more servers, cannot be applied easily due to the state-ful design.
 
 We propose a receiver-driven protocol to address the above weakness.
-The main finding of us is that %the accuracy of rendered image is not
+Our main finding is that %the accuracy of rendered image is not
 %strictly required during previewing,
 receivers can estimate the visual importance of a vertex split, even before
 it is received, based on the current partially received mesh. 
 Moreover, we can exploit the GPU
 in determining the visibility and visual importance of vertices by
-analyzing the content in frame buffer. 
+analyzing the content in the frame buffer. 
 In addition, we could easily detect the silhouette and hence can 
 assign it higher priority to ensure the rendered image has an accurate shape.
 We have done extensive experiments to validate the screen-area based method.

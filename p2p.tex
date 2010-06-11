@@ -94,14 +94,16 @@
     video streaming and P2P file downloading and point out
     the main difficulties of P2P mesh streaming.  Second, 
     considering the differences and challenges, 
-    we investigate on two content discovery schemes for P2P
+    we investigate two content discovery schemes for P2P
     mesh streaming.  The structure of the progressive
     mesh is considered in the second design to further
     reduce server overhead.  Third, we propose a 
     chunking scheme for progressive meshes to support P2P mesh
-    streaming.  Finally, we run simulations based on real
-    traces collected from users to evaluate the P2P
-    mesh streaming system we proposed.  Analysis and
+    streaming.  Finally, we run simulations based on synthetic traces
+    generated with the method introduced in Chapter \ref{c:user} 
+    %real
+    %traces collected from users 
+    to evaluate the P2P mesh streaming system we proposed.  Analysis and
     simulation results show that server overhead can be
     reduced by 90\%. Meanwhile,  average response time and
     control overhead are low.
@@ -142,7 +144,7 @@ In typical multi-tree-based
 approaches, like CoopNet \cite{padmanabhan:coopnet}, different parts of a video segment are
 separately pushed down along different sub-trees. SplitStream
 \cite{castro:splitstream}
-utilizes Multiple Description Coding (MDC) scheme to further improve
+utilizes Multiple Description Coding (MDC) to further improve
 streaming quality by introducing data redundancy. Besides, each peer
 serves as an interior node in only one sub-tree to minimize the
 negative effect of node failures. 
@@ -158,7 +160,7 @@ tree-based approaches, such systems incur higher end-to-end latency
 and control overhead. To reduce these negative effects,
 push-pull-based approaches are proposed in \cite{zhang:coolstreaming}. 
 Moreover, PRIME \cite{magharei:prime}
-incorporates swarming scheme and MDC to improve robustness and
+incorporates a swarming scheme and MDC to improve robustness and
 streaming quality, but its two-phase design increases end-to-end
 latency.
 
@@ -177,7 +179,7 @@ between their windows. Yiu et al. \cite{yiu:distributed} propose that
 each peer randomly stores some segments and uses DHT to locate peers
 storing previous, current, and next segments, respectively. This
 approach can achieve better scalability and shorter initial delay than
-sliding window scheme, but maintaining the segment
+a sliding window scheme, but maintaining the segment
 lists in a highly dynamic environment is difficult.
    
 \section{P2P Mesh Streaming}
@@ -200,11 +202,11 @@ lists in a highly dynamic environment is difficult.
     %peers.  
     Chunks can be downloaded in any order.
     Therefore, peer $p$ can receive chunks from peer $q$ as
-    long as $q$ possesses fresh chunks that $p$ have
+    long as $q$ possesses fresh chunks that $p$ has
     not received.
 
     In P2P video streaming, however, the video is played
-    back mostly in the increasing time order\footnote{unless the
+    back mostly in increasing time order\footnote{unless the
     user seek to another playback point}.  The point the
     peer is watching the video is the \textit{playback
     time}, and each chunk in the video has an associated
@@ -238,20 +240,20 @@ lists in a highly dynamic environment is difficult.
 	(e.g., C1). \label{f:diff}}
     \end{figure}
 
-    Temporal locality does not apply to mesh.  In P2P mesh
+    Temporal locality does not apply to meshes.  In P2P mesh
     streaming, however, users might be interested in
     different parts of the mesh at different level of
     details.  Each may choose to look at different facets,
     or zoom into different levels.  Therefore, each peer may
     be interested in different chunks of the mesh at
-    different time.  Consequently, even if peer $p$ can
+    different times.  Consequently, even if peer $p$ can
     receive a chunk from peer $q$ now, $p$ may not receive
     subsequent chunks from $q$ later, since $p$ may request
     a chunk that $q$ has never seen and is not visible to
     $q$. %(See Figure \ref{f:diff}).  
     Thus, a peer would have
     to continuously query for peers to retrieve the mesh
-    data from, as the peer's view point and level of details
+    data from, as the peer's view point and level of detail
     change over time.  More queries are needed in mesh
     streaming than in file downloading or video streaming.
     Reducing such overhead is one of the main challenges of
@@ -267,7 +269,7 @@ lists in a highly dynamic environment is difficult.
     reduce query overhead inappropriate. To reduce the
     number of queries, a peer typically caches information
     about the chunks available in a provider for future
-    requests.  High churn rate invalidates these cache
+    requests.  High churn rate invalidates this cache
     information quickly.
 
     %TODO{transition here}
@@ -282,7 +284,7 @@ lists in a highly dynamic environment is difficult.
     %the receiver.  
     Hu et al. \cite{Hu2008} and Cavagna et al. \cite{Cavagna2006} have considered using peer-to-peer architecture to stream a 3D scene
     to improve scalability.  Our work is similar in
-    spirit, but we focus on streaming single, large,
+    spirit, but we focus on streaming a single, large,
     progressive mesh in a view-dependent manner, rather than a 3D scene,
     %. Streaming a single, highly detailed, progressive
     %mesh is different from streaming of a 3D scene,
@@ -414,7 +416,7 @@ errors using this rule of thumb \cite{Cheng2008}.
 \label{s:chunk}
 We now elaborate on how to group vertex splits into chunks while maintaining
 progressiveness among the chunks.
-    In the original design of receiver-driven protocol \cite{Cheng2008}, 
+    In the original design of the receiver-driven protocol \cite{Cheng2008}, 
     the receiver explicitly requests individual vertex splits.
     Such design is not appropriate for P2P streaming for three reasons. 
     First, %since a packet can comprise
@@ -422,11 +424,11 @@ progressiveness among the chunks.
     %300 IDs need to be encoded in a request packet, equivalent to
     %600 bytes in our implementation. 
     the receiver needs to send one ID (2 bytes in our implementation)
-    to request for one vertex split (less than 5 bytes in our
+    to request one vertex split (less than 5 bytes in our
     implementation).
     Hence, the requests occupy a large proportion of the up-link bandwidth,
     which is precious in P2P streaming, in which the up-link bandwidth
-    are needed to share data with other peers. 
+    is needed to share data with other peers. 
     Second, data packets need to be generated dynamically at the
     sender whenever requests are received, increasing
     computation overhead and delay. 
@@ -438,7 +440,7 @@ progressiveness among the chunks.
     protocol to the concept of chunk, commonly used in P2P systems.
     Our chunk, however, is of much finer granularity, to allow a peer
     the flexibility of retrieving only the %segments of mesh visible.
-    mesh data within current visible region.
+    mesh data within the current visible region.
     Each chunk consists of multiple vertex splits, and each vertex
     split only belongs to one chunk. When a peer needs a vertex split,
     it finds the chunk that includes this vertex split and sends its
@@ -457,7 +459,7 @@ progressiveness among the chunks.
     the server, so no computation cost and time are needed by peers 
     for online packetization. 
     
-    The question now is that how a peer knows which chunk to request
+    The question now is how a peer knows which chunk to request
     when it decides to refine a certain part of a mesh.  
     One naive solution is to store the chunk ID together with vertex
     splits,
@@ -603,15 +605,16 @@ progressiveness among the chunks.
     to the mesh quality,
     but it increases the possibility of including many invisible
     vertices.
-    In our implementation, each chunk is the size of one packet, although we can easily generalized to larger chunk.  Since about 300 vertices can fit into an IP packet 
+    In our implementation, each chunk is the size of one packet, although we can easily generalize to larger chunks.
+    Since about 300 vertices can fit into an IP packet 
     (i.e. $n=300$),
     We choose $w=4$ and $d=4$, so a total of $240$ vertex splits are 
     in one chunk (if the progressive mesh is completely balanced).
 
-    After deciding the value $w$, value of $i$ can be decided 
+    After deciding the value $w$, the value of $i$ can be decided 
     based on the size of base mesh. 
-    Certain number of vertices are needed in the base mesh to ensure 
-    the minimal quality, and we know that the base mesh has $i \times 2^{w}$ vertices.
+    A certain number of vertices is needed in the base mesh to ensure 
+    a minimal quality, and we know that the base mesh has $i \times 2^{w}$ vertices.
     So we can choose a proper $i$ value to satisfy the quality
     of base mesh. 
     In our implementation, we choose $i= 1024$. 
@@ -731,7 +734,7 @@ progressiveness among the chunks.
 \section{Content Discovery}
 \label{s:content}
 
-    We now consider how a peer can discover other peers can provide a given chunk.
+    We now consider how a peer can discover other peers that can provide a given chunk.
     We first consider distributed
     hash table (DHT) and gossip-based techniques, 
     commonly used in file sharing and video streaming, and
@@ -739,7 +742,7 @@ progressiveness among the chunks.
     describe a simple centralized scheme that works reasonably well,
     followed by a more complex scheme that exploits the 
     hierarchical structure in the data, trading off
-    the number of messages processed by server with response time and control overhead.
+    the number of messages processed by a server with response time and control overhead.
 
     DHT, a well-known technique for 
     content discovery,  hashes a chunk to a
@@ -754,7 +757,7 @@ progressiveness among the chunks.
     too long for the application we have in mind.
     We therefore preclude DHT in our solution.
 
-    Another common solution is gossip-based protocol, in which, peers
+    Another common solution is a gossip-based protocol, in which peers
     exchange a bit-vector to notify each other which chunk it is
     holding on to. This approach is very flexible, but it does not fit
     well in P2P mesh streaming, either. The bit-vector is large
@@ -779,7 +782,7 @@ progressiveness among the chunks.
     for each chunk of the mesh. 
     The server maintains a list of peers who have downloaded each chunk.
     A peer $p$ who needs a chunk $i$ contacts the server.  The server
-    chooses a peer who has chunk $i$ as provider and inform $p$ (see
+    chooses a peer who has chunk $i$ as provider and informs $p$ (see
     Figure \ref{f:cp2p} (a)).  Peer $p$
     informs the server after downloading chunk $i$, and is then added to the
     list of peers with chunk $i$.
@@ -810,7 +813,7 @@ progressiveness among the chunks.
     one RTT in terms of delay.
     Second, 
     states are maintained in one reliable
-    node (the server), removing the needs of synchronizing states among
+    node (the server), removing the need of synchronizing states among
     peers. 
     Third, the server, maintaining all states, can employ better %simple 
     algorithms to determine the provider to improve the performance. 
@@ -818,7 +821,7 @@ progressiveness among the chunks.
     reduce the response time and inter-ISP traffic; load- and capability-aware 
 	provider selection can balance the load among peers and improve fairness.
     
-    Nonetheless, the centralized lookup is not scalable to large
+    Nonetheless, the centralized lookup is not scalable to a large
     number of peers, as provider monitoring and selection incur
     server overhead.  Every request still causes a small packet to be
     sent from the server.  We only decrease the size of outgoing 
@@ -849,7 +852,7 @@ progressiveness among the chunks.
     $G_i$ has a \textit{leader}, denoted $l_i$, which acts
     similarly to the server in the 
     %centralized P2P mesh streaming system we introduced
-    P2P mesh streaming system with centralized P2P lookup we
+    P2P mesh streaming system with the centralized P2P lookup we
     introduced
     above.  The members act as the providers for the chunk
     and are monitored by the leader.  Since the group and
@@ -867,7 +870,7 @@ progressiveness among the chunks.
     requested chunk from the provider, it informs $l_i$ and
     becomes a member of $G_i$.
 
-    Group leader acts as a provider when no other member
+    The group leader acts as a provider when no other member
     exists.  But, unlike the centralized lookup approach, %P2P system, 
     if peer $p$ fails to receive chunk $i$ from a provider, it requests
     the chunk from the server rather than the group leader.  The
@@ -884,8 +887,8 @@ progressiveness among the chunks.
     Because a leader is also a peer, neither reliable nor
     having a well-known, fixed, address, two questions need
     to be answered: (i) how each peer knows the leader of a
-    given group; (ii) how to deal with the leader failure.
-    We explain our solutions in following sections.
+    given group; (ii) how to deal with leader failure.
+    We explain our solutions in the following sections.
 
     \subsubsection{Leader Hierarchy}
     %\begin{figure}[t]
@@ -904,7 +907,7 @@ progressiveness among the chunks.
     we consider the server as the parent of all root leaders.
     
     Due to the dependency among the chunks, children of a
-    chunk $i$ is only useful after $i$ is received.  Hence,
+    chunk $i$ are only useful after $i$ is received.  Hence,
     it is natural for a leader to supply the information of
     its children to its members.  When a peer joins the
     group $G_i$, in addition to the information of provider
@@ -930,7 +933,7 @@ progressiveness among the chunks.
     Since leader assignments and replacements are done by 
     the server, the server knows the current leader hierarchy.
     When assigning a peer $p$ as the leader of group $G_i$, the
-    server also include information about $p$'s parent and 
+    server also includes information about $p$'s parent and 
     children in the tree.  The new leader then notifies its 
     parent and all its children of its new role.   
 
@@ -955,8 +958,8 @@ progressiveness among the chunks.
     The leader replacement information is disseminated
     %to all group members, parent, and children of the leader.
     to the parent and children of the leader when the new leader
-    notifies its role. The parent leader in turn notifies
-    its own members of this leader changes. So a member in the parent
+    advertised its role. The parent leader in turn notifies
+    its own members of this leader change. So a member in the parent
     group of $G_i$ will always know the updated leader
     of $G_i$. 
 
@@ -977,7 +980,7 @@ progressiveness among the chunks.
     This problem can be easily solved by restricting the 
     group size and the number of groups a peer belongs to.  
 
-    We reduce the number of group a peer belongs to by the 
+    We reduce the number of groups a peer belongs to by the 
     following rule: if a peer $p$ obtained two chunks $i$
     and $j$, and $i$ is an ancestor of $j$, then $p$ only
     belongs to $G_j$.  
@@ -1054,7 +1057,7 @@ progressiveness among the chunks.
     In the P2P system with hierarchical P2P lookup approach, %P2P system, 
     each group behaves like a small P2P system with centralized lookup
     approach. 
-    First, most provider selection algorithms that can be used in centralized
+    First, most provider selection algorithms that can be used in a centralized
     %P2P system, 
     lookup approach, 
     such as topology-aware and load balancing, can also
@@ -1068,12 +1071,12 @@ progressiveness among the chunks.
 
     Compared with the centralized lookup approach, %P2P system, 
     the management overhead of the 
-    server in hierarchical P2P lookup approach %P2P system 
+    server in the hierarchical P2P lookup approach %P2P system 
     is significantly reduced. 
     In the stable stage, most group leaders are peers, so the server
     only monitors the leaders of the top chunks instead of all the peers in 
-    centralized P2P system. 
-    In addition, in hierarchical P2P lookup approach, %P2P system, 
+    the centralized P2P system. 
+    In addition, in the hierarchical P2P lookup approach, %P2P system, 
     the server is also responsible
     for replacing the failed leaders, and thus maintains the leader hierarchy
     at a small overhead.
@@ -1081,10 +1084,10 @@ progressiveness among the chunks.
     the number of chunks and thus is independent of the number of peers. 
     Second, the rate of replacing leaders 
     only relates to the leaving rate of the peers, which is typically
-    small compared with the total number of peers.
+    small compared to the total number of peers.
     Thus, the management overhead is significantly smaller and the
     server is more scalable to a large number of peers compared
-    with the centralized lookup approach. %P2P system.
+    to the centralized lookup approach. %P2P system.
     
     The hierarchical P2P lookup approach, %system, 
     however, increases the control overhead and response time. 
@@ -1184,9 +1187,9 @@ bandwidth (download mean = 4292.8Kbps, upload mean = 1023.0Kbps) used in our sim
     model.  Each peer randomly selects a trace from 4000 random 
     traces we generated and leaves the system at the end of the trace. 
     Our experiment lasts for 320 seconds, and the period from $300s$
-    to $320s$ is seemed as the stable stage (approximately).
+    to $320s$ is the stable stage (approximately).
     We choose the arrival rate ($\lambda$) as 20, 40, 60, and 80. 
-    During the stable stage, the number of online peers are around 1974, 4030,
+    During the stable stage, the number of online peers is around 1974, 4030,
     6014, and 7974, respectively.
 
 
@@ -1204,7 +1207,7 @@ bandwidth (download mean = 4292.8Kbps, upload mean = 1023.0Kbps) used in our sim
     %\end{figure}
 
     The end-to-end delay between two peers (including server to peers)
-    are taken from the data collected from the Meridian
+    is taken from the data collected from the Meridian
     \cite{meridian:wong}
     %\todo{CITE and check spelling of Meridian}.
     project. The original data is a $2500 \times 2500$ matrix
@@ -1306,7 +1309,7 @@ peers. The value in stable stage is averaged from $t = 300s$ to $t =
     %we will not consider this model in the following experiments.
     Second, we measure the ratio of the server's outgoing data rate 
     to the total chunk size received by the peers. It is a \emph{relative
-    server overhead} compared with the client-server model based
+    server overhead} compared to the client-server model based
     system.
     Third, to evaluate how busy a server is in handling incoming messages,
     we measure the incoming message rate %the number of
@@ -1342,7 +1345,7 @@ peers. The value in stable stage is averaged from $t = 300s$ to $t =
     %condition. To evaluate how busy a server is, we measure the
     %number of messages per second 
     %incoming message rate of the server in both design. 
-    The server incoming message rate of the two designs are shown in
+    The server incoming message rate of the two designs is shown in
     Figures \ref{f:result}(e) and (f), where we can see that 
     the hierarchical P2P lookup reduces the number of incoming
     messages by around
@@ -1424,7 +1427,7 @@ peers. The value in stable stage is averaged from $t = 300s$ to $t =
     lookup, and congestion may happen due to limited supply ability,  %may cause congestion in the
     causing request failures and higher response time. %hence request failure.
 
-    The response time of hierarchical P2P approach, however, is still
+    The response time of the hierarchical P2P approach, however, is still
     under 1 second, which according to our experience, does not
     significantly affect users' experience.  When a user interacts with
     the mesh (e.g., rotate), the renderer responds almost immediately. 
@@ -1445,7 +1448,7 @@ peers. The value in stable stage is averaged from $t = 300s$ to $t =
     \subsection{Summary}
     The results above indicate that
     both designs work well under an environment with heterogeneous peers, 
-    asymmetric bandwidth, and high churn rate. Compared with a
+    asymmetric bandwidth, and high churn rate. Compared to a
     client-server design, the server outgoing bandwidth 
     is reduced by more than 90\%.  Hierarchical P2P
     lookup also reduces 60\% of incoming messages to the server,
@@ -1460,7 +1463,7 @@ peers. The value in stable stage is averaged from $t = 300s$ to $t =
 
 \section{Conclusion}
 \label{s:conclude}
-This chapter investigates into the problem of P2P view-dependent,
+This chapter investigates the problem of P2P view-dependent,
 progressive mesh streaming, and studied two important components of
 the problem - chunking and content discovery. We find that in P2P mesh
 streaming, peers need to keep finding new chunk providers, increasing
